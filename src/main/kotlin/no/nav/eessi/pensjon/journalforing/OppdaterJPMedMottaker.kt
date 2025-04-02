@@ -56,15 +56,15 @@ class OppdaterJPMedMottaker(
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
 
                 runCatching {
-                    val mottaker = euxService.hentDeltakereForBuc(rinaId)
-                        ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
-                        ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
-                        val avsenderMottaker = AvsenderMottaker(
-                            id = mottaker.id,
-                            idType = IdType.UTL_ORG,
-                            navn = mottaker.name,
-                            land = mottaker.countryCode
-                        ).toJson()
+//                    val mottaker = euxService.hentDeltakereForBuc(rinaId)
+//                        ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
+//                        ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
+//                        val avsenderMottaker = AvsenderMottaker(
+//                            id = mottaker.id,
+//                            idType = IdType.UTL_ORG,
+//                            navn = mottaker.name,
+//                            land = mottaker.countryCode
+//                        ).toJson()
 
 //                    journalpostKlient.oppdaterJournalpostMedMottaker(
 //                        journalpostId, JournalpostResponse(
@@ -77,7 +77,7 @@ class OppdaterJPMedMottaker(
 //                        ).toJsonSkipEmpty()
 //                    )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
-                    logger.info(avsenderMottaker.toJson())
+//                    logger.info(avsenderMottaker.toJson())
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId")
                 }.onFailure {
                     logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
