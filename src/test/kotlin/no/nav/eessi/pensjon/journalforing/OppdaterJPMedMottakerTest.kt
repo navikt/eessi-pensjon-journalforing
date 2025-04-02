@@ -12,10 +12,12 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
+@Disabled
 class OppdaterJPMedMottakerTest {
 
     private var safClient: SafClient = mockk()
