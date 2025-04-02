@@ -60,23 +60,29 @@ class OppdaterJPMedMottaker(
                     val mottaker = euxService.hentDeltakereForBuc(rinaId)
                         ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
                         ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
+                        val avsenderMottaker = AvsenderMottaker(
+                            id = mottaker.id,
+                            idType = IdType.UTL_ORG,
+                            navn = mottaker.name,
+                            land = mottaker.countryCode
+                        ).toJson()
 
-                    journalpostKlient.oppdaterJournalpostMedMottaker(
-                        journalpostId, JournalpostResponse(
-                            avsenderMottaker = AvsenderMottaker(
-                                id = mottaker.id,
-                                idType = IdType.UTL_ORG,
-                                navn = mottaker.name,
-                                land = mottaker.countryCode
-                            )
-                        ).toJsonSkipEmpty()
-                    )
-                    journalpostIderSomGikkBraFile.leggTil(journalpostId)
+//                    journalpostKlient.oppdaterJournalpostMedMottaker(
+//                        journalpostId, JournalpostResponse(
+//                            avsenderMottaker = AvsenderMottaker(
+//                                id = mottaker.id,
+//                                idType = IdType.UTL_ORG,
+//                                navn = mottaker.name,
+//                                land = mottaker.countryCode
+//                            )
+//                        ).toJsonSkipEmpty()
+//                    )
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId, mottaker: ${avsenderMottaker}"))
                     journalposterDuringRun.add(journalpostId)
-                    logger.debug("Journalpost: $journalpostId ferdig oppdatert")
+                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${avsenderMottaker}")
                 }.onFailure {
                     logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
-                    journalpostIderSomFeilet.leggTil(journalpostId)
+                    journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
                     journalposterDuringRun.add(journalpostId)
                 }
             }
