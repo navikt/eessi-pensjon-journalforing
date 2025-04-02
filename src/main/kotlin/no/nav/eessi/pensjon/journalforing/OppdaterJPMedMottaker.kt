@@ -23,7 +23,7 @@ class OppdaterJPMedMottaker(
     private val safClient: SafClient,
     private val euxService: EuxService,
     private val journalpostKlient: JournalpostKlient,
-    @Value("\${JOURNALPOST_ID_FILE}") private var journalpostIdFile: String
+    @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
 ) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
     private val journalpostIderSomGikkBraFile = JournalpostIdFilLager(FILE_NAME_OK)
@@ -44,7 +44,7 @@ class OppdaterJPMedMottaker(
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
-        val journalpostIderList = readFileUsingGetResource(journalpostIdFile)
+        val journalpostIderList = readFileUsingGetResource()
 
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
@@ -101,12 +101,14 @@ class OppdaterJPMedMottaker(
         }
     }
 
-    fun readFileUsingGetResource(fileName: String): Sequence<String> =
-        this::class.java.getResourceAsStream("/$fileName")
+    fun readFileUsingGetResource(): Sequence<String> {
+        val fileName = if (profile == "prod") "JournalpostIderPROD.txt" else "JournalpostIderTest.txt"
+        return this::class.java.getResourceAsStream("/$fileName")
             ?.bufferedReader()
             ?.lineSequence()
             ?.mapNotNull { it.split(" ").firstOrNull() }
             ?: emptySequence()
+    }
 
     //Henter Journalpost en etter en fra liste over Journalposter vi skal endre mottaker på
     fun hentRinaIdForJournalpost(journalpostId: String): String? {
