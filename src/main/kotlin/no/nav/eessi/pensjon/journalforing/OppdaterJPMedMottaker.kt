@@ -41,7 +41,7 @@ class OppdaterJPMedMottaker(
 //        oppdatereHeleSulamitten()
     }
 
-    @Scheduled(cron = "0 10 14 * * ?")
+    @Scheduled(cron = "0 30 14 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
