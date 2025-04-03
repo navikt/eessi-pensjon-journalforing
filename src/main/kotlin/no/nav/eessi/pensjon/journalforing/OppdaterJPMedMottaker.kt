@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.*
 import java.time.LocalDateTime
@@ -37,10 +38,10 @@ class OppdaterJPMedMottaker(
 
     @PostConstruct
     fun onStartup() {
-        oppdatereHeleSulamitten()
+//        oppdatereHeleSulamitten()
     }
 
-    //    @Scheduled(cron = "0 0 21 * * ?")
+    @Scheduled(cron = "0 32 08 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
