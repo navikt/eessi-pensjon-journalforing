@@ -1,18 +1,18 @@
 package no.nav.eessi.pensjon.journalforing
 
 import jakarta.annotation.PostConstruct
-import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
+import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.*
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -29,7 +29,6 @@ class OppdaterJPMedMottaker(
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
     private val journalpostIderSomGikkBraFile = JournalpostIdFilLager(FILE_NAME_OK)
     private val journalpostIderSomFeilet = JournalpostIdFilLager(FILE_NAME_ERROR)
-
     /**
      * Henter Journalpost en etter en fra liste over Journalposter vi skal endre mottaker på
      * Hente tilhørende bucId fra journalposten
@@ -42,66 +41,44 @@ class OppdaterJPMedMottaker(
         oppdatereHeleSulamitten()
     }
 
-    //    @Scheduled(cron = "0 50 08 * * ?")
+//    @Scheduled(cron = "0 50 08 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
         val journalpostIderList = readFileUsingGetResource()
+
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
         val journalposterDuringRun = mutableSetOf<String>()
-        val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
-        val mutex = Mutex()
+        journalpostIderList
+            .filterNot { it in journalposterOK || it in journalposterError || it in journalposterDuringRun }
+            .forEachIndexed { index, journalpostId ->
+                if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
-        runBlocking {
-            journalpostIderList
-                .filterNot { it in journalposterOK || it in journalposterError || it in journalposterDuringRun }
-                .chunked(10)
-                .forEachIndexed { batchIndex, batch ->
-                    logger.info("Processing batch ${batchIndex + 1}")
+                val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
+                val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
+                runCatching {
 
-                    batch.map { journalpostId ->
-                        async(Dispatchers.IO) {
-                            runCatching {
-                                processJournalpost(journalpostId, rinaNrOgMottaker, mutex, journalposterDuringRun)
-                            }.onFailure {
-                                logger.error("Error processing journalpostId: $journalpostId", it)
-                            }
-                        }
-                    }.awaitAll()
-                }
-        }
-    }
-    private suspend fun processJournalpost(
-        journalpostId: String,
-        rinaNrOgMottaker: MutableMap<String, AvsenderMottaker>,
-        mutex: Mutex,
-        journalposterDuringRun: MutableSet<String>
-    ) {
-        val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return
-        runCatching {
-            val mottaker = mutex.withLock {
-                rinaNrOgMottaker[rinaId] ?: hentDeltakerOgMottaker(rinaId).also {
-                    rinaNrOgMottaker[rinaId] = it
+                    val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
+                        rinaNrOgMottaker.put(rinaId, it)
+                    }
+                    logger.info("Mottaker $mottaker")
+
+//                    journalpostKlient.oppdaterJournalpostMedMottaker(
+//                        journalpostId, JournalpostResponse(
+//                            avsenderMottaker = mottaker
+//                        ).toJsonSkipEmpty()
+//                    )
+                    journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
+                    journalposterDuringRun.add(journalpostId)
+                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
+                }.onFailure {
+                    logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
+                    journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
+                    journalposterDuringRun.add(journalpostId)
                 }
             }
-            logger.info("Mottaker $mottaker")
-
-//            journalpostKlient.oppdaterJournalpostMedMottaker(
-//                journalpostId, JournalpostResponse(
-//                    avsenderMottaker = mottaker
-//                ).toJsonSkipEmpty()
-//            )
-            journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
-            journalposterDuringRun.add(journalpostId)
-            logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
-        }.onFailure {
-            logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
-            journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
-            journalposterDuringRun.add(journalpostId)
-        }
     }
-
 
     private fun hentDeltakerOgMottaker(rinaId: String): AvsenderMottaker {
         val mottaker = euxService.hentDeltakereForBuc(rinaId)

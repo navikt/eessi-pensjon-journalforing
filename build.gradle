@@ -49,8 +49,6 @@ dependencies {
 
 	implementation "org.springframework.kafka:spring-kafka:$springKafkaVersion"
 
-	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-
 	//GCP
 	implementation("com.google.cloud:google-cloud-storage:2.50.0")
 
