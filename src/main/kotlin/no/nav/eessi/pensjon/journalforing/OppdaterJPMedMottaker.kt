@@ -15,9 +15,6 @@ import java.io.*
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 private const val FILE_NAME_OK = "/tmp/journalpostIderSomGikkBra.txt"
 private const val FILE_NAME_ERROR = "/tmp/journalpostIderSomFeilet.txt"
@@ -60,7 +57,7 @@ class OppdaterJPMedMottaker(
 
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
                 val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
-                runBlocking {
+                runCatching {
 
                     val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
                         rinaNrOgMottaker.put(rinaId, it)
@@ -75,12 +72,11 @@ class OppdaterJPMedMottaker(
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
                     journalposterDuringRun.add(journalpostId)
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
+                }.onFailure {
+                    logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
+                    journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
+                    journalposterDuringRun.add(journalpostId)
                 }
-//                    .onFailure {
-//                    logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
-//                    journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
-//                    journalposterDuringRun.add(journalpostId)
-//                }
             }
     }
 
