@@ -36,12 +36,7 @@ class OppdaterJPMedMottaker(
      * Oppdatere JP med Mottaker ("id", "idType" : "UTL_ORG", "navn", "land" )
      */
 
-    @PostConstruct
-    fun onStartup() {
-//        oppdatereHeleSulamitten()
-    }
-
-    @Scheduled(cron = "0 30 14 * * ?")
+    @Scheduled(cron = "0 40 0 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
@@ -49,9 +44,8 @@ class OppdaterJPMedMottaker(
 
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
-        val journalposterDuringRun = mutableSetOf<String>()
         journalpostIderList
-            .filterNot { it in journalposterOK || it in journalposterError || it in journalposterDuringRun }
+            .filterNot { it in journalposterOK || it in journalposterError }
             .forEachIndexed { index, journalpostId ->
                 if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
@@ -64,18 +58,16 @@ class OppdaterJPMedMottaker(
                     }
                     logger.info("Mottaker $mottaker")
 
-//                    journalpostKlient.oppdaterJournalpostMedMottaker(
-//                        journalpostId, JournalpostResponse(
-//                            avsenderMottaker = mottaker
-//                        ).toJsonSkipEmpty()
-//                    )
+                    journalpostKlient.oppdaterJournalpostMedMottaker(
+                        journalpostId, JournalpostResponse(
+                            avsenderMottaker = mottaker
+                        ).toJsonSkipEmpty()
+                    )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
-                    journalposterDuringRun.add(journalpostId)
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
                 }.onFailure {
                     logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
                     journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
-                    journalposterDuringRun.add(journalpostId)
                 }
             }
     }
