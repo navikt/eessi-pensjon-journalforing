@@ -64,16 +64,11 @@ class OppdaterJPMedMottaker(
                     }
                     logger.info("Mottaker $mottaker")
 
-//                    journalpostKlient.oppdaterJournalpostMedMottaker(
-//                        journalpostId, JournalpostResponse(
-//                            avsenderMottaker = AvsenderMottaker(
-//                                id = mottaker.id,
-//                                idType = IdType.UTL_ORG,
-//                                navn = mottaker.name,
-//                                land = mottaker.countryCode
-//                            )
-//                        ).toJsonSkipEmpty()
-//                    )
+                    journalpostKlient.oppdaterJournalpostMedMottaker(
+                        journalpostId, JournalpostResponse(
+                            avsenderMottaker = mottaker
+                        ).toJsonSkipEmpty()
+                    )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
                     journalposterDuringRun.add(journalpostId)
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
@@ -94,9 +89,16 @@ class OppdaterJPMedMottaker(
             id = mottaker.id,
             idType = IdType.UTL_ORG,
             navn = mottaker.name,
-            land = mottaker.countryCode
+            land = konverterGBUKLand(mottaker.countryCode)
         )
     }
+
+    fun konverterGBUKLand(mottakerAvsenderLand: String?): String? =
+        when (mottakerAvsenderLand) {
+            "UK" -> "GB"
+            else -> mottakerAvsenderLand
+        }
+
 
     class JournalpostIdFilLager(private val fileName: String) {
         private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
