@@ -38,10 +38,10 @@ class OppdaterJPMedMottaker(
 
     @PostConstruct
     fun onStartup() {
-//        oppdatereHeleSulamitten()
+        oppdatereHeleSulamitten()
     }
 
-    @Scheduled(cron = "0 32 08 * * ?")
+//    @Scheduled(cron = "0 50 08 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
@@ -56,17 +56,13 @@ class OppdaterJPMedMottaker(
                 if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
-
+                val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
                 runCatching {
-                    val mottaker = euxService.hentDeltakereForBuc(rinaId)
-                        ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
-                        ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
-                        val avsenderMottaker = AvsenderMottaker(
-                            id = mottaker.id,
-                            idType = IdType.UTL_ORG,
-                            navn = mottaker.name,
-                            land = mottaker.countryCode
-                        ).toJson()
+
+                    val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
+                        rinaNrOgMottaker.put(rinaId, it)
+                    }
+                    logger.info("Mottaker $mottaker")
 
 //                    journalpostKlient.oppdaterJournalpostMedMottaker(
 //                        journalpostId, JournalpostResponse(
@@ -79,15 +75,27 @@ class OppdaterJPMedMottaker(
 //                        ).toJsonSkipEmpty()
 //                    )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
-                    logger.info(avsenderMottaker)
                     journalposterDuringRun.add(journalpostId)
-                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${avsenderMottaker}")
+                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
                 }.onFailure {
                     logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
                     journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
                     journalposterDuringRun.add(journalpostId)
                 }
             }
+    }
+
+    private fun hentDeltakerOgMottaker(rinaId: String): AvsenderMottaker {
+        val mottaker = euxService.hentDeltakereForBuc(rinaId)
+            ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
+            ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
+        logger.info("Henter mottaker fra Eux")
+        return AvsenderMottaker(
+            id = mottaker.id,
+            idType = IdType.UTL_ORG,
+            navn = mottaker.name,
+            land = mottaker.countryCode
+        )
     }
 
     class JournalpostIdFilLager(private val fileName: String) {
