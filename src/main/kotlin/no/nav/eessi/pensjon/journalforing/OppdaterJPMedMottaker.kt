@@ -41,10 +41,10 @@ class OppdaterJPMedMottaker(
 
     @PostConstruct
     fun onStartup() {
-        oppdatereHeleSulamitten()
+//        oppdatereHeleSulamitten()
     }
 
-//    @Scheduled(cron = "0 50 08 * * ?")
+    @Scheduled(cron = "0 10 14 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
