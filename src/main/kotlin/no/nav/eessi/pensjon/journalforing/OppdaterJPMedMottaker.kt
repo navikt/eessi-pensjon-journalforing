@@ -48,23 +48,24 @@ class OppdaterJPMedMottaker(
 
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
+        val journalposterDuringRun = mutableSetOf<String>()
         journalpostIderList
-            .filterNot { it in journalposterOK || it in journalposterError }
+            .filterNot { it in journalposterOK || it in journalposterError || it in journalposterDuringRun }
             .forEachIndexed { index, journalpostId ->
                 if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
 
                 runCatching {
-//                    val mottaker = euxService.hentDeltakereForBuc(rinaId)
-//                        ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
-//                        ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
-//                        val avsenderMottaker = AvsenderMottaker(
-//                            id = mottaker.id,
-//                            idType = IdType.UTL_ORG,
-//                            navn = mottaker.name,
-//                            land = mottaker.countryCode
-//                        ).toJson()
+                    val mottaker = euxService.hentDeltakereForBuc(rinaId)
+                        ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
+                        ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
+                        val avsenderMottaker = AvsenderMottaker(
+                            id = mottaker.id,
+                            idType = IdType.UTL_ORG,
+                            navn = mottaker.name,
+                            land = mottaker.countryCode
+                        ).toJson()
 
 //                    journalpostKlient.oppdaterJournalpostMedMottaker(
 //                        journalpostId, JournalpostResponse(
@@ -77,11 +78,13 @@ class OppdaterJPMedMottaker(
 //                        ).toJsonSkipEmpty()
 //                    )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
-//                    logger.info(avsenderMottaker.toJson())
-                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId")
+                    logger.info(avsenderMottaker)
+                    journalposterDuringRun.add(journalpostId)
+                    logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${avsenderMottaker}")
                 }.onFailure {
                     logger.error("Feil under oppdatering av $journalpostId (rinaId: $rinaId)", it)
                     journalpostIderSomFeilet.leggTil(journalpostId.plus(", $rinaId"))
+                    journalposterDuringRun.add(journalpostId)
                 }
             }
     }
