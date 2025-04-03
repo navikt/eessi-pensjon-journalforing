@@ -64,11 +64,11 @@ class OppdaterJPMedMottaker(
                     }
                     logger.info("Mottaker $mottaker")
 
-                    journalpostKlient.oppdaterJournalpostMedMottaker(
-                        journalpostId, JournalpostResponse(
-                            avsenderMottaker = mottaker
-                        ).toJsonSkipEmpty()
-                    )
+//                    journalpostKlient.oppdaterJournalpostMedMottaker(
+//                        journalpostId, JournalpostResponse(
+//                            avsenderMottaker = mottaker
+//                        ).toJsonSkipEmpty()
+//                    )
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
                     journalposterDuringRun.add(journalpostId)
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
