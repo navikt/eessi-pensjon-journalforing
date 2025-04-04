@@ -49,12 +49,18 @@ class OppdaterJPMedMottaker(
         val journalpostIderList = hentAlleJournalpostIderFraFil()
         val rinaNrOgMottakerMap = mutableMapOf<String, AvsenderMottaker>()
 
+        var runRun = journalpostIdFraGcp.isNullOrEmpty()
         journalpostIderList
             .forEachIndexed { index, journalpostId ->
-
-                if(!journalpostIdFraGcp.isNullOrEmpty() && journalpostId != journalpostIdFraGcp) {
-                    return@forEachIndexed
+                if(!runRun){
+                    if(journalpostId == journalpostIdFraGcp) {
+                        runRun = true
+                    }
+                    else{
+                        return@forEachIndexed
+                    }
                 }
+
                 if ((index + 1) % 10 == 0) {
                     logger.info("Prosessert ${index + 1} journalposter, lagrede mottakere: ${rinaNrOgMottakerMap.keys.size}")
                     gcpStorageService.lagreJournalPostIndex(journalpostId)
