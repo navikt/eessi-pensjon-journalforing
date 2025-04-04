@@ -1,18 +1,17 @@
 package no.nav.eessi.pensjon.journalforing
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.io.*
-import java.time.LocalDateTime
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -94,6 +93,13 @@ class OppdaterJPMedMottaker(
 
     class JournalpostIdFilLager(private val fileName: String) {
         private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+
+        init {
+            val file = File(fileName)
+            if (!file.exists()) {
+                file.createNewFile()
+            }
+        }
 
         fun leggTil(newId: String) {
             val timestamp = LocalTime.now().format(timeFormatter)
