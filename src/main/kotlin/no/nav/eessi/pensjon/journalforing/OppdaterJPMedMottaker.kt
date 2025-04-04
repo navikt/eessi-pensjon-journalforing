@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.BufferedWriter
 import java.io.File
@@ -43,33 +42,29 @@ class OppdaterJPMedMottaker(
      * Oppdatere JP med Mottaker ("id", "idType" : "UTL_ORG", "navn", "land" )
      */
 
-    @Scheduled(cron = "0 40 09 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
         val journalpostIdFraGcp = gcpStorageService.hentIndex()
-        val journalpostIderList = readFileUsingGetResource()
-
-        val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
-        val journalposterError = journalpostIderSomFeilet.hentAlle()
-
+        val journalpostIderList = hentAlleJournalpostIderFraFil()
+        val rinaNrOgMottakerMap = mutableMapOf<String, AvsenderMottaker>()
 
         journalpostIderList
-            .filterNot { it in journalposterOK || it in journalposterError }
             .forEachIndexed { index, journalpostId ->
-                if ((index + 1) % 10 == 0) {
-                    logger.info("Prosessert ${index + 1} journalposter")
-                }
+
                 if(!journalpostIdFraGcp.isNullOrEmpty() && journalpostId != journalpostIdFraGcp) {
                     return@forEachIndexed
                 }
+                if ((index + 1) % 10 == 0) {
+                    logger.info("Prosessert ${index + 1} journalposter, lagrede mottakere: ${rinaNrOgMottakerMap.keys.size}")
+                    gcpStorageService.lagreJournalPostIndex(journalpostId)
+                }
 
-                gcpStorageService.lagreJournalPostIndex(journalpostId)
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
-                val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
+
                 runCatching {
-                    val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
-                        rinaNrOgMottaker[rinaId] = it
+                    val mottaker = (rinaNrOgMottakerMap[rinaId]) ?: hentDeltakerOgMottakerFraApi(rinaId).also {
+                        rinaNrOgMottakerMap[rinaId] = it
                     }
                     logger.info("Mottaker $mottaker")
 
@@ -87,7 +82,7 @@ class OppdaterJPMedMottaker(
             }
     }
 
-    private fun hentDeltakerOgMottaker(rinaId: String): AvsenderMottaker {
+    private fun hentDeltakerOgMottakerFraApi(rinaId: String): AvsenderMottaker {
         val mottaker = euxService.hentDeltakereForBuc(rinaId)
             ?.firstOrNull { it.organisation?.countryCode != "NO" }?.organisation
             ?: throw IllegalStateException("Fant ingen utenlandsk mottaker for rinaId: $rinaId")
@@ -133,7 +128,7 @@ class OppdaterJPMedMottaker(
         }
     }
 
-    fun readFileUsingGetResource(): Sequence<String> {
+    fun hentAlleJournalpostIderFraFil(): Sequence<String> {
         val fileName = if (profile == "prod") "JournalpostIderPROD.txt" else "JournalpostIderTest.txt"
         return this::class.java.getResourceAsStream("/$fileName")
             ?.bufferedReader()
