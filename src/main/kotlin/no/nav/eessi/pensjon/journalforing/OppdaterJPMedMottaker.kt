@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
+import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
@@ -8,6 +9,8 @@ import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.BufferedWriter
@@ -26,7 +29,11 @@ class OppdaterJPMedMottaker(
     private val journalpostKlient: JournalpostKlient,
     private val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
-) {
+) : ApplicationRunner {
+    override fun run(args: ApplicationArguments?) {
+        oppdatereHeleSulamitten()
+    }
+
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
     private val journalpostIderSomGikkBraFile = JournalpostIdFilLager(FILE_NAME_OK)
     private val journalpostIderSomFeilet = JournalpostIdFilLager(FILE_NAME_ERROR)
