@@ -35,7 +35,7 @@ class OppdaterJPMedMottaker(
      * Oppdatere JP med Mottaker ("id", "idType" : "UTL_ORG", "navn", "land" )
      */
 
-    @Scheduled(cron = "0 15 09 * * ?")
+    @Scheduled(cron = "0 40 09 * * ?")
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
