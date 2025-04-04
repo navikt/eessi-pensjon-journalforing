@@ -56,6 +56,11 @@ class GcpStorageService(
         return hent(storageKey, gjennyBucket)
     }
 
+    fun hentIndex(storageKey: String): String? {
+        logger.debug("Henter index for rinaSakId: $storageKey")
+        return hent("journalpost/index", gjennyBucket)
+    }
+
     fun hent(storageKey: String, bucketName: String): String? {
         try {
             logger.info("storageKey: $storageKey og bucketName: $bucketName")
@@ -68,6 +73,17 @@ class GcpStorageService(
             logger.warn("En feil oppstod under henting av objekt: $storageKey i bucket")
         }
         return null
+    }
+
+    fun lagreJournalPostIndex(index: String) {
+        val index = "journalpost/index"
+        val blobInfo =  BlobInfo.newBuilder(BlobId.of(gjennyBucket, index)).setContentType("application/json").build()
+        kotlin.runCatching {
+            gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(index.toByteArray())) }.also { logger.info("Lagrer index for journalpost: $it") }
+        }.onFailure { e ->
+            logger.error("Feilet med å lagre dokument med id: ${blobInfo.blobId.name}", e)
+        }.onSuccess {
+        }
     }
 
     fun lagre(euxCaseId: String, gjennysak: GjennySak? = null) {

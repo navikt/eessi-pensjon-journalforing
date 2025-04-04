@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
@@ -23,6 +24,7 @@ class OppdaterJPMedMottaker(
     private val safClient: SafClient,
     private val euxService: EuxService,
     private val journalpostKlient: JournalpostKlient,
+    private val gcpStorageService: GcpStorageService,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
 ) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
@@ -46,12 +48,12 @@ class OppdaterJPMedMottaker(
         journalpostIderList
             .filterNot { it in journalposterOK || it in journalposterError }
             .forEachIndexed { index, journalpostId ->
-                if ((index + 1) % 1000 == 0) logger.info("Prosessert ${index + 1} journalposter")
+                if ((index + 1) % 10 == 0) logger.info("Prosessert ${index + 1} journalposter")
 
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
                 val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
                 runCatching {
-
+                    logger.info(gcpStorageService.hentIndex("journalpost/index"))
                     val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
                         rinaNrOgMottaker.put(rinaId, it)
                     }
@@ -62,6 +64,7 @@ class OppdaterJPMedMottaker(
                             avsenderMottaker = mottaker
                         ).toJsonSkipEmpty()
                     )
+                    gcpStorageService.lagreJournalPostIndex(journalpostId)
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
                 }.onFailure {
