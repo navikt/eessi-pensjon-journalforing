@@ -27,7 +27,7 @@ class OppdaterJPMedMottakerTest {
 
     @BeforeEach
     fun setUp() {
-        oppdaterJPMedMottaker = OppdaterJPMedMottaker(safClient, euxService, journalpostKlient, "JournalpostIderTest.txt")
+        oppdaterJPMedMottaker = OppdaterJPMedMottaker(safClient, euxService, journalpostKlient, mockk(), "JournalpostIderTest.txt")
 
         every { euxService.hentDeltakereForBuc(any()) } returns deltakere()
         every { journalpostKlient.oppdaterJournalpostMedMottaker(any(), any()) } just Runs
