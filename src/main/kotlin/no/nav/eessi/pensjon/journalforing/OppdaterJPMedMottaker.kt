@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.journalforing
 
-import jakarta.annotation.PostConstruct
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
@@ -48,12 +47,8 @@ class OppdaterJPMedMottaker(
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
-        val indexFraGcp = gcpStorageService.hentIndex()
-        var journalpostIderList = readFileUsingGetResource()
-
-        if(!indexFraGcp.isNullOrEmpty()) {
-            journalpostIderList = journalpostIderList.drop(indexFraGcp.toInt())
-        }
+        val journalpostIdFraGcp = gcpStorageService.hentIndex()
+        val journalpostIderList = readFileUsingGetResource()
 
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
@@ -65,12 +60,16 @@ class OppdaterJPMedMottaker(
                 if ((index + 1) % 10 == 0) {
                     logger.info("Prosessert ${index + 1} journalposter")
                 }
+                if(!journalpostIdFraGcp.isNullOrEmpty() && journalpostId != journalpostIdFraGcp) {
+                    return@forEachIndexed
+                }
+
                 gcpStorageService.lagreJournalPostIndex(journalpostId)
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
                 val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
                 runCatching {
                     val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
-                        rinaNrOgMottaker.put(rinaId, it)
+                        rinaNrOgMottaker[rinaId] = it
                     }
                     logger.info("Mottaker $mottaker")
 
