@@ -48,19 +48,27 @@ class OppdaterJPMedMottaker(
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
 
-        val journalpostIderList = readFileUsingGetResource()
+        val indexFraGcp = gcpStorageService.hentIndex()
+        var journalpostIderList = readFileUsingGetResource()
+
+        if(!indexFraGcp.isNullOrEmpty()) {
+            journalpostIderList = journalpostIderList.drop(indexFraGcp.toInt())
+        }
 
         val journalposterOK = journalpostIderSomGikkBraFile.hentAlle()
         val journalposterError = journalpostIderSomFeilet.hentAlle()
+
+
         journalpostIderList
             .filterNot { it in journalposterOK || it in journalposterError }
             .forEachIndexed { index, journalpostId ->
-                if ((index + 1) % 10 == 0) logger.info("Prosessert ${index + 1} journalposter")
-
+                if ((index + 1) % 10 == 0) {
+                    logger.info("Prosessert ${index + 1} journalposter")
+                    gcpStorageService.lagreJournalPostIndex(journalpostId)
+                }
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
                 val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
                 runCatching {
-                    logger.info(gcpStorageService.hentIndex("journalpost/index"))
                     val mottaker = (rinaNrOgMottaker[rinaId]) ?: hentDeltakerOgMottaker(rinaId).also {
                         rinaNrOgMottaker.put(rinaId, it)
                     }
@@ -71,7 +79,6 @@ class OppdaterJPMedMottaker(
                             avsenderMottaker = mottaker
                         ).toJsonSkipEmpty()
                     )
-                    gcpStorageService.lagreJournalPostIndex(journalpostId)
                     journalpostIderSomGikkBraFile.leggTil(journalpostId.plus(", $rinaId"))
                     logger.info("Journalpost: $journalpostId ferdig oppdatert: resultat: $rinaId, mottaker: ${mottaker}")
                 }.onFailure {

@@ -56,9 +56,9 @@ class GcpStorageService(
         return hent(storageKey, gjennyBucket)
     }
 
-    fun hentIndex(storageKey: String): String? {
-        logger.debug("Henter index for rinaSakId: $storageKey")
-        return hent("journalpost/index", gjennyBucket)
+    fun hentIndex(): String? {
+        logger.debug("Henter index")
+        return hent("journalpostindex", gjennyBucket)
     }
 
     fun hent(storageKey: String, bucketName: String): String? {
@@ -76,8 +76,7 @@ class GcpStorageService(
     }
 
     fun lagreJournalPostIndex(index: String) {
-        val index = "journalpost/index"
-        val blobInfo =  BlobInfo.newBuilder(BlobId.of(gjennyBucket, index)).setContentType("application/json").build()
+        val blobInfo =  BlobInfo.newBuilder(BlobId.of(gjennyBucket, "journalpostindex")).setContentType("application/json").build()
         kotlin.runCatching {
             gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(index.toByteArray())) }.also { logger.info("Lagrer index for journalpost: $it") }
         }.onFailure { e ->
