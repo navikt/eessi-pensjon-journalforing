@@ -41,7 +41,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     @MockkBean
     private lateinit var personService: PersonService
 
-    @MockkBean
+    @MockkBean(relaxed = true)
     private lateinit var oppdaterJPMedMottaker: OppdaterJPMedMottaker
 
     @MockkBean(relaxed = true)
