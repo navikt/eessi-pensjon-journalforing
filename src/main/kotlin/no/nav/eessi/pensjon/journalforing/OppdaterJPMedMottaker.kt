@@ -64,8 +64,8 @@ class OppdaterJPMedMottaker(
             .forEachIndexed { index, journalpostId ->
                 if ((index + 1) % 10 == 0) {
                     logger.info("Prosessert ${index + 1} journalposter")
-                    gcpStorageService.lagreJournalPostIndex(journalpostId)
                 }
+                gcpStorageService.lagreJournalPostIndex(journalpostId)
                 val rinaId = hentRinaIdForJournalpost(journalpostId) ?: return@forEachIndexed
                 val rinaNrOgMottaker = mutableMapOf<String, AvsenderMottaker>()
                 runCatching {
