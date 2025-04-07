@@ -48,7 +48,7 @@ class OppdaterJPMedMottakerTest {
     }
 
     @Test
-    fun `skal oppdatere alle som ligger `() {
+    fun `skal oppdatere alle`() {
         oppdaterJPMedMottaker.oppdatereHeleSulamitten()
         verify(exactly = 5) { journalpostKlient.oppdaterJournalpostMedMottaker(any(), avsenderMottker(deltakere().first().organisation!!)) }
     }
@@ -61,6 +61,18 @@ class OppdaterJPMedMottakerTest {
 
         verify(exactly = 1) { euxService.hentDeltakereForBuc(any()) }
         verify(exactly = 3) { journalpostKlient.oppdaterJournalpostMedMottaker(any(), any()) }
+    }
+
+    @Test
+    fun `Ferdigstille Jper og oppdatere distribusjonsinfo`() {
+        OppdaterJPMedMottaker.JournalpostIdFilLager("/tmp/journalpostIderSomGikkBra.txt").leggTil("453976833")
+        every { gcpStorageService.hentIndex() } returns "453976833"
+        justRun { journalpostKlient.ferdigstillJournalpost(any(), any()) }
+        justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
+        oppdaterJPMedMottaker.ferdigstilleOgOppdatereDistribusjonsinfoForJP()
+
+        verify(exactly = 2) { journalpostKlient.ferdigstillJournalpost(any(), any()) }
+        verify(exactly = 2) { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
     }
 
     fun avsenderMottker(organisation: Organisation) : String {

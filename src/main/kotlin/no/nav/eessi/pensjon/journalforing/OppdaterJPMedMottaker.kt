@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileWriter
+import java.io.*
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -29,7 +27,7 @@ class OppdaterJPMedMottaker(
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        oppdatereHeleSulamitten()
+        ferdigstilleOgOppdatereDistribusjonsinfoForJP()
     }
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
@@ -41,6 +39,32 @@ class OppdaterJPMedMottaker(
      * Hente deltakere for bucId
      * Oppdatere JP med Mottaker ("id", "idType" : "UTL_ORG", "navn", "land" )
      */
+
+    fun ferdigstilleOgOppdatereDistribusjonsinfoForJP() {
+
+        val journalpostIderList = hentAlleJournalpostIderFraFil()
+        journalpostIderList.forEach { journalpostId ->
+            println("journalpostId: $journalpostId")
+            try {
+                if (journalpostId in journalpostIderSomGikkBraFile.hentAlle()) {
+                    logger.info("Journalpost $journalpostId er allerede oppdatert")
+                    return@forEach
+                }
+
+                val journalforendeEnheter = hentJournalforendeEnhetForJP(journalpostId)?.let { it ->
+                    journalpostKlient.ferdigstillJournalpost(journalpostId, it)
+                    journalpostKlient.oppdaterDistribusjonsinfo(journalpostId)
+                }
+
+                journalpostIderSomGikkBraFile.leggTil("$journalpostId\n")
+                logger.info("Ferdigstilt journalpost med JPID: $journalpostId og journalforendeEnhet: $journalforendeEnheter")
+            } catch (e: Exception) {
+               journalpostIderSomFeilet.leggTil("$journalpostId\n")
+                logger.error("Feil under oppdatering av journalpost med JPID: $journalpostId", e)
+            }
+        }
+
+    }
 
     fun oppdatereHeleSulamitten() {
         logger.debug("journalpostIderSomGikkBraFile: ${journalpostIderSomGikkBraFile.hentAlle()}")
@@ -150,5 +174,21 @@ class OppdaterJPMedMottaker(
             return journalpost.tilleggsopplysninger.firstOrNull()?.get("verdi")
         }
         return null
+    }
+
+    fun hentJournalforendeEnhetForJP(journalpostId: String): String? {
+        val journalpost = safClient.hentJournalpostForJp(journalpostId)
+        if (journalpost != null) {
+            return journalpost.journalforendeEnhet
+        }
+        return null
+    }
+
+    fun readFileUsingGetResource(fileName: String) = this::class.java.getResource(fileName).readText(Charsets.UTF_8)
+
+    fun readResourceFile(fileName: String): List<String> {
+        val inputStream = object {}.javaClass.classLoader.getResourceAsStream(fileName)
+            ?: throw IllegalArgumentException("File not found: $fileName")
+        return BufferedReader(InputStreamReader(inputStream)).readLines()
     }
 }

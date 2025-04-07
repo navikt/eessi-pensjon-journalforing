@@ -32,6 +32,7 @@ class JournalpostKlient(
 
     private lateinit var opprettjournalpost: MetricsHelper.Metric
     private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
+    private lateinit var oppdaterJpFerdigstill: MetricsHelper.Metric
     private lateinit var avbruttStatusInfo: MetricsHelper.Metric
     private lateinit var oppdatertJpMedMottaker: MetricsHelper.Metric
     private lateinit var ferdigstillJournal: MetricsHelper.Metric
@@ -42,6 +43,7 @@ class JournalpostKlient(
         oppdatertJpMedMottaker = metricsHelper.init("oppdatertJpMedMottaker")
         opprettjournalpost = metricsHelper.init("opprettjournalpost")
         oppdaterDistribusjonsinfo = metricsHelper.init("oppdaterDistribusjonsinfo")
+        oppdaterJpFerdigstill = metricsHelper.init("oppdaterJpFerdigstill")
         ferdigstillJournal = metricsHelper.init("ferdigstillJournal")
 
     }
@@ -128,6 +130,29 @@ class JournalpostKlient(
             }
         }
     }
+
+    fun ferdigstillJournalpost(journalpostId: String, journalfoerendeEnhet: String) {
+        val path = "/journalpost/$journalpostId/ferdigstill"
+        val body = """{"journalfoerendeEnhet":"$journalfoerendeEnhet"}"""
+
+        return oppdaterJpFerdigstill.measure {
+            try {
+                logger.info("Forsøker å ferdigstille journalpost med JPID: $journalpostId")
+                val headers = HttpHeaders()
+                headers.contentType = MediaType.APPLICATION_JSON
+
+                journalpostOidcRestTemplate.exchange(
+                    path,
+                    HttpMethod.PATCH,
+                    HttpEntity(body, headers),
+                    String::class.java
+                )
+            } catch (ex: Exception) {
+                handleException("Oppdatering av distribusjonsinfo på journalpostId: $journalpostId ex: ", ex)
+            }
+        }
+    }
+
 
     fun oppdaterJournalpostMedAvbrutt(journalpostId: String) {
 
