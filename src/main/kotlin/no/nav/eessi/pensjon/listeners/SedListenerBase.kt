@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
@@ -90,7 +91,7 @@ abstract class SedListenerBase(
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
-        val sakInformasjon = if (hendelseType == HendelseType.SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
+        val sakInformasjon = if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
             pensjonSakInformasjon(
                 identifisertPerson,
                 bucType,
@@ -127,8 +128,8 @@ abstract class SedListenerBase(
 
     fun behandleHendelse(hendelse: String, sedRetning: HendelseType, acknowledgment: Acknowledgment) {
         val sedHendelse = SedHendelse.fromJson(hendelse)
-        val gyldigeSendteHendelser = (sedRetning == HendelseType.SENDT) && GyldigeHendelser.sendt(sedHendelse)
-        val gyldigeMottatteHendelser = (sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.mottatt(sedHendelse)
+        val gyldigeSendteHendelser = (sedRetning == SENDT) && GyldigeHendelser.sendt(sedHendelse)
+        val gyldigeMottatteHendelser = (sedRetning == MOTTATT) && GyldigeHendelser.mottatt(sedHendelse)
 
         if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
@@ -141,6 +142,12 @@ abstract class SedListenerBase(
             behandleSedHendelse(sedHendelse, buc)
         } else {
             logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
+
+            val sedSendt = (sedRetning == SENDT && sedHendelse.bucType in GyldigeHendelser.gyldigUtgaaendeBucType)
+            val sedMottatt = (sedRetning == MOTTATT && sedHendelse.bucType in GyldigeHendelser.gyldigeInnkommendeBucTyper)
+            if (sedMottatt || sedSendt) {
+                throw RuntimeException("Sed ${sedHendelse.sedType}, buc: ${sedHendelse.bucType} burde vært håndtert")
+            }
         }
         acknowledgment.acknowledge()
     }
