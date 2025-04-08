@@ -52,6 +52,18 @@ internal class SedSendtListenerTest {
     }
 
     @Test
+    fun `Gitt en mottatt P_BUC_01 `() {
+        every { gcpStorageService.gjennyFinnes(any()) } returns true
+        every { gcpStorageService.oppdaterGjennysak(any(), any(), any()) } returns "123546"
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+        sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
+
+        verify(exactly = 0) { gcpStorageService.lagre(any(), any()) }
+        verify(exactly = 1) { acknowledgment.acknowledge() }
+        verify(exactly = 1) { jouralforingService.journalfor(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedSendt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)

@@ -127,11 +127,13 @@ abstract class SedListenerBase(
 
     fun behandleHendelse(hendelse: String, sedRetning: HendelseType, acknowledgment: Acknowledgment) {
         val sedHendelse = SedHendelse.fromJson(hendelse)
+        val gyldigeSendteHendelser = (sedRetning == HendelseType.SENDT) && GyldigeHendelser.sendt(sedHendelse)
+        val gyldigeMottatteHendelser = (sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.mottatt(sedHendelse)
 
         if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
-        } else if ((sedRetning == HendelseType.SENDT || sedRetning == HendelseType.MOTTATT) && GyldigeHendelser.sendt(sedHendelse)) {
-            logger.info("Godkjent sed: ${sedHendelse.sedId}, klar for behandling")
+        } else if (gyldigeSendteHendelser || gyldigeMottatteHendelser) {
+            logger.info("Gyldig sed: ${sedHendelse.sedId}, klar for behandling")
 
             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
             secureLog.info("Buc: ${buc.id}, sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}")
@@ -140,9 +142,9 @@ abstract class SedListenerBase(
         } else {
             logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
         }
-
         acknowledgment.acknowledge()
     }
+
 }
 
 interface journalListener {

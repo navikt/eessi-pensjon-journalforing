@@ -60,6 +60,18 @@ internal class SedMottattListenerTest {
     }
 
     @Test
+    fun `Gitt en mottatt H_BUC_07 `() {
+        every { gcpStorageService.gjennyFinnes(any()) } returns true
+        every { gcpStorageService.oppdaterGjennysak(any(), any(), any()) } returns "123546"
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+        sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/H_BUC_07_H070.json"))), cr, acknowledgment)
+
+        verify(exactly = 0) { gcpStorageService.lagre(any(), any()) }
+        verify(exactly = 1) { acknowledgment.acknowledge() }
+        verify(exactly = 1) { jouralforingService.journalfor(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
     fun `Gitt en P_BUC_02 som ikke er P2100 saa skal den ikke lagres i gjenny bucketen`() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         sedListener.consumeSedMottatt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_02_P10000.json"))), cr, acknowledgment)
