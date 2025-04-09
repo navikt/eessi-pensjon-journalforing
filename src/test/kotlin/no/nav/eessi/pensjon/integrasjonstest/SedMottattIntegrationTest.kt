@@ -88,35 +88,25 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
     }
     @Test
     fun `Gitt en mottatt P2000 med en fdato som er lik med fdato i fnr så skal oppgaven routes til 4303`() {
+        val bucId = "147729"
+        val journalpostId = "429434378"
+        val sedId1 = "44cb68f89a2f4e748934fb4722721018"
+        val sedId2 = "b12e06dda2c7474b9998c7139c841646"
 
-        //setup server
+        // setup
         CustomMockServer()
-            .medJournalforing(false, "429434378")
+            .medJournalforing(false, journalpostId)
             .medNorg2Tjeneste()
             .mockBestemSak()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/147729",
-                HttpMethod.GET,
-                Buc(
-                    id = "7477291",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/147729/sed/44cb68f89a2f4e748934fb4722721018",
-                HttpMethod.GET,
-                "/sed/P2000-NAV.json"
-            )
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/147729/sed/b12e06dda2c7474b9998c7139c841646/filer",
-                HttpMethod.GET,
-                "/pdf/pdfResponseMedVedlegg.json"
-            )
+            .mockBucResponse("/buc/$bucId", bucId, "/fagmodul/alldocumentsids.json")
+            .mockSedResponse("/buc/$bucId/sed/$sedId1", "/sed/P2000-NAV.json")
+            .mockFileResponse("/buc/$bucId/sed/$sedId2/filer", "/pdf/pdfResponseMedVedlegg.json")
 
+        // send melding
         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000.json")
-        //verify route
-        OppgaveMeldingVerification("429434378")
+
+        // verifikasjon
+        OppgaveMeldingVerification(journalpostId)
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
             .medtildeltEnhetsnr("4303")
@@ -124,32 +114,19 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
     @Test
     fun `Sender Pensjon SED (P2000) med ugyldig FNR og forventer routing til 4303`() {
-
-        //setup server
+        // setup
         CustomMockServer()
             .medJournalforing(false, "429434388")
             .medNorg2Tjeneste()
             .mockBestemSak()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/7477291",
-                HttpMethod.GET, Buc(
-                    id = "7477291",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocuments_ugyldigFNR_ids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx",
-                HttpMethod.GET, "/sed/P2000-ugyldigFNR-NAV.json"
-            )
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer",
-                HttpMethod.GET, "/pdf/pdfResponseUtenVedlegg.json"
-            )
-        //send msg
+            .mockBucResponse("/buc/7477291", "7477291", "/fagmodul/alldocuments_ugyldigFNR_ids.json")
+            .mockSedResponse("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx", "/sed/P2000-ugyldigFNR-NAV.json")
+            .mockFileResponse("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer", "/pdf/pdfResponseUtenVedlegg.json")
+
+        // send melding
         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
 
-        //then route to 4303
+        // verifisering
         OppgaveMeldingVerification("429434388")
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
@@ -160,29 +137,13 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
     @Test
     fun `Sender Pensjon SED (P2000) med ugyldig vedlegg og skal routes til 9999`() {
 
-        //setup server
         CustomMockServer()
             .medJournalforing()
             .medNorg2Tjeneste()
             .mockBestemSak()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/147666",
-                HttpMethod.GET, Buc(
-                    id = "147666",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/147666/sed/44cb68f89a2f4e748934fb4722721018",
-                HttpMethod.GET,
-                "/sed/P2000-NAV.json"
-            )
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer",
-                HttpMethod.GET,
-                "/pdf/pdfResponseMedUgyldigVedlegg.json"
-            )
+            .mockBucResponse("/buc/147666", "147666", "/fagmodul/alldocumentsids.json")
+            .mockSedResponse("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2000-NAV.json")
+            .mockFileResponse("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer", "/pdf/pdfResponseMedUgyldigVedlegg.json")
 
         meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
 
