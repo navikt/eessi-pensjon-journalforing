@@ -64,22 +64,28 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
     }
 
     @Test
-    fun `Sender 1 Foreldre SED til Kafka`() {
+    fun `en mottatt H_BUC_07 skal journalfores`() {
+        val bucId = "147729"
+        val journalpostId = "429434388"
+        val sedId1 = "44cb68f89a2f4e748934fb4722721018"
+        val sedId2 = "9498fc46933548518712e4a1d5133113"
 
-        //given
         CustomMockServer()
-            .medJournalforing(false, "429434378")
+            .medJournalforing(false, journalpostId)
             .medNorg2Tjeneste()
             .mockBestemSak()
-            .mockHttpRequestWithResponseFromFile(
-                "/buc/747729177/sed/44cb68f89a2f4e748934fb4722721018",
-                HttpMethod.GET,
-                "/sed/P2000-NAV.json"
-            )
+            .mockBucResponse("/buc/$bucId", bucId, "/fagmodul/alldocumentsids.json")
+            .mockSedResponse("/buc/$bucId/sed/$sedId1", "/sed/H070-NAV.json")
+            .mockFileResponse("/buc/$bucId/sed/$sedId1/filer", "/pdf/pdfResponseUtenVedlegg.json")
+            .mockFileResponse("/buc/$bucId/sed/$sedId2/filer", "/pdf/pdfResponseUtenVedlegg.json")
 
-        meldingForMottattListener("/eux/hendelser/FB_BUC_01_F001.json")
+        meldingForMottattListener("/eux/hendelser/H_BUC_07_H070.json")
+
+        OppgaveMeldingVerification(journalpostId)
+            .medHendelsetype("MOTTATT")
+            .medSedtype("H070")
+            .medtildeltEnhetsnr("4303")
     }
-
     @Test
     fun `Gitt en mottatt P2000 med en fdato som er lik med fdato i fnr så skal oppgaven routes til 4303`() {
 
@@ -184,5 +190,24 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
             .medHendelsetype("MOTTATT")
             .medSedtype("P2000")
             .medtildeltEnhetsnr("4303")
+    }
+
+    private fun CustomMockServer.mockBucResponse(endpoint: String, bucId: String, documentsPath: String) = apply {
+        mockHttpRequestWithResponseFromJson(
+            endpoint,
+            HttpMethod.GET,
+            Buc(
+                id = bucId,
+                participants = emptyList(),
+                documents = opprettBucDocuments(documentsPath)
+            ).toJson()
+        )
+    }
+    private fun CustomMockServer.mockSedResponse(endpoint: String, responseFile: String) = apply {
+        mockHttpRequestWithResponseFromFile(endpoint, HttpMethod.GET, responseFile)
+    }
+
+    private fun CustomMockServer.mockFileResponse(endpoint: String, responseFile: String) = apply {
+        mockHttpRequestWithResponseFromFile(endpoint, HttpMethod.GET, responseFile)
     }
 }

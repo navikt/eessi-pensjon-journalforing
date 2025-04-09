@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "bruker": {
+      "doedsfall": {
+        "sted": {
+          "adresse": {
+            "land": "FI",
+            "postnummer": "234",
+            "bygning": "fqwfwq wefq",
+            "gate": "fqwfw wefqf",
+            "region": "qwerrwqer",
+            "by": "qwfeqwef wef"
+          }
+        },
+        "dokumentervedlagt": {
+          "annet": [
+            "ondocnooino",
+            "onddasdocnooino"
+          ],
+          "type": [
+            "søknad",
+            "dødsattest",
+            "fakturaer"
+          ]
+        },
+        "doedsdato": "1988-02-11"
+      },
+      "mor": {
+        "person": {
+          "etternavnvedfoedsel": "asdff sdafasd",
+          "fornavn": "afdsfffn"
+        }
+      },
+      "person": {
+        "pin": [
+          {
+            "sektor": "familieytelser",
+            "land": "DE",
+            "institusjonsid": "asdfds fdsfad",
+            "institusjonsnavn": "sdaf sdafafd",
+            "identifikator": "r23ffwv"
+          }
+        ],
+        "fornavn": "asdfaf sadff",
+        "foedested": {
+          "region": "asdf fsafsaf",
+          "by": "fasdf sdaffasdf",
+          "land": "DK"
+        },
+        "kjoenn": "M",
+        "etternavn": "sadf dsaff",
+        "etternavnvedfoedsel": "qwer weqrqwerwe",
+        "fornavnvedfoedsel": "wqer weqrwrr",
+        "foedselsdato": "1955-09-12",
+        "statsborgerskap": [
+          {
+            "land": "SE"
+          }
+        ]
+      },
+      "far": {
+        "person": {
+          "etternavnvedfoedsel": "fasdf dsafasdf",
+          "fornavn": "asdfs adfsfasdf"
+        }
+      }
+    },
+    "ytterligereinformasjon": "pasdij oijoij"
+  },
+  "sedGVer": "4",
+  "sedVer": "1",
+  "sed": "H070"
+}
