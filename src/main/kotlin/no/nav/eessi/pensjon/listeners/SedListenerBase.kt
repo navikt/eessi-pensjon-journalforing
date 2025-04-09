@@ -163,7 +163,7 @@ abstract class SedListenerBase(
 
     private fun metricForGyldigSed(retning: String, bucType: BucType?, sedType: SedType?) {
         try {
-            Metrics.counter("behandled_sed_${retning.lowercase()}_gyldig", "bucSed", "${bucType}_$sedType").increment()
+            Metrics.counter("behandled_sed_${retning.lowercase()}_gyldig", "bucSed", "${bucType}, $sedType").increment()
         } catch (e: Exception) {
             logger.warn("Metrics feilet med melding", e)
         }
@@ -171,7 +171,7 @@ abstract class SedListenerBase(
 
     private fun metricForUgyldigSed(retning: String, bucType: BucType?, sedType: SedType?) {
         try {
-            Metrics.counter("behandled_sed_${retning.lowercase()}_ugyldig", "bucSed", "${bucType}_$sedType").increment()
+            Metrics.counter("behandled_sed_${retning.lowercase()}_ugyldig", "bucSed", "${bucType}, $sedType").increment()
         } catch (e: Exception) {
             logger.warn("Metrics feilet med melding", e)
         }
