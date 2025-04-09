@@ -1,7 +1,10 @@
 package no.nav.eessi.pensjon.listeners
+
+import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -11,6 +14,7 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
+import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
@@ -20,6 +24,7 @@ import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.support.Acknowledgment
 
 abstract class SedListenerBase(
@@ -27,10 +32,13 @@ abstract class SedListenerBase(
     private val bestemSakService: BestemSakService,
     private val gcpStorageService: GcpStorageService,
     private val euxService: EuxService,
-    private val profile: String
-) : journalListener{
+    private val profile: String,
+    @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
+) : journalListener {
 
     private val logger = LoggerFactory.getLogger(SedListenerBase::class.java)
+    private var gyldigeSed: MetricsHelper.Metric = metricsHelper.init("gyldigeSed")
+    private var ugyldigeSed: MetricsHelper.Metric = metricsHelper.init("ugyldigeSed")
 
     /** Velger saktype fra enten bestemSak eller pensjonsinformasjon der det finnes */
     private fun pensjonSakInformasjon(
@@ -79,7 +87,7 @@ abstract class SedListenerBase(
         currentSed: SED?
     ): SaksInfoSamlet {
         val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
-        if(erGjennysak) {
+        if (erGjennysak) {
             val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
@@ -104,18 +112,17 @@ abstract class SedListenerBase(
         return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktypeFraSedEllerPesys)
     }
 
-    private fun oppdaterGjennySak(sedHendelse: SedHendelse, gjennysakFraSed: String) : String? {
+    private fun oppdaterGjennySak(sedHendelse: SedHendelse, gjennysakFraSed: String): String? {
         val gcpGjennysak = gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId)?.let { mapJsonToAny<GjennySak>(it) }
         val gjennyFinnes = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
 
         return if (gjennyFinnes && gcpGjennysak?.sakId == null && gcpGjennysak != null) {
             gcpStorageService.oppdaterGjennysak(sedHendelse, gcpGjennysak, gjennysakFraSed)
-        }
-        else null
+        } else null
     }
 
 
-    fun skippingOffsett(offset: Long, offsetsToSkip : List<Long>): Boolean {
+    fun skippingOffsett(offset: Long, offsetsToSkip: List<Long>): Boolean {
         return if (offset !in offsetsToSkip) {
             false
         } else {
@@ -138,21 +145,40 @@ abstract class SedListenerBase(
 
             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
             secureLog.info("Buc: ${buc.id}, sedid: ${sedHendelse.sedId} sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}")
-
             behandleSedHendelse(sedHendelse, buc)
-        } else {
-            logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.rinaSakId} er ikke med i listen over gyldige hendelser")
 
+            metricForGyldigSed(sedRetning.toString(), sedHendelse.bucType, sedHendelse.sedType)
+        } else {
+            logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.sedId} er ikke med i listen over gyldige hendelser")
             val sedSendt = (sedRetning == SENDT && sedHendelse.bucType in GyldigeHendelser.gyldigUtgaaendeBucType)
             val sedMottatt = (sedRetning == MOTTATT && sedHendelse.bucType in GyldigeHendelser.gyldigeInnkommendeBucTyper)
+
             if (sedMottatt || sedSendt) {
                 throw RuntimeException("Sed ${sedHendelse.sedType}, buc: ${sedHendelse.bucType} burde vært håndtert")
             }
+            metricForUgyldigSed(sedRetning.toString(), sedHendelse.bucType, sedHendelse.sedType)
         }
         acknowledgment.acknowledge()
     }
 
+    private fun metricForGyldigSed(retning: String, bucType: BucType?, sedType: SedType?) {
+        try {
+            Metrics.counter("behandled_sed_${retning.lowercase()}_gyldig", "bucSed", "${bucType}_$sedType").increment()
+        } catch (e: Exception) {
+            logger.warn("Metrics feilet med melding", e)
+        }
+    }
+
+    private fun metricForUgyldigSed(retning: String, bucType: BucType?, sedType: SedType?) {
+        try {
+            Metrics.counter("behandled_sed_${retning.lowercase()}_ugyldig", "bucSed", "${bucType}_$sedType").increment()
+        } catch (e: Exception) {
+            logger.warn("Metrics feilet med melding", e)
+        }
+    }
+
 }
+
 
 interface journalListener {
     fun behandleSedHendelse(sedHendelse: SedHendelse, buc: Buc)
