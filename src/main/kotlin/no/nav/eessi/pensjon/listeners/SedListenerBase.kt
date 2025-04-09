@@ -137,7 +137,7 @@ abstract class SedListenerBase(
             logger.info("Gyldig sed: ${sedHendelse.sedId}, klar for behandling")
 
             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
-            secureLog.info("Buc: ${buc.id}, sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}")
+            secureLog.info("Buc: ${buc.id}, sedid: ${sedHendelse.sedId} sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}")
 
             behandleSedHendelse(sedHendelse, buc)
         } else {
