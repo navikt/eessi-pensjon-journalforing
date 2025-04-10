@@ -11,191 +11,85 @@ import java.util.concurrent.TimeUnit
 
 class CustomMockServer {
 
-    var mockServer = MockServerClient("localhost", System.getProperty("mockServerport").toInt())
+
+    private val mockServer = MockServerClient("localhost", System.getProperty("mockServerport").toInt())
 
     fun medOppdaterDistribusjonsinfo() = apply {
-        // Mocker oppdaterDistribusjonsinfo
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("PATCH")
-                .withPath("/journalpost/.*/oppdaterDistribusjonsinfo")
-        )
-        .respond(
-            HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody("")
-        )
+        mockPatchRequest("/journalpost/.*/oppdaterDistribusjonsinfo", "")
     }
 
     fun medStatusAvbrutt() = apply {
-        // Mocker sett status avbrutt
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("PATCH")
-                .withPath("/journalpost/.*/settStatusAvbryt")
-        )
-            .respond(
-                HttpResponse.response()
-                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                    .withStatusCode(HttpStatusCode.OK_200.code())
-                    .withBody("")
-            )
+        mockPatchRequest("/journalpost/.*/settStatusAvbryt", "")
     }
 
-
     fun mockBestemSak() = apply {
-
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("POST")
-                .withPath("/")
-        )
-        .respond(
-            HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody(javaClass.getResource("/pen/bestemSakGjenlevendeResponse.json").readText())
-                .withDelay(TimeUnit.SECONDS, 1)
-        )
+        mockPostRequest("/", "/pen/bestemSakGjenlevendeResponse.json", delaySeconds = 1)
     }
 
     fun mockPensjonsinformasjon() = apply {
-
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("GET")
-                .withPath("/pensjon/sakliste/.*")
-        )
-        .respond(
-            HttpResponse.response()
-                .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                .withStatusCode(HttpStatusCode.OK_200.code())
-                .withBody(javaClass.getResource("/pen/pensjonsinformasjonResponse.json")!!.readText())
-                .withDelay(TimeUnit.SECONDS, 1)
-        )
+        mockGetRequest("/pensjon/sakliste/.*", "/pen/pensjonsinformasjonResponse.json", delaySeconds = 1)
     }
 
     fun mockHttpRequestFromFileWithBodyContains(bodyContains: String, httpMethod: HttpMethod, response: String) = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(httpMethod.name())
-                .withBody(subString(bodyContains))
-        )
-        .respond(
-            withResponseFromFile(response)
-        )
+        mockRequestWithBodyContains(bodyContains, httpMethod, withResponseFromFile(response))
     }
+
     fun mockHttpRequestFromJsonWithBodyContains(bodyContains: String, httpMethod: HttpMethod, response: String) = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(httpMethod.name())
-                .withBody(subString(bodyContains))
-        )
-        .respond(
-            withResponseAsJsonString(response)
-        )
+        mockRequestWithBodyContains(bodyContains, httpMethod, withResponseAsJsonString(response))
     }
 
-    fun mockLagreJournalPostDetaljer() {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("POST")
-                .withPath("/journalpost/.*")
-        )
-
-    }
-
-    /**
-     * mocker journalføringresponse
-     * @param {Boolean} forsoekFerdigstill, gjør det mulig å benytte krav init
-     * @param {String} journalpostId, erstatter default id
-     * */
     fun medJournalforing(forsoekFerdigstill: Boolean = false, journalpostId: String = "429434378") = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("POST")
-                .withPath("/journalpost")
-        )
-        .respond(
-            when (forsoekFerdigstill) {
-                true -> {
-                    val reponse = withResponseFromFile("/journalpost/opprettJournalpostResponseTrue.json")
-                    reponse.withBody(reponse.body.toString().replace("429434378", journalpostId))
-                }
-                false -> {
-                    val reponse = withResponseFromFile("/journalpost/opprettJournalpostResponseFalse.json")
-                    reponse.withBody(reponse.body.toString().replace("429434378", journalpostId))
-                }
-            }
-        )
+        val responseFile = if (forsoekFerdigstill) "/journalpost/opprettJournalpostResponseTrue.json"
+        else "/journalpost/opprettJournalpostResponseFalse.json"
+        mockPostRequest("/journalpost", responseFile, journalpostId)
     }
 
-    /**
-     * mocker journalføringresponse
-     * @param {Boolean} forsoekFerdigstill, gjør det mulig å benytte krav init
-     * @param {String} journalpostId, erstatter default id
-     * */
     fun medJournalforingMedUkjentBruker(forsoekFerdigstill: Boolean = false, journalpostId: String = "429434378") = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("PATCH")
-                .withPath("/journalpost/$journalpostId/feilregistrer/settUkjentBruker")
-        )
-            .respond(
-                when (forsoekFerdigstill) {
-                    true -> {
-                        val reponse = withResponseFromFile("/journalpost/opprettJournalpostResponseTrue.json")
-                        reponse.withBody(reponse.body.toString().replace("429434378", journalpostId))
-                    }
-                    false -> {
-                        val reponse = withResponseFromFile("/journalpost/opprettJournalpostResponseFalse.json")
-                        reponse.withBody(reponse.body.toString().replace("429434378", journalpostId))
-                    }
-                }
-            )
+        val responseFile = if (forsoekFerdigstill) "/journalpost/opprettJournalpostResponseTrue.json"
+        else "/journalpost/opprettJournalpostResponseFalse.json"
+        mockPatchRequest("/journalpost/$journalpostId/feilregistrer/settUkjentBruker", responseFile, journalpostId)
     }
 
     fun medNorg2Tjeneste() = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("POST")
-                .withPath("/api/v1/arbeidsfordeling")
-        )
-        .respond(
-            withResponseFromFile("/norg2/norg2arbeidsfordelig4803result.json")
-        )
+        mockPostRequest("/api/v1/arbeidsfordeling", "/norg2/norg2arbeidsfordelig4803result.json")
     }
 
     fun medGjennyResponse() = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod("GET")
-                .withPath("/api/sak/123123124341345134513513451345134513513451345")
-        )
-            .respond(
-                HttpResponse.response()
-                    .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
-                    .withStatusCode(HttpStatusCode.OK_200.code())
-                    .withDelay(TimeUnit.SECONDS, 1)
-            )
+        mockGetRequest("/api/sak/123123124341345134513513451345134513513451345", "", delaySeconds = 1)
     }
 
     fun mockHttpRequestWithResponseFromFile(path: String, httpMethod: HttpMethod, response: String) = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(httpMethod.name())
-                .withPath(path)
-
-        ).respond(withResponseFromFile(response))}
+        mockRequest(path, httpMethod, withResponseFromFile(response))
+    }
 
     fun mockHttpRequestWithResponseFromJson(path: String, httpMethod: HttpMethod, responseAsJson: String) = apply {
-        mockServer.`when`(
-            HttpRequest.request()
-                .withMethod(httpMethod.name())
-                .withPath(path)
+        mockRequest(path, httpMethod, withResponseAsJsonString(responseAsJson))
+    }
 
-        ).respond(withResponseAsJsonString(responseAsJson))}
+    private fun mockRequest(path: String, httpMethod: HttpMethod, response: HttpResponse) {
+        mockServer.`when`(HttpRequest.request().withMethod(httpMethod.name()).withPath(path)).respond(response)
+    }
+
+    private fun mockRequestWithBodyContains(bodyContains: String, httpMethod: HttpMethod, response: HttpResponse) {
+        mockServer.`when`(
+            HttpRequest.request().withMethod(httpMethod.name()).withBody(subString(bodyContains))
+        ).respond(response)
+    }
+
+    private fun mockPostRequest(path: String, responseFile: String, journalpostId: String? = null, delaySeconds: Long = 0) {
+        val response = withResponseFromFile(responseFile).applyJournalpostId(journalpostId).applyDelay(delaySeconds)
+        mockRequest(path, HttpMethod.POST, response)
+    }
+
+    private fun mockPatchRequest(path: String, responseFile: String, journalpostId: String? = null, delaySeconds: Long = 0) {
+        val response = withResponseFromFile(responseFile).applyJournalpostId(journalpostId).applyDelay(delaySeconds)
+        mockRequest(path, HttpMethod.PATCH, response)
+    }
+
+    private fun mockGetRequest(path: String, responseFile: String, delaySeconds: Long = 0) {
+        val response = withResponseFromFile(responseFile).applyDelay(delaySeconds)
+        mockRequest(path, HttpMethod.GET, response)
+    }
 
     private fun withResponseFromFile(filePath: String) = HttpResponse.response()
         .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
@@ -206,4 +100,14 @@ class CustomMockServer {
         .withHeader(Header("Content-Type", "application/json; charset=utf-8"))
         .withStatusCode(HttpStatusCode.OK_200.code())
         .withBody(jsonString)
+
+    private fun HttpResponse.applyJournalpostId(journalpostId: String?) = apply {
+        if (journalpostId != null) {
+            withBody(body.toString().replace("429434378", journalpostId))
+        }
+    }
+
+    private fun HttpResponse.applyDelay(seconds: Long) = apply {
+        if (seconds > 0) withDelay(TimeUnit.SECONDS, seconds)
+    }
 }
