@@ -53,21 +53,21 @@ class OppdaterJPMedMottakerTest {
         verify(exactly = 5) { journalpostKlient.oppdaterJournalpostMedMottaker(any(), avsenderMottker(deltakere().first().organisation!!)) }
     }
 
-    @Test
-    fun `skal oppdatere alle som ligger `() {
-        val fileName = "JournalpostIderPROD.txt"
-        val numberCounts = mutableMapOf<String, Int>()
-
-        File(fileName).forEachLine { line ->
-            val number = line.trim()
-            if (number.isNotEmpty()) {
-                numberCounts[number] = numberCounts.getOrDefault(number, 0) + 1
-            }
-        }
-
-        val numbersNotListedTwice = numberCounts.filter { it.value != 2 }.keys
-        numbersNotListedTwice.forEach(::println)
-    }
+//    @Test
+//    fun `skal oppdatere alle som ligger `() {
+//        val fileName = "JournalpostIderPROD.txt"
+//        val numberCounts = mutableMapOf<String, Int>()
+//
+//        File(fileName).forEachLine { line ->
+//            val number = line.trim()
+//            if (number.isNotEmpty()) {
+//                numberCounts[number] = numberCounts.getOrDefault(number, 0) + 1
+//            }
+//        }
+//
+//        val numbersNotListedTwice = numberCounts.filter { it.value != 2 }.keys
+//        numbersNotListedTwice.forEach(::println)
+//    }
 
     @Test
     fun `skal hoppe over allerede lagret filer`() {
