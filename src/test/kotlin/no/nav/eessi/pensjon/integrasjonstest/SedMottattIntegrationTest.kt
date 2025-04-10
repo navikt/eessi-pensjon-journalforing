@@ -4,25 +4,19 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
-import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.socket.PortFactory
+import org.slf4j.event.Level
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.http.HttpMethod
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.client.RestTemplate
 
-@SpringBootTest(classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, SedMottattIntegrationTest.TestConfig::class])
+@SpringBootTest(classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
@@ -31,11 +25,10 @@ import org.springframework.web.client.RestTemplate
 internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
     init {
-        if (System.getProperty("mockServerport") == null) {
-            mockServer = ClientAndServer(PortFactory.findFreePort())
-                .also {
-                    System.setProperty("mockServerport", it.localPort.toString())
-                }
+        if(System.getProperty("mockServerport") == null){
+            val port = System.getProperty("mockServerport")?.toInt() ?: PortFactory.findFreePort()
+            mockServer = ClientAndServer(Configuration().apply { logLevel(Level.ERROR) }, port)
+            System.setProperty("mockServerport", port.toString())
         }
     }
 
@@ -51,124 +44,73 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
         }
     }
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
-
-        @Bean
-        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
-
-        @Bean
-        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
-    }
-
     @Test
-    fun `en mottatt H_BUC_07 skal journalfores`() {
+    fun `H070-NAV for en H_BUC_07 skal journalfores`() {
         val bucId = "147729"
         val journalpostId = "429434388"
         val sedId1 = "44cb68f89a2f4e748934fb4722721018"
         val sedId2 = "9498fc46933548518712e4a1d5133113"
-
-        CustomMockServer()
-            .medJournalforing(false, journalpostId)
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .mockBucResponse("/buc/$bucId", bucId, "/fagmodul/alldocumentsids.json")
-            .mockSedResponse("/buc/$bucId/sed/$sedId1", "/sed/H070-NAV.json")
-            .mockFileResponse("/buc/$bucId/sed/$sedId1/filer", "/pdf/pdfResponseUtenVedlegg.json")
-            .mockFileResponse("/buc/$bucId/sed/$sedId2/filer", "/pdf/pdfResponseUtenVedlegg.json")
-
-        meldingForMottattListener("/eux/hendelser/H_BUC_07_H070.json")
-
-        OppgaveMeldingVerification(journalpostId)
-            .medHendelsetype("MOTTATT")
-            .medSedtype("H070")
-            .medtildeltEnhetsnr("4303")
+        setupMockServer(
+            bucId = bucId, journalpostId = journalpostId, responses = listOf(
+                "/buc/$bucId/sed/$sedId1" to "/sed/H070-NAV.json",
+                "/buc/$bucId/sed/$sedId1/filer" to "/pdf/pdfResponseUtenVedlegg.json",
+                "/buc/$bucId/sed/$sedId2/filer" to "/pdf/pdfResponseUtenVedlegg.json"
+            )
+        )
+        startJornalforingForMottatt("/eux/hendelser/H_BUC_07_H070.json")
+        verifyOppgave(journalpostId, "MOTTATT", "H070", "4303")
     }
+
     @Test
-    fun `Gitt en mottatt P2000 med en fdato som er lik med fdato i fnr så skal oppgaven routes til 4303`() {
+    fun `P2000 skal routes to 4303`() {
         val bucId = "147729"
         val journalpostId = "429434378"
         val sedId1 = "44cb68f89a2f4e748934fb4722721018"
         val sedId2 = "b12e06dda2c7474b9998c7139c841646"
-
-        // setup
-        CustomMockServer()
-            .medJournalforing(false, journalpostId)
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .mockBucResponse("/buc/$bucId", bucId, "/fagmodul/alldocumentsids.json")
-            .mockSedResponse("/buc/$bucId/sed/$sedId1", "/sed/P2000-NAV.json")
-            .mockFileResponse("/buc/$bucId/sed/$sedId2/filer", "/pdf/pdfResponseMedVedlegg.json")
-
-        // send melding
-        meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000.json")
-
-        // verifikasjon
-        OppgaveMeldingVerification(journalpostId)
-            .medHendelsetype("MOTTATT")
-            .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
-    }
-
-    @Test
-    fun `Sender Pensjon SED (P2000) med ugyldig FNR og forventer routing til 4303`() {
-        // setup
-        CustomMockServer()
-            .medJournalforing(false, "429434388")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .mockBucResponse("/buc/7477291", "7477291", "/fagmodul/alldocuments_ugyldigFNR_ids.json")
-            .mockSedResponse("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx", "/sed/P2000-ugyldigFNR-NAV.json")
-            .mockFileResponse("/buc/7477291/sed/b12e06dda2c7474b9998c7139c841646fffx/filer", "/pdf/pdfResponseUtenVedlegg.json")
-
-        // send melding
-        meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
-
-        // verifisering
-        OppgaveMeldingVerification("429434388")
-            .medHendelsetype("MOTTATT")
-            .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
-    }
-
-
-    @Test
-    fun `Sender Pensjon SED (P2000) med ugyldig vedlegg og skal routes til 9999`() {
-
-        CustomMockServer()
-            .medJournalforing()
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .mockBucResponse("/buc/147666", "147666", "/fagmodul/alldocumentsids.json")
-            .mockSedResponse("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018", "/sed/P2000-NAV.json")
-            .mockFileResponse("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer", "/pdf/pdfResponseMedUgyldigVedlegg.json")
-
-        meldingForMottattListener("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
-
-        OppgaveMeldingVerification("429434378")
-            .medHendelsetype("MOTTATT")
-            .medSedtype("P2000")
-            .medtildeltEnhetsnr("4303")
-    }
-
-    private fun CustomMockServer.mockBucResponse(endpoint: String, bucId: String, documentsPath: String) = apply {
-        mockHttpRequestWithResponseFromJson(
-            endpoint,
-            HttpMethod.GET,
-            Buc(
-                id = bucId,
-                participants = emptyList(),
-                documents = opprettBucDocuments(documentsPath)
-            ).toJson()
+        setupMockServer(
+            bucId = bucId, journalpostId = journalpostId, responses = listOf(
+                "/buc/$bucId/sed/$sedId1" to "/sed/P2000-ugyldigFNR-NAV.json",
+                "/buc/$bucId/sed/$sedId2/filer" to "/pdf/pdfResponseUtenVedlegg.json"
+            )
         )
-    }
-    private fun CustomMockServer.mockSedResponse(endpoint: String, responseFile: String) = apply {
-        mockHttpRequestWithResponseFromFile(endpoint, HttpMethod.GET, responseFile)
+        startJornalforingForMottatt("/eux/hendelser/P_BUC_01_P2000.json")
+        verifyOppgave(journalpostId, "MOTTATT", "P2000", "4303")
     }
 
-    private fun CustomMockServer.mockFileResponse(endpoint: String, responseFile: String) = apply {
-        mockHttpRequestWithResponseFromFile(endpoint, HttpMethod.GET, responseFile)
+    @Test
+    fun `P2000 med ugyldig FNR skal routes til 4303`() {
+        val bucId = "7477291"
+        val journalpostId = "429434388"
+        val sedId1 = "b12e06dda2c7474b9998c7139c841646fffx"
+        setupMockServer(
+            bucId = bucId,
+            journalpostId = journalpostId,
+            bucDocList = "/fagmodul/alldocuments_ugyldigFNR_ids.json",
+            responses = listOf(
+                "/buc/$bucId/sed/$sedId1" to "/sed/P2000-ugyldigFNR-NAV.json",
+                "/buc/$bucId/sed/$sedId1/filer" to "/pdf/pdfResponseUtenVedlegg.json"
+            )
+        )
+        startJornalforingForMottatt("/eux/hendelser/P_BUC_01_P2000_ugyldigFNR.json")
+        verifyOppgave(journalpostId, "MOTTATT", "P2000", "4303")
+    }
+
+    @Test
+    fun `Pensjon SED (P2000) med ugyldig vedlegg skal routes til 9999`() {
+        val bucId = "147666"
+        val journalpostId = "429434378"
+        val sedId1 = "44cb68f89a2f4e748934fb4722721018"
+        val sedId2 = "b12e06dda2c7474b9998c7139c666666"
+        setupMockServer(
+            bucId = bucId,
+            journalpostId = journalpostId,
+            bucDocList = "/fagmodul/alldocumentsids.json",
+            responses = listOf(
+                "/buc/147666/sed/$sedId1" to "/sed/P2000-NAV.json",
+                "/buc/147666/sed/$sedId2/filer" to "/pdf/pdfResponseMedUgyldigVedlegg.json"
+            )
+        )
+        startJornalforingForMottatt("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")
+        verifyOppgave(journalpostId, "MOTTATT", "P2000", "4303")
     }
 }

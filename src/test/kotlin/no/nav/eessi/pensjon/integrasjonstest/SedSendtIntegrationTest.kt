@@ -2,14 +2,9 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
-import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
-import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.saf.SafClient
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
@@ -18,14 +13,11 @@ import org.mockserver.socket.PortFactory
 import org.slf4j.event.Level
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.client.RestTemplate
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, SedSendtIntegrationTest.TestConfig::class])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
@@ -40,14 +32,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     private lateinit var hentSakService: HentSakService
 
     init {
-        if (System.getProperty("mockServerport") == null) {
-            mockServer = ClientAndServer(Configuration().apply {
-                logLevel(Level.ERROR)
-            }, PortFactory.findFreePort())
-                .also {
-                    System.setProperty("mockServerport", it.localPort.toString())
-                }
-        }
+        val port = System.getProperty("mockServerport")?.toInt() ?: PortFactory.findFreePort()
+        mockServer = ClientAndServer(Configuration().apply { logLevel(Level.ERROR) }, port)
+        System.setProperty("mockServerport", port.toString())
     }
 
     @BeforeEach
@@ -56,48 +43,12 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         every { gcpStorageService.hentFraGjenny(any()) } returns null
     }
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
-
-        @Bean
-        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
-
-        @Bean
-        fun gcpStorageService(): GcpStorageService = mockk<GcpStorageService>()
-
-        @Bean
-        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
-
-    }
-
-    @Test
-    fun `Gitt en sedSendt hendelse med en foreldre blir konsumert så skal den ikke opprette oppgave`() {
-
-        //setup server
-        CustomMockServer()
-            .medJournalforing(false, "429434378")
-            .medNorg2Tjeneste()
-            .mockBestemSak()
-            .mockHttpRequestWithResponseFromFile("/buc/747729177/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET,"/sed/P2000-NAV.json")
-
-        meldingForSendtListener("/eux/hendelser/FB_BUC_01_F001.json")
-    }
 
     @Test
     fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 
         CustomMockServer()
-            .mockHttpRequestWithResponseFromJson(
-                "/buc/148161",
-                HttpMethod.GET,
-                Buc(
-                    id = "12312312312452345624355",
-                    participants = emptyList(),
-                    documents = opprettBucDocuments("/fagmodul/alldocumentsids.json")
-                ).toJson()
-            )
+            .mockBucResponse("/buc/148161" , "12312312312452345624355", "/fagmodul/alldocumentsids.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/44cb68f89a2f4e748934fb4722721018", HttpMethod.GET, "/sed/P2100-PinNO-NAV.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/f899bf659ff04d20bc8b978b186f1ecc/filer",HttpMethod.GET, "/pdf/pdfResponseMedTomtVedlegg.json")
             .mockHttpRequestFromFileWithBodyContains("hentPerson", HttpMethod.POST,"/pdl/hentPersonResponse.json")
@@ -111,21 +62,11 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
             .mockPensjonsinformasjon()
             .medOppdaterDistribusjonsinfo()
 
-        meldingForSendtListener("/eux/hendelser/P_BUC_05_P8000.json")
+        startJornalforingForSendt("/eux/hendelser/P_BUC_05_P8000.json")
 
         OppgaveMeldingVerification("429434379")
             .medHendelsetype("SENDT")
             .medSedtype("P8000")
             .medtildeltEnhetsnr("4475")
-    }
-
-    fun emptyResponse(): String {
-        return """
-            {
-              "data" : {},
-              "errors" : null
-            }
-
-        """.trimIndent()
     }
 }

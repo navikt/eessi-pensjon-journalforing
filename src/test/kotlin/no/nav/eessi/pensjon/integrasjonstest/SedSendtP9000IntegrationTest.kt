@@ -30,7 +30,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.client.RestTemplate
 
-@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, SedSendtP9000IntegrationTest.TestConfig::class])
+@SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
@@ -57,17 +57,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         every { gcpStorageService.hentFraGjenny(any())} returns null
     }
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
 
-        @Bean
-        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
-
-        @Bean
-        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
-    }
 
     @Test
     fun `Skal finne fødselsdato for 3 personer gitt en forsikret person i P9000 og to gjenlevende (P8000) `() {
@@ -100,7 +90,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003", HttpMethod.GET,"/sed/p9000/forsikretMedToEtterlatte/p9000.json")
             .mockHttpRequestWithResponseFromFile("/buc/148161/sed/30000000003/filer", HttpMethod.GET, "/pdf/pdfResponseMedTomtVedlegg.json")
 
-        meldingForSendtListener( "/eux/hendelser/P_BUC_05_P9000.json")
+        startJornalforingForSendt( "/eux/hendelser/P_BUC_05_P9000.json")
 
         assertTrue(isMessageInlog("Fant fødselsdato i P8000, fdato: 2005-03-29"))
         assertTrue(isMessageInlog("Fant fødselsdato i P8000, fdato: 2007-06-19"))
