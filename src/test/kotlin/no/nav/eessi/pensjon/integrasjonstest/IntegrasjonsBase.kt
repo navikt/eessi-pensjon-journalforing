@@ -4,19 +4,25 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import io.mockk.CapturingSlot
+import io.mockk.mockk
 import io.mockk.slot
+import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.SedHendelse
+import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.journalforing.JournalpostMedSedInfo
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
+import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -27,6 +33,9 @@ import org.mockserver.client.MockServerClient
 import org.mockserver.integration.ClientAndServer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.http.HttpMethod
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -73,6 +82,21 @@ abstract class IntegrasjonsBase {
 
     @Autowired
     lateinit var fagmodulOidcRestTemplate : RestTemplate
+
+    @TestConfiguration
+    class TestConfig {
+        @Bean
+        fun euxRestTemplate(): RestTemplate = IntegrasjonsTestConfig().mockedRestTemplate()
+
+        @Bean
+        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxRestTemplate())
+
+        @Bean
+        fun gcpStorageService(): GcpStorageService = mockk<GcpStorageService>()
+
+        @Bean
+        fun safClient(): SafClient = SafClient(IntegrasjonsTestConfig().mockedRestTemplate())
+    }
 
     private fun settOppUtitlityConsumer(topicName: String): KafkaMessageListenerContainer<String, String> {
         val consumerProperties = KafkaTestUtils.consumerProps(
@@ -168,7 +192,7 @@ abstract class IntegrasjonsBase {
     }
 
 
-    fun meldingForMottattListener(messagePath: String) {
+    fun startJornalforingForMottatt(messagePath: String) {
         // del 1: opprettelse av journalpost og oppgave: lagre jp-request før vurdering
         val journalpostRequest = slot<OpprettJournalpostRequest>()
 
@@ -205,10 +229,61 @@ abstract class IntegrasjonsBase {
             )
         }
     }
-    fun meldingForSendtListener(messagePath: String) {
+    fun startJornalforingForSendt(messagePath: String) {
         sedSendttTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
         sendtListener.getLatch().await(50, TimeUnit.SECONDS)
         Thread.sleep(5000)
     }
+
+
+    fun CustomMockServer.mockBucResponse(endpoint: String, bucId: String, documentsPath: String?) = apply {
+        mockHttpRequestWithResponseFromJson(
+            endpoint,
+            HttpMethod.GET,
+            Buc(
+                id = bucId,
+                participants = emptyList(),
+                documents = opprettBucDocuments(documentsPath!!)
+            ).toJson()
+        )
+    }
+    fun CustomMockServer.mockSedResponse(endpoint: String, responseFile: String) = apply {
+        mockHttpRequestWithResponseFromFile(endpoint, HttpMethod.GET, responseFile)
+    }
+
+    fun CustomMockServer.mockFileResponse(endpoint: String, responseFile: String) = apply {
+        mockHttpRequestWithResponseFromFile(endpoint, HttpMethod.GET, responseFile)
+    }
+
+    fun emptyResponse(): String = """{ "data": {}, "errors": null }"""
+
+
+    fun setupMockServer(
+        bucId: String,
+        journalpostId: String,
+        bucDocList: String? =  "/fagmodul/alldocumentsids.json",
+        responses: List<Pair<String, String>>
+    ) {
+        CustomMockServer()
+            .mockBucResponse("/buc/$bucId", bucId, bucDocList)
+            .apply {
+                responses.forEach { (endpoint, responseFile) ->
+                    if (responseFile.contains("filer")) mockFileResponse(endpoint, responseFile)
+                    else mockSedResponse(endpoint, responseFile)
+                }
+            }
+            .medJournalforing(false, journalpostId)
+            .medNorg2Tjeneste()
+            .mockBestemSak()
+    }
+
+
+    fun verifyOppgave(journalpostId: String, hendelsetype: String, sedtype: String, enhetsnr: String) {
+        OppgaveMeldingVerification(journalpostId)
+            .medHendelsetype(hendelsetype)
+            .medSedtype(sedtype)
+            .medtildeltEnhetsnr(enhetsnr)
+    }
+
 }
 
