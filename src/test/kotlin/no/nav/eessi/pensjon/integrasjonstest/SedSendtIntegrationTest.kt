@@ -32,9 +32,11 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     private lateinit var hentSakService: HentSakService
 
     init {
-        val port = System.getProperty("mockServerport")?.toInt() ?: PortFactory.findFreePort()
-        mockServer = ClientAndServer(Configuration().apply { logLevel(Level.ERROR) }, port)
-        System.setProperty("mockServerport", port.toString())
+        if(System.getProperty("mockServerport") == null){
+            val port = System.getProperty("mockServerport")?.toInt() ?: PortFactory.findFreePort()
+            mockServer = ClientAndServer(Configuration().apply { logLevel(Level.ERROR) }, port)
+            System.setProperty("mockServerport", port.toString())
+        }
     }
 
     @BeforeEach
