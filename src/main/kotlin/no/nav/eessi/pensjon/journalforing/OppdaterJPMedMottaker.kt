@@ -27,7 +27,6 @@ class OppdaterJPMedMottaker(
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        oppdatereHeleSulamitten()
     }
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(OppdaterJPMedMottaker::class.java) }
