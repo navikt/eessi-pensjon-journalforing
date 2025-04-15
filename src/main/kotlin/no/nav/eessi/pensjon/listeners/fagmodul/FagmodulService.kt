@@ -39,6 +39,12 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
+        // edgecase: vi har en feil sakId i SED som ikke finnes i pensjonsinformasjon for bruker, benytter derfor sakId fra pensjonsinformasjon
+        if(saklist.filter { it.sakId != pesysSakId }.size == 1) {
+            logger.warn("Vi har bare en sak fra pesys og den matcher ikke pesys sakId fra sed: $aktoerId med pesys sakID: $pesysSakId, bruker derfor sakId fra pesys")
+            return saklist.first()
+        }
+
         val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId }
 
         if (gyldigSak?.sakType !in eessipenSakTyper ||gyldigSak == null) {
