@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.listeners.fagmodul
 
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -39,10 +40,9 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
-        // edgecase: vi har en feil sakId i SED som ikke finnes i pensjonsinformasjon for bruker, benytter derfor sakId fra pensjonsinformasjon
-        if(saklist.filter { it.sakId != pesysSakId }.size == 1) {
-            logger.warn("Vi har bare en sak fra pesys og den matcher ikke pesys sakId fra sed: $aktoerId med pesys sakID: $pesysSakId, bruker derfor sakId fra pesys")
-            return saklist.first()
+        if(saklist.any { it.sakId != pesysSakId }) {
+            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId. Velger å ikke bruke saksId fra sed")
+            return null
         }
 
         val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId }

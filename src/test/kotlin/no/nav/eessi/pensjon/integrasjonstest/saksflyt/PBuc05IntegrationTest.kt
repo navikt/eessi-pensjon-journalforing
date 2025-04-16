@@ -386,7 +386,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnrAnnenPerson = FNR_OVER_62
 
             testRunnerFlerePersoner(FNR_OVER_62, fnrAnnenPerson = fnrAnnenPerson, saker = saker, sakId = SAK_ID, rolle = Rolle.ETTERLATTE) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 assertEquals(fnrAnnenPerson, it.bruker?.id)
             }
@@ -431,11 +431,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
         }
 
+        //TODO: Er dette riktig enhet?
         @Test
         fun `2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = AVSLUTTET),
-                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = AVSLUTTET),
                     SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
 
