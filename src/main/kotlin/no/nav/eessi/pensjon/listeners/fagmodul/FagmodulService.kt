@@ -31,7 +31,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
+
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
+            .filter { it.sakType in eessipenSakTyper }
+
         secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
 
         if(saklist.isEmpty()){
@@ -40,20 +43,21 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
-        if(saklist.any { it.sakId != pesysSakId }) {
-            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId. Velger å ikke bruke saksId fra sed")
+        if(saklist.none { it.sakId == pesysSakId }) {
+            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId")
             return null
         }
 
-        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId }
-
-        if (gyldigSak?.sakType !in eessipenSakTyper ||gyldigSak == null) {
-            logger.info("Finner ingen sakId i saksliste for aktoer for sedSakId: $pesysSakId")
-            return null
+        val gyldigSak = if (saklist.size == 1 && saklist.first().sakId == pesysSakId) {
+            logger.info("Finner kun en sak fra pesys som matcher sakId fra sed for: $aktoerId med pesys sakID fra SED: $pesysSakId, sakId fra Pensjonsinformasjon: ${saklist.first().sakId}")
+            return saklist.first()
+        } else {
+            saklist.firstOrNull { it.sakId == pesysSakId }
         }
+
         // saker med flere tilknyttede sakerx
         return gyldigSak.takeIf { saklist.size <= 1 }
-            ?: gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+            ?: gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
 
     }
 
