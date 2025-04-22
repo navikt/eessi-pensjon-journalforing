@@ -386,7 +386,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnrAnnenPerson = FNR_OVER_62
 
             testRunnerFlerePersoner(FNR_OVER_62, fnrAnnenPerson = fnrAnnenPerson, saker = saker, sakId = SAK_ID, rolle = Rolle.ETTERLATTE) {
-                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 assertEquals(fnrAnnenPerson, it.bruker?.id)
             }

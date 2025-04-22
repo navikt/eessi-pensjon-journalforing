@@ -48,16 +48,16 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             return null
         }
 
-        val gyldigSak = if (saklist.size == 1 && saklist.first().sakId == pesysSakId) {
-            logger.info("Finner kun en sak fra pesys som matcher sakId fra sed for: $aktoerId med pesys sakID fra SED: $pesysSakId, sakId fra Pensjonsinformasjon: ${saklist.first().sakId}")
-            return saklist.first()
-        } else {
-            saklist.firstOrNull { it.sakId == pesysSakId }
+        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId } ?: return null.also {
+            logger.info("Returnerer første match for pesys sakID: $pesysSakId da flere saker ble funnet")
         }
 
-        // saker med flere tilknyttede sakerx
-        return gyldigSak.takeIf { saklist.size <= 1 }
-            ?: gyldigSak?.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+        // saker med flere tilknyttede saker
+        return if (saklist.size > 1) {
+            gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+        } else {
+            gyldigSak
+        }
 
     }
 
