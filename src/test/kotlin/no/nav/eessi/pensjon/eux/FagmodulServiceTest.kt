@@ -36,16 +36,13 @@ internal class FagmodulServiceTest {
     fun `Gitt det finnes aktoerid og det finnes en eller flere pensjonsak Så skal det sakid fra sed valideres og sakid returneres`() {
 
         val expected = sakInformasjon(sakType = ALDER, sakStatus = LOPENDE)
-        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874901", sakType = UFOREP, sakStatus = AVSLUTTET))
+        val mockPensjonSaklist = listOf(expected, SakInformasjon(sakId = "22874955", sakType = UFOREP, sakStatus = AVSLUTTET))
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
 
-        val sedP5000 = String(Files.readAllBytes(Paths.get("src/test/resources/sed/P5000-medNorskGjenlevende-NAV.json")))
-        val mockAllSediBuc = listOf(
-                mapJsonToAny<SED>(sedP5000)
-        )
+        val sedP5000 =  mapJsonToAny<SED>(javaClass.getResource("/sed/P5000-medNorskGjenlevende-NAV.json")!!.readText())
 
-        val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc, null)
+        val result = helper.hentPensjonSakFraPesys("123123", listOf(sedP5000), sedP5000)
 
         assertNotNull(result)
         assertEquals(expected.sakId, result?.sakId)
