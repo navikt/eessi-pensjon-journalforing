@@ -404,6 +404,68 @@ internal open class JournalforingTestBase {
         clearAllMocks()
     }
 
+    protected fun testRunnerPBuc06(
+        fnr: String?,
+        saker: List<SakInformasjon> = emptyList(),
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        hendelseType: HendelseType = SENDT,
+        bucType: BucType = P_BUC_01,
+        sedType: SedType = SedType.P8000,
+        assertBlock: (OpprettJournalpostRequest) -> Unit
+    ) {
+        val sed = SED.generateSedToClass<P8000>(createSed(sedType = sedType, fnr = fnr, eessiSaknr = sakId))
+        initCommonMocks(sed, bucType = bucType)
+
+        every { personService.harAdressebeskyttelse(any()) } returns false
+
+        if (fnr != null) {
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
+                fnr,
+                "Fornavn",
+                "Etternavn",
+                land,
+                aktorId = AKTOER_ID
+            )
+        }
+
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
+        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+        every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(sakId)
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+
+
+        val (journalpost, _) = initJournalPostRequestSlot(true)
+
+        val hendelse = createHendelseJson(SedType.P8000)
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+
+        if (hendelseType == SENDT)
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+        else
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
+
+        assertBlock(journalpost.captured)
+
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+        verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
+
+        fnr != null && fnr.length == 11
+
+        clearAllMocks()
+    }
+
+
     fun testRunnerVoksenMedSokPerson(
         fnrVoksen: String,
         benyttSokPerson: Boolean = true,
