@@ -70,7 +70,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
-        if (sakerFraSed.isEmpty()) logger.warn("Fant ingen sakId i SED")
+        if (sakerFraSed.isEmpty()) {
+            logger.warn("Fant ingen sakId i SED")
+            return null
+        }
 
         if (sakerFraSed.size > 1) {
             logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort alle som ikke er pesysnr")
