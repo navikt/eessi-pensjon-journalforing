@@ -89,7 +89,7 @@ internal class FagmodulServiceTest {
                 mockSED(P6000, "22874955")
         )
 
-        val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc, null)!!
+        val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc, mockAllSediBuc.first())!!
         assertNotNull(result)
         assertEquals(expected.sakType, result.sakType)
         assertEquals(3, result.tilknyttedeSaker.size)
@@ -111,7 +111,7 @@ internal class FagmodulServiceTest {
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
         val mockAllSediBuc = listOf(mockSED(P2000), mockSED(P4000), mockSED(P5000), mockSED(P6000))
 
-        val result = helper.hentPensjonSakFraPesys("aktoerId", mockAllSediBuc, null)!!
+        val result = helper.hentPensjonSakFraPesys("aktoerId", mockAllSediBuc, mockAllSediBuc.get(0))!!
         assertNotNull(result)
         assertEquals(expected.sakType, result.sakType)
         assertTrue(result.harGenerellSakTypeMedTilknyttetSaker())
