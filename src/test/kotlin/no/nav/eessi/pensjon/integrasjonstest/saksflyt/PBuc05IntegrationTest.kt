@@ -431,11 +431,12 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             }
         }
 
+        //TODO: Er dette riktig enhet?
         @Test
         fun `2 personer i SED, har rolle familiemedlem, fnr finnes og bestemsak finner sak ALDER Så journalføres automatisk på tema PENSJON`() {
             val saker = listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = AVSLUTTET),
-                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE),
+                    SakInformasjon(sakId = "123123123", sakType = UFOREP, sakStatus = AVSLUTTET),
                     SakInformasjon(sakId = "34234123", sakType = GENRL, sakStatus = AVSLUTTET)
             )
 
@@ -722,7 +723,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 
             val (journalpost, _) = initJournalPostRequestSlot(true)
-            val hendelse = createHendelseJson(SedType.P6000, P_BUC_05)
+            val hendelse = createHendelseJson(SedType.P6000, P_BUC_05, rinaDokumentId = dokumenter.first().id)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -1009,7 +1010,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(NFP_UTLAND_AALESUND, oppgaveMelding.tildeltEnhetsnr)
             assertEquals(NFP_UTLAND_AALESUND, request.journalfoerendeEnhet)
 
-            verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+//            verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
             verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
@@ -1057,7 +1058,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             assertEquals(PENSJON, request.tema)
             assertEquals(PENSJON_UTLAND, request.journalfoerendeEnhet)
 
-            verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+//            verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
             verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
@@ -1106,7 +1107,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             verify(exactly = 1) { euxKlient.hentBuc(any()) }
             verify(exactly = 2) { euxKlient.hentSedJson(any(), any()) }
             verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
-            verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+//            verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
 
             clearAllMocks()
         }

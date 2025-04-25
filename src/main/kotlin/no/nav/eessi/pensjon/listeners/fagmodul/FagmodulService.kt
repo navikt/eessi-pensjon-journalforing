@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.listeners.fagmodul
 
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -30,7 +31,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
+
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
+            .filter { it.sakType in eessipenSakTyper }
+
         secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
 
         if(saklist.isEmpty()){
@@ -39,15 +43,21 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
-        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId }
-
-        if (gyldigSak?.sakType !in eessipenSakTyper ||gyldigSak == null) {
-            logger.info("Finner ingen sakId i saksliste for aktoer for sedSakId: $pesysSakId")
+        if(saklist.none { it.sakId == pesysSakId }) {
+            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId")
             return null
         }
-        // saker med flere tilknyttede sakerx
-        return gyldigSak.takeIf { saklist.size <= 1 }
-            ?: gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+
+        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId } ?: return null.also {
+            logger.info("Returnerer første match for pesys sakID: $pesysSakId da flere saker ble funnet")
+        }
+
+        // saker med flere tilknyttede saker
+        return if (saklist.size > 1) {
+            gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+        } else {
+            gyldigSak
+        }
 
     }
 
@@ -56,16 +66,21 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .mapNotNull { sed -> filterEESSIsak(sed) }
             .map { id -> trimSakidString(id) }
             .filter { it.erGyldigPesysNummer() }
+            .filter { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
-        if (sakerFraSed.isEmpty()) logger.warn("Fant ingen sakId i SED")
+        if (sakerFraSed.isEmpty()) {
+            logger.warn("Fant ingen sakId i SED")
+            return null
+        }
 
         if (sakerFraSed.size > 1) {
             logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort alle som ikke er pesysnr")
 
             //ser om vi har en treff mot SED som skal journalføres, dette vil kun gjelde utgående SED
-            val sakID = sakerFraSed.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
+            val sakID = sakerFraSed
+                .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
             if (sakID != null) {
                 logger.info("Fant pesys sakId fra SED med samme akId i EESSI: $sakID")
                 return sakID
@@ -75,7 +90,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
                 logger.warn("Fant flere gyldige pesys sakId i SED: $sakerFraSed  (kan fremdeles finne saktype fra bestemsak)")
                 return null
             }
-            return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED, etter filtrering: $it") }
+            return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED, ett er filtrering: $it") }
         }
 
         return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }

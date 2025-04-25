@@ -55,7 +55,6 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.kafka.core.KafkaTemplate
@@ -268,7 +267,7 @@ internal open class JournalforingTestBase {
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
-        val hendelse = createHendelseJson(SedType.P8000)
+        val hendelse = createHendelseJson(SedType.P8000,  rinaDokumentId = "44cb68f89a2f4e748934fb4722721018")
 
         val meldingSlot = slot<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -296,7 +295,7 @@ internal open class JournalforingTestBase {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
 
             val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
-            val antallKallTilPensjonSaklist = if (antallPersoner > 0 && sakId != null) 1 else 0
+            val antallKallTilPensjonSaklist = if (antallPersoner > 0 && fagmodulService.hentSakIdFraSED(listOf(sed), sed) != null) 1 else 0
             verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
         } else {
             assertEquals(JournalpostType.INNGAAENDE, request.journalpostType)
@@ -373,6 +372,68 @@ internal open class JournalforingTestBase {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
+        val (journalpost, _) = initJournalPostRequestSlot(true)
+
+        val hendelse = createHendelseJson(SedType.P8000, rinaDokumentId = "44cb68f89a2f4e748934fb4722721018")
+
+        val meldingSlot = slot<String>()
+        every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
+
+        val journalpostRequest = slot<OpprettJournalpostRequest>()
+
+        if (hendelseType == SENDT)
+            sendtListener.consumeSedSendt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+        else
+            mottattListener.consumeSedMottatt(hendelse, mockk(relaxed = true), mockk(relaxed = true))
+
+        createMockedJournalPostWithOppgave(journalpostRequest, hendelse, hendelseType)
+
+        assertBlock(journalpost.captured)
+
+        verify(exactly = 1) { euxKlient.hentBuc(any()) }
+        verify(exactly = 1) { euxKlient.hentSedJson(any(), any()) }
+        verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
+        verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
+
+        val gyldigFnr: Boolean = fnr != null && fnr.length == 11
+        val antallKallTilPensjonSaklist = if (gyldigFnr && fagmodulService.hentSakIdFraSED(listOf(sed), sed) != null) 1 else 0
+        verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
+
+        clearAllMocks()
+    }
+
+    protected fun testRunnerPBuc06(
+        fnr: String?,
+        saker: List<SakInformasjon> = emptyList(),
+        sakId: String? = SAK_ID,
+        land: String = "NOR",
+        hendelseType: HendelseType = SENDT,
+        bucType: BucType = P_BUC_01,
+        sedType: SedType = SedType.P8000,
+        assertBlock: (OpprettJournalpostRequest) -> Unit
+    ) {
+        val sed = SED.generateSedToClass<P8000>(createSed(sedType = sedType, fnr = fnr, eessiSaknr = sakId))
+        initCommonMocks(sed, bucType = bucType)
+
+        every { personService.harAdressebeskyttelse(any()) } returns false
+
+        if (fnr != null) {
+            every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(
+                fnr,
+                "Fornavn",
+                "Etternavn",
+                land,
+                aktorId = AKTOER_ID
+            )
+        }
+
+        every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
+        every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
+        every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
+        every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(sakId)
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { gcpStorageService.hentFraGjenny(any()) } returns null
+
 
         val (journalpost, _) = initJournalPostRequestSlot(true)
 
@@ -397,12 +458,11 @@ internal open class JournalforingTestBase {
         verify(exactly = 1) { euxKlient.hentAlleDokumentfiler(any(), any()) }
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
-        val gyldigFnr: Boolean = fnr != null && fnr.length == 11
-        val antallKallTilPensjonSaklist = if (gyldigFnr && sakId != null) 1 else 0
-        verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
+        fnr != null && fnr.length == 11
 
         clearAllMocks()
     }
+
 
     fun testRunnerVoksenMedSokPerson(
         fnrVoksen: String,
@@ -612,7 +672,7 @@ internal open class JournalforingTestBase {
     ): SED {
         val validFnr = Fodselsnummer.fra(fnr)
 
-         val pdlForsikret = if (annenPerson == null) pdlPerson else null
+        val pdlForsikret = if (annenPerson == null) pdlPerson else null
 
         val forsikretBruker = Bruker(
             person = Person(
@@ -698,7 +758,8 @@ internal open class JournalforingTestBase {
     protected fun createHendelseJson(
         sedType: SedType,
         bucType: BucType = P_BUC_05,
-        forsikretFnr: String? = null
+        forsikretFnr: String? = null,
+        rinaDokumentId: String? = "b12e06dda2c7474b9998c7139c841646",
     ): String {
         return """
             {
@@ -713,7 +774,7 @@ internal open class JournalforingTestBase {
               "mottakerId": "NO:NAVT007",
               "mottakerNavn": "NAV Test 07",
               "mottakerLand": "NO",
-              "rinaDokumentId": "b12e06dda2c7474b9998c7139c841646",
+              "rinaDokumentId": "$rinaDokumentId",
               "rinaDokumentVersjon": "2",
               "sedType": "${sedType.name}",
               "navBruker": ${forsikretFnr?.let { "\"$it\"" }}
