@@ -2,9 +2,15 @@ package no.nav.eessi.pensjon.listeners
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.EuxService
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.sed.Sak
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Test
@@ -18,6 +24,7 @@ internal class SedMottattListenerTest {
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
     private val jouralforingService = mockk<JournalforingService>(relaxed = true)
+    private val fagmodulService = mockk<FagmodulService>(relaxed = true)
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
@@ -29,7 +36,7 @@ internal class SedMottattListenerTest {
         jouralforingService,
         personidentifiseringService,
         euxService,
-        fagmodulService = mockk(relaxed = true),
+        fagmodulService,
         bestemSakService,
         gcpStorageService,
         "test"

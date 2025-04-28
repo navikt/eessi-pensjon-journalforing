@@ -28,7 +28,7 @@ internal class SedSendtListenerTest {
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
-    private val fagmodulService = mockk<FagmodulService>(relaxed = true)
+    private val fagmodulService = mockk<FagmodulService>()
     private val gcpStorageService = mockk<GcpStorageService>()
 
     private val sedListener = SedSendtListener(jouralforingService,
@@ -43,11 +43,14 @@ internal class SedSendtListenerTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
+        every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
     }
 
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
+        every { fagmodulService.hentSakIdFraSED(any(), any()) } returns null
         sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
@@ -100,6 +103,8 @@ internal class SedSendtListenerTest {
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedSendt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
+        every { fagmodulService.hentSakIdFraSED(any(), any()) } returns null
+        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }

@@ -104,7 +104,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = ALDER),
+            SaksInfoSamlet(saktypeFraSed = ALDER, pesysSaker = emptyList()),
             false,
             identifisertePersoner = 1,
             navAnsattInfo = null,
@@ -135,7 +135,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             SLAPP_SKILPADDE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = ALDER),
+            SaksInfoSamlet(saktypeFraSed = ALDER, pesysSaker = emptyList()),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = sed
@@ -174,7 +174,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = GJENLEV),
+            SaksInfoSamlet(saktypeFraSed = GJENLEV, pesysSaker = emptyList()),
             identifisertePersoner = 2,
             navAnsattInfo = null,
             currentSed = sed
@@ -211,7 +211,11 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             LocalDate.of(1952, 3, 9),
-            SaksInfoSamlet(saktypeFraSed = ALDER, sakInformasjonFraPesys = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE)),
+            SaksInfoSamlet(
+                sakInformasjonFraPesys = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE),
+                saktypeFraSed = ALDER,
+                pesysSaker = emptyList()
+            ),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.R005)
@@ -237,7 +241,11 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             fdato,
-            SaksInfoSamlet(saktypeFraSed = ALDER, sakInformasjonFraPesys = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE)),
+            SaksInfoSamlet(
+                sakInformasjonFraPesys = SakInformasjon(sakId = "12345", sakType = ALDER, sakStatus = LOPENDE),
+                saktypeFraSed = ALDER,
+                pesysSaker = emptyList()
+            ),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.R005)
@@ -270,7 +278,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             fdato,
-            SaksInfoSamlet(saktypeFraSed = ALDER),
+            SaksInfoSamlet(saktypeFraSed = ALDER, pesysSaker = emptyList()),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.R005)
@@ -433,7 +441,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = ALDER),
+            SaksInfoSamlet(saktypeFraSed = ALDER, pesysSaker = emptyList()),
             false,
             identifisertePersoner = 1,
             navAnsattInfo = null,
@@ -507,7 +515,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet( saktypeFraSed = GJENLEV, sakInformasjonFraPesys = sakInformasjon),
+            SaksInfoSamlet(sakInformasjonFraPesys = sakInformasjon, saktypeFraSed = GJENLEV, pesysSaker = emptyList()),
             identifisertePersoner = 2,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2100)
@@ -556,7 +564,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertGjenlevendePerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = GJENLEV, sakInformasjonFraPesys = saksInfo),
+            SaksInfoSamlet(sakInformasjonFraPesys = saksInfo, saktypeFraSed = GJENLEV, pesysSaker = emptyList()),
             identifisertePersoner = 2,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2100)
@@ -583,7 +591,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             SENDT,
             identifisertPerson,
             fdato,
-            SaksInfoSamlet(sakInformasjonFraPesys = sakInformasjon),
+            SaksInfoSamlet(sakInformasjonFraPesys = sakInformasjon, pesysSaker = emptyList()),
             identifisertePersoner = 2,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2100)
@@ -682,7 +690,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
             MOTTATT,
             identifisertGjenlevendePerson,
             STERK_BUSK.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = BARNEP, sakInformasjonFraPesys = saksInfo),
+            SaksInfoSamlet(sakInformasjonFraPesys = saksInfo, saktypeFraSed = BARNEP, pesysSaker = emptyList()),
             identifisertePersoner = 2,
             navAnsattInfo = null,
             currentSed = SED(type = SedType.P2100)
@@ -762,7 +770,12 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         assertEquals(PENSJON, result)
     }
 
-    private fun saksInfoSamlet(sakType: SakType) = SaksInfoSamlet("321654", SakInformasjon("321654", sakType, LOPENDE), saktypeFraSed = sakType)
+    private fun saksInfoSamlet(sakType: SakType) = SaksInfoSamlet(
+        "321654",
+        SakInformasjon("321654", sakType, LOPENDE),
+        saktypeFraSed = sakType,
+        emptyList()
+    )
 
     @Test
     fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {

@@ -295,7 +295,7 @@ internal open class JournalforingTestBase {
             assertEquals(JournalpostType.UTGAAENDE, request.journalpostType)
 
             val antallPersoner = listOfNotNull(fnr, fnrAnnenPerson).size
-            val antallKallTilPensjonSaklist = if (antallPersoner > 0 && fagmodulService.hentSakIdFraSED(listOf(sed), sed) != null) 1 else 0
+            val antallKallTilPensjonSaklist = if (antallPersoner > 0) 1 else 0
             verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
         } else {
             assertEquals(JournalpostType.INNGAAENDE, request.journalpostType)
@@ -396,7 +396,7 @@ internal open class JournalforingTestBase {
         verify(exactly = 0) { bestemSakKlient.kallBestemSak(any()) }
 
         val gyldigFnr: Boolean = fnr != null && fnr.length == 11
-        val antallKallTilPensjonSaklist = if (gyldigFnr && fagmodulService.hentSakIdFraSED(listOf(sed), sed) != null) 1 else 0
+        val antallKallTilPensjonSaklist = if (gyldigFnr) 1 else 0
         verify(exactly = antallKallTilPensjonSaklist) { fagmodulKlient.hentPensjonSaklist(any()) }
 
         clearAllMocks()

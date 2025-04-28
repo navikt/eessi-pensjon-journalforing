@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.journalforing.opprettoppgave
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.eessi.pensjon.eux.model.SedType
-import no.nav.eessi.pensjon.journalforing.Bruker
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -18,7 +17,8 @@ data class OppgaveMelding(
     val hendelseType: HendelseType,
     var filnavn: String?,
     val oppgaveType: OppgaveType,
-    val tema: Tema? = Tema.PENSJON
+    val tema: Tema? = Tema.PENSJON,
+    val sendeAdvarsel: Boolean? = false
 )  {
     override fun toString(): String {
         return toJson()

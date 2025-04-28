@@ -94,12 +94,21 @@ abstract class SedListenerBase(
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             }
-            return SaksInfoSamlet(gjennySakId, null, null)
+            return SaksInfoSamlet(gjennySakId, null, null, emptyList())
         }
-        val saksIdFraSed = fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed)
+
+        // henter kun pesysSakID fra SED dersom det er en utgående SED
+        val saksIdFraSed = if(hendelseType == SENDT) fagmodulService.hentSakIdFraSED(alleSedIBucList, currentSed) else Pair(null, emptyList())
 
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
+
+        val saksListeFraPesys = if(saksIdFraSed?.second != null) saksIdFraSed.second else emptyList()
+        val advarsel =  if (saksListeFraPesys.size > 1) {
+            val sakID = saksListeFraPesys
+                .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
+            sakID != null && saksListeFraPesys.size > 1
+        } else false
 
         val sakInformasjon = if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
             pensjonSakInformasjon(
@@ -112,13 +121,13 @@ abstract class SedListenerBase(
         }
 
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
-        if (saksIdFraSed != null && sakInformasjon == null) {
+        if (saksIdFraSed?.first != null && sakInformasjon == null) {
             logger.warn("Ingen gyldig sakId funnet i SED eller Pensjonsinformasjon")
-            return SaksInfoSamlet(null, null, sakTypeFraSED)
+            return SaksInfoSamlet(null, null, sakTypeFraSED, saksListeFraPesys, advarsel = advarsel)
         }
 
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
-        return SaksInfoSamlet(saksIdFraSed, sakInformasjon, saktypeFraSedEllerPesys)
+        return SaksInfoSamlet(saksIdFraSed?.first, sakInformasjon, saktypeFraSedEllerPesys, saksListeFraPesys, advarsel)
     }
 
     private fun oppdaterGjennySak(sedHendelse: SedHendelse, gjennysakFraSed: String): String? {

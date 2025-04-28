@@ -70,7 +70,11 @@ class HentTemaServiceTest {
         assertEquals(Enhet.UFORE_UTLANDSTILSNITT, tema)
     }
 
-    private fun saksInfoSamlet() = SaksInfoSamlet(RINA_ID, SakInformasjon(RINA_ID, SakType.UFOREP, SakStatus.LOPENDE))
+    private fun saksInfoSamlet() = SaksInfoSamlet(
+        RINA_ID,
+        SakInformasjon(RINA_ID, SakType.UFOREP, SakStatus.LOPENDE),
+        pesysSaker = emptyList()
+    )
 
     private fun sedHendelse() = SedHendelse(rinaSakId = RINA_ID, rinaDokumentId = RINA_ID, sektorKode = "P", bucType = P_BUC_02, rinaDokumentVersjon = "1")
 

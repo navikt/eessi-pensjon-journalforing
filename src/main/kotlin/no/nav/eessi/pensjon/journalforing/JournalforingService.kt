@@ -199,7 +199,8 @@ class JournalforingService(
                 tildeltJoarkEnhet,
                 aktoerId,
                 sedHendelse,
-                tema = tema
+                tema = tema,
+                sendeAdvarsel = saksInfoSamlet?.advarsel
             )
             kravInitialiseringsService.initKrav(
                 sedHendelse,
@@ -269,7 +270,8 @@ class JournalforingService(
                 hendelseType,
                 null,
                 if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
-                tema = tema
+                tema = tema,
+                false
             ).also { logger.info("Tema for oppgaven er: ${it.tema}") }
             oppgaveService.opprettOppgaveMeldingPaaKafkaTopic(melding)
         }
