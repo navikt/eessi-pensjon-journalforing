@@ -113,7 +113,7 @@ abstract class SedListenerBase(
                 alleSedIBucList,
                 currentSed
             )
-        }
+        }.also { logger.debug("SakInformasjon: $it") }
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
         val advarsel = if(sakInformasjon?.second == true) true else if (saksListeFraPesys.size > 1) {
@@ -121,6 +121,7 @@ abstract class SedListenerBase(
                 .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
             sakID != null && saksListeFraPesys.size > 1
         } else false
+        logger.debug("Advarsel: $advarsel")
 
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
         if (saksIdFraSed?.first != null && sakInformasjon == null) {
