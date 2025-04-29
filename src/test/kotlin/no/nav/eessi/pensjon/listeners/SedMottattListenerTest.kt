@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.kafka.support.Acknowledgment
@@ -24,7 +25,7 @@ internal class SedMottattListenerTest {
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
     private val jouralforingService = mockk<JournalforingService>(relaxed = true)
-    private val fagmodulService = mockk<FagmodulService>(relaxed = true)
+    private val fagmodulService = mockk<FagmodulService>()
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val euxService = mockk<EuxService>(relaxed = true)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
@@ -41,6 +42,12 @@ internal class SedMottattListenerTest {
         gcpStorageService,
         "test"
     )
+    @BeforeEach
+    fun setup() {
+        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
+        every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
+    }
+
     @Test
     fun `gitt en gyldig sedHendelse når sedMottatt hendelse konsumeres så ack melding`() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false

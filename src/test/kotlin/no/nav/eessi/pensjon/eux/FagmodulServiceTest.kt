@@ -45,7 +45,7 @@ internal class FagmodulServiceTest {
         val result = helper.hentPensjonSakFraPesys("123123", listOf(sedP5000), sedP5000)
 
         assertNotNull(result)
-        assertEquals(expected.sakId, result?.sakId)
+        assertEquals(expected.sakId, result?.first?.sakId)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -91,8 +91,8 @@ internal class FagmodulServiceTest {
 
         val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc, mockAllSediBuc.first())!!
         assertNotNull(result)
-        assertEquals(expected.sakType, result.sakType)
-        assertEquals(3, result.tilknyttedeSaker.size)
+        assertEquals(expected.sakType, result.first?.sakType)
+        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -113,9 +113,9 @@ internal class FagmodulServiceTest {
 
         val result = helper.hentPensjonSakFraPesys("aktoerId", mockAllSediBuc, mockAllSediBuc.get(0))!!
         assertNotNull(result)
-        assertEquals(expected.sakType, result.sakType)
-        assertTrue(result.harGenerellSakTypeMedTilknyttetSaker())
-        assertEquals(3, result.tilknyttedeSaker.size)
+        assertEquals(expected.sakType, result.first?.sakType)
+        assertTrue(result.first?.harGenerellSakTypeMedTilknyttetSaker() ?: false)
+        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }

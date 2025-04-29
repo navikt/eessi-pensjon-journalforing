@@ -49,21 +49,21 @@ abstract class SedListenerBase(
         saktypeFraSed: SakType?,
         alleSedIBuc: List<SED>,
         currentSed: SED?
-    ): SakInformasjon? {
+    ): Pair<SakInformasjon?, Boolean?>? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
         fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc, currentSed).let { pensjonsinformasjon ->
-            if (pensjonsinformasjon?.sakType != null) {
-                logger.info("Velger sakType ${pensjonsinformasjon.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.sakId}")
+            if (pensjonsinformasjon?.first?.sakType != null) {
+                logger.info("Velger sakType ${pensjonsinformasjon.first?.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.first?.sakId}")
                 return pensjonsinformasjon
             }
         }
         bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let {
             if (it?.sakType != null) {
                 logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
-                return it
+                return Pair(it, false)
             }
         }
         logger.info("Finner ingen sakType(fra bestemsak og pensjonsinformasjon) returnerer null.")
@@ -104,11 +104,6 @@ abstract class SedListenerBase(
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
         val saksListeFraPesys = if(saksIdFraSed?.second != null) saksIdFraSed.second else emptyList()
-        val advarsel =  if (saksListeFraPesys.size > 1) {
-            val sakID = saksListeFraPesys
-                .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
-            sakID != null && saksListeFraPesys.size > 1
-        } else false
 
         val sakInformasjon = if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
             pensjonSakInformasjon(
@@ -120,14 +115,21 @@ abstract class SedListenerBase(
             )
         }
 
+        // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
+        val advarsel = if(sakInformasjon?.second == true) true else if (saksListeFraPesys.size > 1) {
+            val sakID = saksListeFraPesys
+                .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
+            sakID != null && saksListeFraPesys.size > 1
+        } else false
+
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
         if (saksIdFraSed?.first != null && sakInformasjon == null) {
             logger.warn("Ingen gyldig sakId funnet i SED eller Pensjonsinformasjon")
             return SaksInfoSamlet(null, null, sakTypeFraSED, saksListeFraPesys, advarsel = advarsel)
         }
 
-        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjon, bucType)
-        return SaksInfoSamlet(saksIdFraSed?.first, sakInformasjon, saktypeFraSedEllerPesys, saksListeFraPesys, advarsel)
+        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjon?.first, bucType)
+        return SaksInfoSamlet(saksIdFraSed?.first, sakInformasjon?.first, saktypeFraSedEllerPesys, saksListeFraPesys, advarsel)
     }
 
     private fun oppdaterGjennySak(sedHendelse: SedHendelse, gjennysakFraSed: String): String? {
