@@ -18,8 +18,7 @@ class OpprettOppgaveService(private val oppgaveHandler: OppgaveHandler) {
         aktoerId: String? = null,
         sedHendelseModel: SedHendelse,
         uSupporterteVedlegg: String? = null,
-        tema: Tema,
-        sendeAdvarsel: Boolean? = false
+        tema: Tema
     ) {
         if (sedHendelseModel.avsenderLand != "NO") {
             val oppgave = OppgaveMelding(
@@ -31,8 +30,7 @@ class OpprettOppgaveService(private val oppgaveHandler: OppgaveHandler) {
                 MOTTATT,
                 uSupporterteVedlegg,
                 OppgaveType.BEHANDLE_SED,
-                tema,
-                sendeAdvarsel
+                tema
             )
             oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(oppgave)
         } else logger.warn("Nå har du forsøkt å opprette en BEHANDLE_SED oppgave, men avsenderland er Norge.")

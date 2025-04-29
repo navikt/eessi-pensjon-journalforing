@@ -93,8 +93,7 @@ class JournalpostService(
                             aktoerId,
                             sedHendelse,
                             usupporterteFilnavn(documentsAndAttachments.second),
-                            tema,
-                            false
+                            tema
                         )
                     }
                 }

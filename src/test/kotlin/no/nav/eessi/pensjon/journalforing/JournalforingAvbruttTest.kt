@@ -284,7 +284,7 @@ internal class JournalforingAvbruttTest : JournalforingServiceBase() {
             },
             Enhet.ID_OG_FORDELING,
             identer.first().fdato.toString(),
-            Tema.OMSTILLING
+            Tema.OMSTILLING,
         )
     }
 

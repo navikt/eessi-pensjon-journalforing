@@ -189,7 +189,8 @@ class JournalforingService(
             journalPostResponse,
             tildeltJoarkEnhet,
             aktoerId,
-            tema
+            tema,
+            saksInfoSamlet
         )
 
         if (hendelseType == MOTTATT && journalPostResponse?.journalpostferdigstilt == true) {
@@ -199,8 +200,7 @@ class JournalforingService(
                 tildeltJoarkEnhet,
                 aktoerId,
                 sedHendelse,
-                tema = tema,
-                sendeAdvarsel = saksInfoSamlet?.advarsel
+                tema = tema
             )
             kravInitialiseringsService.initKrav(
                 sedHendelse,
@@ -230,7 +230,8 @@ class JournalforingService(
         journalPostResponse: OpprettJournalPostResponse?,
         tildeltJoarkEnhet: Enhet,
         aktoerId: String?,
-        tema: Tema
+        tema: Tema,
+        saksInfoSamlet: SaksInfoSamlet? = null
     ) {
         // journalposten skal settes til avbrutt KUN VED UTGÅENDE SEDer ved manglende bruker/identifisertperson
         val journalpostErAvbrutt = journalpostService.journalpostSattTilAvbrutt(
@@ -271,7 +272,7 @@ class JournalforingService(
                 null,
                 if (hendelseType == MOTTATT) OppgaveType.JOURNALFORING else OppgaveType.JOURNALFORING_UT,
                 tema = tema,
-                false
+                saksInfoSamlet?.advarsel
             ).also { logger.info("Tema for oppgaven er: ${it.tema}") }
             oppgaveService.opprettOppgaveMeldingPaaKafkaTopic(melding)
         }
