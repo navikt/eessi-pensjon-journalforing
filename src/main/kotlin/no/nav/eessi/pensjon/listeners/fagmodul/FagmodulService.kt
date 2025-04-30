@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.listeners.fagmodul
 
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -29,32 +28,39 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): Pair<SakInformasjon?, Boolean?> ? {
+    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakIdFraSed: String?): Pair<SakInformasjon?, Boolean?> ? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
-        val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
+        val saklistFraPesys: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
             .filter { it.sakType in eessipenSakTyper }
 
-        secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
-
-        if(saklist.isEmpty()){
-            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ")
+        secureLog.info("Svar fra pensjonsinformasjon: ${saklistFraPesys.toJson()}")
+        if(saklistFraPesys.isEmpty() && pesysSakIdFraSed == null) {
+            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")
             return null
         }
-        logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
-        if(saklist.none { it.sakId == pesysSakId }) {
-            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId")
+        // ingen sak funnet i pesys, men sakId fra sed
+        if(saklistFraPesys.isEmpty() && pesysSakIdFraSed != null) {
+            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")
             return Pair(null, true)
         }
 
-        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId } ?: return null.also {
-            logger.info("Returnerer første match for pesys sakID: $pesysSakId da flere saker ble funnet")
+        logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakIdFraSed Pensjoninformasjon: ${saklistFraPesys.toJson()}")
+
+        // sak funnet i pesys, men ingen match mot sakId fra sed
+        if(saklistFraPesys.none { it.sakId == pesysSakIdFraSed }) {
+            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakIdFraSed")
+            return Pair(null, true)
+        }
+
+        val gyldigSak = saklistFraPesys.firstOrNull { it.sakId == pesysSakIdFraSed } ?: return null.also {
+            logger.info("Returnerer første match for pesys sakID: $pesysSakIdFraSed da flere saker ble funnet")
         }
 
         // saker med flere tilknyttede saker
-        return if (saklist.size > 1) {
-            return Pair(gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId }), false)
+        return if (saklistFraPesys.size > 1) {
+            return Pair(gyldigSak.copy(tilknyttedeSaker = saklistFraPesys.filterNot { it.sakId == gyldigSak.sakId }), false)
         } else {
             Pair(gyldigSak, false)
         }
