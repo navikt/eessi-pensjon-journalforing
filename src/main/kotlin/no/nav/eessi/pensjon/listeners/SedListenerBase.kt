@@ -114,7 +114,7 @@ abstract class SedListenerBase(
         val pesysIDerFraSED = if(saksIDFraAlleSed?.second != null) saksIDFraAlleSed.second else emptyList()
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
-        val advarsel = if(sakInformasjonFraPesys?.second.isNullOrEmpty()) false else hentAdvarsel(pesysIDerFraSED, sakInformasjonFraPesys.second)
+        val advarsel = if(sakInformasjonFraPesys?.second.isNullOrEmpty()) false else hentAdvarsel(pesysIDerFraSED, sakInformasjonFraPesys?.second!!)
 
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
         if (saksIDFraAlleSed?.first != null && sakInformasjonFraPesys == null) {

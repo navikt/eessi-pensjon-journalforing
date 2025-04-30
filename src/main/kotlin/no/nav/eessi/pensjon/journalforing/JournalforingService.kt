@@ -206,7 +206,7 @@ class JournalforingService(
                 sedHendelse,
                 saksInfoSamlet?.sakInformasjonFraPesys,
                 currentSed
-            ).also { logger.info("oppretter krav for ${sedHendelse.bucType} med rinanummer: ${sedHendelse.rinaSakId}") }
+            )
         } else {
             loggDersomIkkeBehSedOppgaveOpprettes(
                 sedHendelse.bucType,
