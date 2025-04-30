@@ -118,7 +118,7 @@ abstract class SedListenerBase(
 
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
         if (saksIDFraAlleSed?.first != null && sakInformasjonFraPesys == null) {
-            logger.warn("Ingen gyldig sakId funnet i SED eller Pensjonsinformasjon")
+            logger.warn("SakId fra Sed: ${saksIDFraAlleSed.first}, pensjonsinformasjon returnerer null")
             return SaksInfoSamlet(null, null, sakTypeFraSED, pesysIDerFraSED, advarsel)
         }
 
