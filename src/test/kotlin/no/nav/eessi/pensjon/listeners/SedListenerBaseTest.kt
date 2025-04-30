@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.listeners
 
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
@@ -14,16 +13,13 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
-import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.springframework.kafka.support.Acknowledgment
 
 class SedListenerBaseTest {
 
@@ -37,6 +33,10 @@ class SedListenerBaseTest {
 
     @BeforeEach
     fun setup() {
+
+        every { gcpStorageService.gjennyFinnes(any()) } returns false
+        every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any(), any()) } returns null
+
         sedListenerBase = object : SedListenerBase(
             fagmodulService,
             bestemSakService,
@@ -50,7 +50,8 @@ class SedListenerBaseTest {
 
     @ParameterizedTest
     @CsvSource(
-        "SENDT, P_BUC_10, GJENLEV, true"
+        "SENDT, P_BUC_10, GJENLEV, true",
+        "MOTTATT, P_BUC_10, GJENLEV, true"
     )
     fun `hentSaksInformasjonForEessi returns correct SaksInfoSamlet based on input`(
         hendelseType: HendelseType,
@@ -58,21 +59,12 @@ class SedListenerBaseTest {
         sakTypeFraSed: SakType?,
         expectedAdvarsel: Boolean
     ) {
-        val hendelse = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_ugyldig_pesysId.json")!!.readText())
+        val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_ugyldig_pesysId.json")!!.readText())
+        val alleSedIBucList = listOf<SED>(sed)
 
-        val alleSedIBucList = listOf<SED>(hendelse)
-
-        val sedHendelse = mockk<SedHendelse> {
-            every { rinaSakId } returns "12345"
-        }
-        val identifisertPerson = mockk<IdentifisertPDLPerson> {
-            every { aktoerId } returns "123456789"
-        }
-        every { gcpStorageService.gjennyFinnes(any()) } returns false
-//        every { fagmodulService.hentSakIdFraSED(any(), any()) } returns Pair(null, emptyList())
+        val sedHendelse = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
+        val identifisertPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456789" }
         every { euxService.hentSaktypeType(any(), any()) } returns sakTypeFraSed
-//        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
-        every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any(), any()) } returns null
 
         val result = sedListenerBase.hentSaksInformasjonForEessi(
             alleSedIBucList,
@@ -80,8 +72,8 @@ class SedListenerBaseTest {
             bucType,
             identifisertPerson,
             hendelseType,
-            hendelse
-        )
+            sed)
+
         assertEquals(expectedAdvarsel, result.advarsel)
     }
 }

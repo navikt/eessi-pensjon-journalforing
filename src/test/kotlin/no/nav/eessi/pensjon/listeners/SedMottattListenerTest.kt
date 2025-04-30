@@ -46,6 +46,7 @@ internal class SedMottattListenerTest {
     fun setup() {
         every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
         every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
+        every { fagmodulService.hentSakIdFraSED(any(), any()) } returns null
     }
 
     @Test

@@ -13,7 +13,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): Pair<SakInformasjon?, Boolean?>? {@Suppress("ComplexMethod")
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): SakInformasjon? {
         return hentSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
             if (sakId.first.erGyldigPesysNummer().not()) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
@@ -28,47 +28,40 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakIdFraSed: String?): Pair<SakInformasjon?, Boolean?> ? {
+    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
-        val saklistFraPesys: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
+        val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
             .filter { it.sakType in eessipenSakTyper }
 
-        secureLog.info("Svar fra pensjonsinformasjon: ${saklistFraPesys.toJson()}")
-        if(saklistFraPesys.isEmpty() && pesysSakIdFraSed == null) {
-            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")
+        secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
+
+        if(saklist.isEmpty()){
+            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ")
+            return null
+        }
+        logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
+
+        if(saklist.none { it.sakId == pesysSakId }) {
+            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId")
             return null
         }
 
-        // ingen sak funnet i pesys, men sakId fra sed
-        if(saklistFraPesys.isEmpty() && pesysSakIdFraSed != null) {
-            logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")
-            return Pair(null, true)
-        }
-
-        logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakIdFraSed Pensjoninformasjon: ${saklistFraPesys.toJson()}")
-
-        // sak funnet i pesys, men ingen match mot sakId fra sed
-        if(saklistFraPesys.none { it.sakId == pesysSakIdFraSed }) {
-            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakIdFraSed")
-            return Pair(null, true)
-        }
-
-        val gyldigSak = saklistFraPesys.firstOrNull { it.sakId == pesysSakIdFraSed } ?: return null.also {
-            logger.info("Returnerer første match for pesys sakID: $pesysSakIdFraSed da flere saker ble funnet")
+        val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId } ?: return null.also {
+            logger.info("Returnerer første match for pesys sakID: $pesysSakId da flere saker ble funnet")
         }
 
         // saker med flere tilknyttede saker
-        return if (saklistFraPesys.size > 1) {
-            return Pair(gyldigSak.copy(tilknyttedeSaker = saklistFraPesys.filterNot { it.sakId == gyldigSak.sakId }), false)
+        return if (saklist.size > 1) {
+            gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
         } else {
-            Pair(gyldigSak, false)
+            gyldigSak
         }
 
     }
 
     fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
-        val sakerFraSed = sedListe
+        val sakIdFraAlleSedIBuc = sedListe
             .mapNotNull { sed -> filterEESSIsak(sed) }
             .map { id -> trimSakidString(id) }
             .filter { it.erGyldigPesysNummer() }
@@ -77,30 +70,30 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
         //Ingen sakIder fra Sed
-        if (sakerFraSed.isEmpty()) {
+        if (sakIdFraAlleSedIBuc.isEmpty()) {
             logger.warn("Fant ingen sakId i SED")
             return Pair(null, listOf(null))
         }
 
         //SakIder fra seder er flere enn 1
-        if (sakerFraSed.size > 1) {
-            logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort de som ikke er i seden som behandles")
+        if (sakIdFraAlleSedIBuc.size > 1) {
+            logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
             //ser om vi har et treff mot SED som skal journalføres, dette vil kun gjelde utgående SED
-            val sakID = sakerFraSed
+            val sakID = sakIdFraAlleSedIBuc
                 .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
             if (sakID != null) {
                 logger.info("Fant pesys sakId fra SED med samme sakId i liste over saker i Seder: $sakID")
-                return Pair(sakID, sakerFraSed)
+                return Pair(sakID, sakIdFraAlleSedIBuc)
             }
 
-            if (sakerFraSed.size > 1) {
-                logger.warn("Fant flere gyldige pesys sakId i SED: $sakerFraSed  (kan fremdeles finne saktype fra bestemsak)")
-                return Pair(sakID, sakerFraSed)
+            if (sakIdFraAlleSedIBuc.size > 1) {
+                logger.warn("Fant flere gyldige pesys sakId i SED: $sakIdFraAlleSedIBuc  (kan fremdeles finne saktype fra bestemsak)")
+                return Pair(sakID, sakIdFraAlleSedIBuc)
             }
-            return Pair(sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED, ett er filtrering: $it") }, sakerFraSed)
+            return Pair(sakIdFraAlleSedIBuc.firstOrNull().also { logger.info("Pesys sakId fra SED, ett er filtrering: $it") }, sakIdFraAlleSedIBuc)
         }
 
-        return Pair(sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }, sakerFraSed)
+        return Pair(sakIdFraAlleSedIBuc.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }, sakIdFraAlleSedIBuc)
     }
 
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
