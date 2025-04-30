@@ -131,18 +131,14 @@ abstract class SedListenerBase(
      * vi har sakId fra pesys, men ingen sakID i sed.
      */
     private fun hentAdvarsel(pesysIDerFraSED: List<String?>, pesysSakId: String?) : Boolean {
-        return if(pesysIDerFraSED.isEmpty() && pesysSakId != null) {
-            false
+        return when {
+            pesysIDerFraSED.isEmpty() && pesysSakId != null -> false
+            pesysIDerFraSED.none { it == pesysSakId } -> {
+                logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys")
+                true
+            }
+            else -> false
         }
-        else if(pesysIDerFraSED.isEmpty().not() && pesysSakId.isNullOrEmpty()) {
-            logger.warn("Sed inneholder pesysSakId som vi ikke finner i pesys")
-            true
-        }
-        else if(pesysIDerFraSED.none { it == pesysSakId }) {
-            logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys")
-            true
-        }
-        else false
     }
 
     private fun oppdaterGjennySak(sedHendelse: SedHendelse, gjennysakFraSed: String): String? {
