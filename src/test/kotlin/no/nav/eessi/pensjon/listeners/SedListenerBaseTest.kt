@@ -58,7 +58,7 @@ class SedListenerBaseTest {
         "MOTTATT, P_BUC_10, GJENLEV, 22975700, true",
         "MOTTATT, P_BUC_10, GJENLEV, 22975710, false",
         "MOTTATT, P_BUC_10, ALDER, 22975710, false",
-//        "MOTTATT, P_BUC_10, ALDER, null, false"
+        "MOTTATT, P_BUC_10, ALDER, null, true"
     )
     fun `hentSaksInformasjonForEessi returns correct SaksInfoSamlet based on input`(
         hendelseType: HendelseType,

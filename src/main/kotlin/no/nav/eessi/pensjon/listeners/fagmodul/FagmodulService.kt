@@ -13,7 +13,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): SakInformasjon? {
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
         return hentSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
             if (sakId.first.erGyldigPesysNummer().not()) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
@@ -28,7 +28,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
+    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): Pair<SakInformasjon?, List<SakInformasjon>>? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
@@ -44,7 +44,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         if(saklist.none { it.sakId == pesysSakId }) {
             logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId")
-            return null
+            return Pair(null, saklist)
         }
 
         val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId } ?: return null.also {
@@ -53,11 +53,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         // saker med flere tilknyttede saker
         return if (saklist.size > 1) {
-            gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+            Pair(gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId }), saklist)
         } else {
-            gyldigSak
+            Pair(gyldigSak, saklist)
         }
-
     }
 
     fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
