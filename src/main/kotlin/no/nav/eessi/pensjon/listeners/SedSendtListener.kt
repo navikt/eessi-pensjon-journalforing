@@ -113,7 +113,6 @@ class SedSendtListener(
             currentSed,
         )
 
-
         journalforingService.journalfor(
             sedHendelse,
             SENDT,

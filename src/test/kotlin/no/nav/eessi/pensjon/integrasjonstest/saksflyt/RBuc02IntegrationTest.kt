@@ -83,7 +83,8 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                         nyopprettet = false,
                         tilknyttedeSaker = emptyList()
                     ),
-                    saktypeFraSed = GJENLEV
+                    saktypeFraSed = GJENLEV,
+                    pesysSaker = emptyList()
                 ),
                 harAdressebeskyttelse = false,
                 identifisertePersoner = 2,
@@ -109,7 +110,8 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "BEHANDLE_SED",
-              "tema" : "PEN"
+              "tema" : "PEN",
+              "sendeAdvarsel" : false
             }
         """.trimIndent(), capturedMelding.captured)
 
@@ -162,7 +164,8 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                     nyopprettet = false,
                     tilknyttedeSaker = emptyList()
                 ),
-                saktypeFraSed = GJENLEV
+                saktypeFraSed = GJENLEV,
+                pesysSaker = emptyList()
             ),
             harAdressebeskyttelse = false,
             identifisertePersoner = 2,
@@ -188,7 +191,8 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING",
-              "tema" : "PEN"
+              "tema" : "PEN",
+              "sendeAdvarsel" : false
             }
         """.trimIndent(), capturedMelding.captured)
 

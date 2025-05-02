@@ -18,8 +18,6 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.nio.file.Files
-import java.nio.file.Paths
 
 internal class FagmodulServiceTest {
 
@@ -45,7 +43,7 @@ internal class FagmodulServiceTest {
         val result = helper.hentPensjonSakFraPesys("123123", listOf(sedP5000), sedP5000)
 
         assertNotNull(result)
-        assertEquals(expected.sakId, result?.sakId)
+        assertEquals(expected.sakId, result?.first?.sakId)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -91,8 +89,8 @@ internal class FagmodulServiceTest {
 
         val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc, mockAllSediBuc.first())!!
         assertNotNull(result)
-        assertEquals(expected.sakType, result.sakType)
-        assertEquals(3, result.tilknyttedeSaker.size)
+        assertEquals(expected.sakType, result.first?.sakType)
+        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -113,9 +111,9 @@ internal class FagmodulServiceTest {
 
         val result = helper.hentPensjonSakFraPesys("aktoerId", mockAllSediBuc, mockAllSediBuc.get(0))!!
         assertNotNull(result)
-        assertEquals(expected.sakType, result.sakType)
-        assertTrue(result.harGenerellSakTypeMedTilknyttetSaker())
-        assertEquals(3, result.tilknyttedeSaker.size)
+        assertEquals(expected.sakType, result.first?.sakType)
+        assertTrue(result.first?.harGenerellSakTypeMedTilknyttetSaker() == true)
+        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -131,6 +129,56 @@ internal class FagmodulServiceTest {
 
         verify { fagmodulKlient wasNot Called }
     }
+
+    @Test
+    fun `hentSakIdFraSED skal gi null og tom liste naar SED mangler pesyys sakid`() {
+        val sedListe = listOf(mockSED(P2000, eessiSakId = null))
+        val currentSed = mockSED(P2000, eessiSakId = null)
+
+        val result = helper.hentSakIdFraSED(sedListe, currentSed)
+
+        assertNull(result?.first)
+        assertEquals(listOf(null), result?.second)
+    }
+
+    @Test
+    fun `hentSakIdFraSED skal gi matchende sakId fra pesys naar det matcher listen fra pesys`() {
+        val sedListe = listOf(mockSED(P2000, eessiSakId = "12345678"))
+        val currentSed = mockSED(P2000, eessiSakId = "12345678")
+
+        val result = helper.hentSakIdFraSED(sedListe, currentSed)
+
+        assertEquals("12345678", result?.first)
+        assertEquals(listOf("12345678"), result?.second)
+    }
+
+    @Test
+    fun `hentSakIdFraSED skal returnere den første saken fra pesys naar det er flere pesys saksId i SED`() {
+        val sedListe = listOf(
+            mockSED(P2000, eessiSakId = "12345678"),
+            mockSED(P4000, eessiSakId = "87654321")
+        )
+        val currentSed = mockSED(P2000, eessiSakId = "12345678")
+
+        val result = helper.hentSakIdFraSED(sedListe, currentSed)
+
+        assertEquals("12345678", result?.first)
+        assertEquals(listOf("12345678"), result?.second)
+    }
+
+    @Test
+    fun `hentSakIdFraSED filterer bort ugyldige nummer og gir kun korrekte tilbake`() {
+        val sedListe = listOf(
+            mockSED(P2000, eessiSakId = "12345678"),
+            mockSED(P4000, eessiSakId = "INVALID"),
+            mockSED(P5000, eessiSakId = "87654321")
+        )
+        val result = helper.hentSakIdFraSED(sedListe, sedListe.first())
+
+        assertEquals("12345678", result?.first)
+        assertEquals(listOf("12345678"), result?.second)
+    }
+
 
     private fun sakInformasjon(
         sakId: String? = "22874955",

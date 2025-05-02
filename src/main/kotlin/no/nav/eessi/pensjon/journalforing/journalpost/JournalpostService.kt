@@ -87,7 +87,14 @@ class JournalpostService(
             sedType?.let {
                 pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it).also { documentsAndAttachments ->
                     if (documentsAndAttachments.second.isNotEmpty()) {
-                        oppgaveService.opprettBehandleSedOppgave(null, tildeltJoarkEnhet, aktoerId, sedHendelse, usupporterteFilnavn(documentsAndAttachments.second), tema)
+                        oppgaveService.opprettBehandleSedOppgave(
+                            null,
+                            tildeltJoarkEnhet,
+                            aktoerId,
+                            sedHendelse,
+                            usupporterteFilnavn(documentsAndAttachments.second),
+                            tema
+                        )
                     }
                 }
             } ?: throw IllegalStateException("sedType is null")

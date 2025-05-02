@@ -18,7 +18,6 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -59,7 +58,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             HendelseType.SENDT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = SakType.ALDER, sakInformasjonFraPesys = saksInformasjon),
+            SaksInfoSamlet(sakInformasjonFraPesys = saksInformasjon, saktypeFraSed = SakType.ALDER, pesysSaker = emptyList()),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
             currentSed = SED(type = SedType.P6000)
@@ -233,7 +232,7 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
             HendelseType.MOTTATT,
             identifisertPerson,
             LEALAUS_KAKE.getBirthDate(),
-            SaksInfoSamlet(saktypeFraSed = SakType.ALDER, sakInformasjonFraPesys = saksInformasjon),
+            SaksInfoSamlet(sakInformasjonFraPesys = saksInformasjon, saktypeFraSed = SakType.ALDER, pesysSaker = emptyList()),
             identifisertePersoner = 1,
             navAnsattInfo = navAnsattInfo(),
             currentSed = mockk<P2000>(relaxed = true).apply {
@@ -254,7 +253,8 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
               "hendelseType" : "MOTTATT",
               "filnavn" : null,
               "oppgaveType" : "BEHANDLE_SED",
-              "tema" : "UFO"
+              "tema" : "UFO",
+              "sendeAdvarsel" : false
             }
         """.trimIndent(), capturedMelding.captured.toJson()
         )

@@ -19,6 +19,7 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -225,7 +226,9 @@ abstract class IntegrasjonsBase {
                 response,
                 lagretJournalpost.journalpostRequest.journalfoerendeEnhet!!,
                 lagretJournalpost.journalpostRequest.bruker?.id,
-                lagretJournalpost.journalpostRequest.tema
+                lagretJournalpost.journalpostRequest.tema,
+                saksInfoSamlet = SaksInfoSamlet()
+
             )
         }
     }

@@ -189,7 +189,7 @@ class JournalforingServiceMedGCPTest {
             HendelseType.MOTTATT,
             identifisertPersonPDL(AKTOERID, sedPersonRelasjon(Fodselsnummer.fra(SLAPP_SKILPADDE))),
             LocalDate.of(1952,3,9),
-            SaksInfoSamlet(saktypeFraSed = ALDER),
+            SaksInfoSamlet(saktypeFraSed = ALDER, pesysSaker = emptyList()),
             identifisertePersoner = 1,
             navAnsattInfo = null,
             currentSed = SED(type = P2000)

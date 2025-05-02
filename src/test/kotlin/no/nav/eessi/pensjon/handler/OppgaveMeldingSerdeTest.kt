@@ -24,6 +24,7 @@ internal class OppgaveMeldingSerdeTest {
             SENDT,
             null,
             OppgaveType.JOURNALFORING,
+            sendeAdvarsel = false,
         )
 
         val serialized = melding.toJson()
@@ -51,6 +52,7 @@ internal class OppgaveMeldingSerdeTest {
             SENDT,
             "filnavn",
             OppgaveType.BEHANDLE_SED,
+            sendeAdvarsel = false,
         )
 
         val serialized = melding.toJson()

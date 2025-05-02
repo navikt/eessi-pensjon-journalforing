@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.listeners.fagmodul
 
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -14,13 +13,13 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): SakInformasjon? {
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
         return hentSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
-            if (sakId.erGyldigPesysNummer().not()) {
-                logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId} for aktoerid: $aktoerId")
+            if (sakId.first.erGyldigPesysNummer().not()) {
+                logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
                 return null
             }
-            hentSakInformasjonFraPensjonSak(aktoerId, sakId)
+            hentSakInformasjonFraPensjonSak(aktoerId, sakId.first)
         }
     }
 
@@ -29,7 +28,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): SakInformasjon? {
+    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): Pair<SakInformasjon?, List<SakInformasjon>>? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
@@ -54,48 +53,31 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         // saker med flere tilknyttede saker
         return if (saklist.size > 1) {
-            gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId })
+            Pair(gyldigSak.copy(tilknyttedeSaker = saklist.filterNot { it.sakId == gyldigSak.sakId }), saklist)
         } else {
-            gyldigSak
+            Pair(gyldigSak, saklist)
         }
-
     }
 
-    fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): String? {
-        val sakerFraSed = sedListe
-            .mapNotNull { sed -> filterEESSIsak(sed) }
-            .map { id -> trimSakidString(id) }
+    fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
+        val sakIdFraAlleSedIBuc = sedListe
+            .mapNotNull { filterEESSIsak(it) }
+            .map { trimSakidString(it) }
             .filter { it.erGyldigPesysNummer() }
             .filter { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
-        if (sakerFraSed.isEmpty()) {
+        if (sakIdFraAlleSedIBuc.isEmpty()) {
             logger.warn("Fant ingen sakId i SED")
-            return null
+            return Pair(null, listOf(null))
         }
+        if(sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
 
-        if (sakerFraSed.size > 1) {
-            logger.warn("Fant flere sakId i SED: $sakerFraSed, filtrer bort alle som ikke er pesysnr")
+        val sakID = sakIdFraAlleSedIBuc.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
+        return Pair(sakID ?: sakIdFraAlleSedIBuc.firstOrNull(), sakIdFraAlleSedIBuc)
 
-            //ser om vi har en treff mot SED som skal journalføres, dette vil kun gjelde utgående SED
-            val sakID = sakerFraSed
-                .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
-            if (sakID != null) {
-                logger.info("Fant pesys sakId fra SED med samme akId i EESSI: $sakID")
-                return sakID
-            }
-
-            if (sakerFraSed.size > 1) {
-                logger.warn("Fant flere gyldige pesys sakId i SED: $sakerFraSed  (kan fremdeles finne saktype fra bestemsak)")
-                return null
-            }
-            return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED, ett er filtrering: $it") }
-        }
-
-        return sakerFraSed.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }
     }
-
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
         val sakIdFraSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }
             ?.map { id -> trimSakidString(id) }

@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
+import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -116,6 +117,8 @@ class SedMottattListener(
                 gcpStorageService.lagre(sedHendelse.rinaSakId, GjennySak(null, gjennyTema.name))
             }
         }
+        val currentSed =  alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
+
 
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,
@@ -123,11 +126,10 @@ class SedMottattListener(
             bucType,
             identifisertPerson,
             MOTTATT,
-            null
+            currentSed
             // trenger ikke å sende med currentSed for MOTTATT, da det dette kommer fra utlandet
         )
 
-        val currentSed = alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
         journalforingService.journalfor(
             sedHendelse,
             MOTTATT,
