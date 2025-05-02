@@ -61,40 +61,23 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
         val sakIdFraAlleSedIBuc = sedListe
-            .mapNotNull { sed -> filterEESSIsak(sed) }
-            .map { id -> trimSakidString(id) }
+            .mapNotNull { filterEESSIsak(it) }
+            .map { trimSakidString(it) }
             .filter { it.erGyldigPesysNummer() }
             .filter { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
-        //Ingen sakIder fra Sed
         if (sakIdFraAlleSedIBuc.isEmpty()) {
             logger.warn("Fant ingen sakId i SED")
             return Pair(null, listOf(null))
         }
+        if(sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
 
-        //SakIder fra seder er flere enn 1
-        if (sakIdFraAlleSedIBuc.size > 1) {
-            logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
-            //ser om vi har et treff mot SED som skal journalføres, dette vil kun gjelde utgående SED
-            val sakID = sakIdFraAlleSedIBuc
-                .find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
-            if (sakID != null) {
-                logger.info("Fant pesys sakId fra SED med samme sakId i liste over saker i Seder: $sakID")
-                return Pair(sakID, sakIdFraAlleSedIBuc)
-            }
+        val sakID = sakIdFraAlleSedIBuc.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
+        return Pair(sakID ?: sakIdFraAlleSedIBuc.firstOrNull(), sakIdFraAlleSedIBuc)
 
-            if (sakIdFraAlleSedIBuc.size > 1) {
-                logger.warn("Fant flere gyldige pesys sakId i SED: $sakIdFraAlleSedIBuc  (kan fremdeles finne saktype fra bestemsak)")
-                return Pair(sakID, sakIdFraAlleSedIBuc)
-            }
-            return Pair(sakIdFraAlleSedIBuc.firstOrNull().also { logger.info("Pesys sakId fra SED, ett er filtrering: $it") }, sakIdFraAlleSedIBuc)
-        }
-
-        return Pair(sakIdFraAlleSedIBuc.firstOrNull().also { logger.info("Pesys sakId fra SED: $it") }, sakIdFraAlleSedIBuc)
     }
-
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
         val sakIdFraSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }
             ?.map { id -> trimSakidString(id) }
