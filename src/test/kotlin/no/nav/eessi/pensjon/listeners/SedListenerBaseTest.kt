@@ -60,7 +60,7 @@ class SedListenerBaseTest {
         "MOTTATT, P_BUC_10, ALDER, 22975710, false",
         "MOTTATT, P_BUC_10, ALDER, null, true"
     )
-    fun `hentSaksInformasjonForEessi returns correct SaksInfoSamlet based on input`(
+    fun `hentSaksInformasjonForEessi skal gi advarsel der hvor pesys nr fra pesys ikke stemmer med sed pesys nr 22975710`(
         hendelseType: HendelseType,
         bucType: BucType,
         sakTypeFraSed: SakType?,

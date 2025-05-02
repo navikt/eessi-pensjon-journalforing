@@ -44,7 +44,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         if(saklist.none { it.sakId == pesysSakId }) {
             logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId fra listen: ${saklist.toJson()}")
-            return null
+            return Pair(null, saklist)
         }
 
         val gyldigSak = saklist.firstOrNull { it.sakId == pesysSakId } ?: return null.also {
