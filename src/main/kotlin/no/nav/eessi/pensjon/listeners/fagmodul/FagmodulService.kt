@@ -44,7 +44,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
         if(saklist.none { it.sakId == pesysSakId }) {
-            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId")
+            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId fra listen: ${saklist.toJson()}")
             return null
         }
 
