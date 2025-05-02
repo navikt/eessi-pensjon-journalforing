@@ -131,49 +131,49 @@ internal class FagmodulServiceTest {
     }
 
     @Test
-    fun `hentSakIdFraSED skal gi null og tom liste naar SED mangler pesyys sakid`() {
+    fun `hentPesysSakIdFraSED skal gi null og tom liste naar SED mangler pesyys sakid`() {
         val sedListe = listOf(mockSED(P2000, eessiSakId = null))
         val currentSed = mockSED(P2000, eessiSakId = null)
 
-        val result = helper.hentSakIdFraSED(sedListe, currentSed)
+        val result = helper.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertNull(result?.first)
         assertEquals(listOf(null), result?.second)
     }
 
     @Test
-    fun `hentSakIdFraSED skal gi matchende sakId fra pesys naar det matcher listen fra pesys`() {
+    fun `hentPesysSakIdFraSED skal gi matchende sakId fra pesys naar det matcher listen fra pesys`() {
         val sedListe = listOf(mockSED(P2000, eessiSakId = "12345678"))
         val currentSed = mockSED(P2000, eessiSakId = "12345678")
 
-        val result = helper.hentSakIdFraSED(sedListe, currentSed)
+        val result = helper.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertEquals("12345678", result?.first)
         assertEquals(listOf("12345678"), result?.second)
     }
 
     @Test
-    fun `hentSakIdFraSED skal returnere den første saken fra pesys naar det er flere pesys saksId i SED`() {
+    fun `hentPesysSakIdFraSED skal returnere den første saken fra pesys naar det er flere pesys saksId i SED`() {
         val sedListe = listOf(
             mockSED(P2000, eessiSakId = "12345678"),
             mockSED(P4000, eessiSakId = "87654321")
         )
         val currentSed = mockSED(P2000, eessiSakId = "12345678")
 
-        val result = helper.hentSakIdFraSED(sedListe, currentSed)
+        val result = helper.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertEquals("12345678", result?.first)
         assertEquals(listOf("12345678"), result?.second)
     }
 
     @Test
-    fun `hentSakIdFraSED filterer bort ugyldige nummer og gir kun korrekte tilbake`() {
+    fun `hentPesysSakIdFraSED filterer bort ugyldige nummer og gir kun korrekte tilbake`() {
         val sedListe = listOf(
             mockSED(P2000, eessiSakId = "12345678"),
             mockSED(P4000, eessiSakId = "INVALID"),
             mockSED(P5000, eessiSakId = "87654321")
         )
-        val result = helper.hentSakIdFraSED(sedListe, sedListe.first())
+        val result = helper.hentPesysSakIdFraSED(sedListe, sedListe.first())
 
         assertEquals("12345678", result?.first)
         assertEquals(listOf("12345678"), result?.second)

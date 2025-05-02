@@ -14,7 +14,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        return hentSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
+        return hentPesysSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
             if (sakId.first.erGyldigPesysNummer().not()) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
                 return null
@@ -59,7 +59,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
     }
 
-    fun hentSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
+    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
         val sakIdFraAlleSedIBuc = sedListe
             .mapNotNull { filterEESSIsak(it) }
             .map { trimSakidString(it) }

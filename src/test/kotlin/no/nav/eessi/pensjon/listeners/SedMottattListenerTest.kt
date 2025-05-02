@@ -2,15 +2,10 @@ package no.nav.eessi.pensjon.listeners
 
 import io.mockk.*
 import no.nav.eessi.pensjon.eux.EuxService
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
-import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.sed.Sak
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.JournalforingService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
-import no.nav.eessi.pensjon.models.SaksInfoSamlet
-import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +41,7 @@ internal class SedMottattListenerTest {
     fun setup() {
         every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
         every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
-        every { fagmodulService.hentSakIdFraSED(any(), any()) } returns null
+        every { fagmodulService.hentPesysSakIdFraSED(any(), any()) } returns null
     }
 
     @Test
