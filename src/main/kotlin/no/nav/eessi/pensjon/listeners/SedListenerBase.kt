@@ -122,8 +122,8 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(null, null, sakTypeFraSED, pesysIDerFraSED, advarsel)
         }
 
-        if(sakInformasjonFraPesys?.second?.isNotEmpty() == true && hendelseType == MOTTATT) {
-            logger.warn("SakId fra INNKOMMENDE Sed: ${saksIDFraAlleSed?.first}, pensjonsinformasjon fra pesys: ${sakInformasjonFraPesys.second.first()}")
+        if(sakInformasjonFraPesys?.second?.isNotEmpty() == true && hendelseType == MOTTATT && saksIDFraAlleSed?.first == null) {
+            logger.warn("SakId fra INNKOMMENDE Sed: ${saksIDFraAlleSed?.first}, pensjonsinformasjon fra pesys: ${sakInformasjonFraPesys.second.first().sakId}")
             return SaksInfoSamlet(saksIDFraAlleSed?.first, sakInformasjonFraPesys.second.first(), sakTypeFraSED, pesysIDerFraSED, advarsel)
         }
 
