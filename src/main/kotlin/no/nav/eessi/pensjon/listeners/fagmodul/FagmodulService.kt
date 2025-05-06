@@ -19,7 +19,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
                 logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
                 return null
             }
-            hentSakInformasjonFraPensjonSak(aktoerId, sakId.first)
+            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId.first)
         }
     }
 
@@ -28,7 +28,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): Pair<SakInformasjon?, List<SakInformasjon>>? {
+    private fun hentGyldigSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): Pair<SakInformasjon?, List<SakInformasjon>>? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
         val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)

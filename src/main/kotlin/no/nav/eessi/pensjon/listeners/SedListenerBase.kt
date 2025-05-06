@@ -25,6 +25,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.support.Acknowledgment
@@ -110,7 +111,7 @@ abstract class SedListenerBase(
                 currentSed
             )
         }.also { logger.debug("SakInformasjon: $it") }
-
+        val pesysSakListe = sakInformasjonFraPesys?.second ?: emptyList()
         val pesysIDerFraSED = if(saksIDFraAlleSed?.second != null) saksIDFraAlleSed.second else emptyList()
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
@@ -122,9 +123,16 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(null, null, sakTypeFraSED, pesysIDerFraSED, advarsel)
         }
 
-        if(sakInformasjonFraPesys?.second?.isNotEmpty() == true && hendelseType == MOTTATT && saksIDFraAlleSed?.first == null) {
-            logger.warn("SakId fra INNKOMMENDE Sed: ${saksIDFraAlleSed?.first}, pensjonsinformasjon fra pesys: ${sakInformasjonFraPesys.second.first().sakId}")
-            return SaksInfoSamlet(saksIDFraAlleSed?.first, sakInformasjonFraPesys.second.first(), sakTypeFraSED, pesysIDerFraSED, advarsel)
+        //Dersom pesysSakid i innkommende Sed finnes så skal vi bruke pesysID fra pensjonsinformasjon og ikke pesysId fra sed
+        if(sakInformasjonFraPesys?.first == null && pesysSakListe.size > 1 && hendelseType == MOTTATT) {
+            logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${pesysSakListe.toJson()}, men ingen treff mot saksid fra sed")
+            return SaksInfoSamlet(null, null, sakTypeFraSED, pesysIDerFraSED, advarsel)
+        }
+
+        if(pesysSakListe.isNotEmpty() && hendelseType == MOTTATT) {
+            logger.warn("SakId fra INNKOMMENDE Sed: ${saksIDFraAlleSed?.first}, pensjonsinformasjon fra pesys: ${pesysSakListe.first().sakId}")
+            val pesysPensjonInfromasjon = sakInformasjonFraPesys?.first ?: pesysSakListe.first()
+            return SaksInfoSamlet(null, pesysPensjonInfromasjon, sakTypeFraSED, pesysIDerFraSED, advarsel)
         }
 
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjonFraPesys?.first, bucType)

@@ -70,7 +70,7 @@ internal class FagmodulServiceTest {
     }
 
     @Test
-    fun `Gitt flere sed i buc som har like saknr hents kun et for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
+    fun `Gitt flere sed i buc som har like saknr hentes kun et for oppslag mot pensjoninformasjon tjenesten, For så å hente ut rett SakInformasjon`() {
         val expected = sakInformasjon("22874955", ALDER, LOPENDE)
 
         val mockPensjonSaklist = listOf(
@@ -88,6 +88,7 @@ internal class FagmodulServiceTest {
         )
 
         val result = helper.hentPensjonSakFraPesys("123123", mockAllSediBuc, mockAllSediBuc.first())!!
+        println("result*****: $result")
         assertNotNull(result)
         assertEquals(expected.sakType, result.first?.sakType)
         assertEquals(3, result.first?.tilknyttedeSaker?.size)
