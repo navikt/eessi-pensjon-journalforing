@@ -4,7 +4,7 @@ buildscript {
 		kotlinVersion = '2.1.20'
 		springBootVersion = '3.4.5'
 		springKafkaVersion = '3.3.5'
-		tokenSupportVersion = '5.0.24'
+		tokenSupportVersion = '5.0.25'
 		imageioVersion = '3.12.0'
 	}
 }
