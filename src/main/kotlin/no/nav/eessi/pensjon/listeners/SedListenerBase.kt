@@ -48,14 +48,14 @@ abstract class SedListenerBase(
         identifisertPerson: IdentifisertPerson?,
         bucType: BucType,
         saktypeFraSed: SakType?,
-        alleSedIBuc: List<SED>,
+        alleSakIdFraSED: List<String>?,
         currentSed: SED?
     ): Pair<SakInformasjon?, List<SakInformasjon>>? ? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSedIBuc, currentSed).let { pensjonsinformasjon ->
+        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSakIdFraSED, currentSed).let { pensjonsinformasjon ->
             if (pensjonsinformasjon?.first?.sakId != null || pensjonsinformasjon?.second?.isNotEmpty() == true) {
                 logger.info("Velger sakType ${pensjonsinformasjon.first?.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.first?.sakId}")
                 return pensjonsinformasjon
@@ -98,7 +98,7 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(gjennySakId, null, null, emptyList())
         }
 
-        val saksIDFraAlleSed = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed)
+        val (sakIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(null, emptyList())
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
@@ -107,36 +107,36 @@ abstract class SedListenerBase(
                 identifisertPerson,
                 bucType,
                 sakTypeFraSED,
-                alleSedIBucList,
+                alleSakId,
                 currentSed
             )
         }.also { logger.debug("SakInformasjon: $it") }
         val pesysSakListe = sakInformasjonFraPesys?.second ?: emptyList()
-        val pesysIDerFraSED = if(saksIDFraAlleSed?.second != null) saksIDFraAlleSed.second else emptyList()
+//        val pesysIDerFraSED = alleSakId
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
-        val advarsel = if(sakInformasjonFraPesys?.second.isNullOrEmpty()) false else hentAdvarsel(pesysIDerFraSED, sakInformasjonFraPesys?.second!!)
+        val advarsel = if(sakInformasjonFraPesys?.second.isNullOrEmpty()) false else hentAdvarsel(alleSakId, sakInformasjonFraPesys?.second!!)
 
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
-        if (saksIDFraAlleSed?.first != null && sakInformasjonFraPesys == null) {
-            logger.warn("SakId fra Sed: ${saksIDFraAlleSed.first}, pensjonsinformasjon returnerer null")
-            return SaksInfoSamlet(null, null, sakTypeFraSED, pesysIDerFraSED, advarsel)
+        if (sakIdFraSed != null && sakInformasjonFraPesys == null) {
+            logger.warn("SakId fra Sed: ${sakIdFraSed}, pensjonsinformasjon returnerer null")
+            return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
         }
 
         //Dersom pesysSakid i innkommende Sed finnes så skal vi bruke pesysID fra pensjonsinformasjon og ikke pesysId fra sed
         if(sakInformasjonFraPesys?.first == null && pesysSakListe.size > 1 && hendelseType == MOTTATT) {
             logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${pesysSakListe.toJson()}, men ingen treff mot saksid fra sed")
-            return SaksInfoSamlet(null, null, sakTypeFraSED, pesysIDerFraSED, advarsel)
+            return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
         }
 
         if(pesysSakListe.isNotEmpty() && hendelseType == MOTTATT) {
-            logger.warn("SakId fra INNKOMMENDE Sed: ${saksIDFraAlleSed?.first}, pensjonsinformasjon fra pesys: ${pesysSakListe.first().sakId}")
+            logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed}, pensjonsinformasjon fra pesys: ${pesysSakListe.first().sakId}")
             val pesysPensjonInfromasjon = sakInformasjonFraPesys?.first ?: pesysSakListe.first()
-            return SaksInfoSamlet(null, pesysPensjonInfromasjon, sakTypeFraSED, pesysIDerFraSED, advarsel)
+            return SaksInfoSamlet(null, pesysPensjonInfromasjon, sakTypeFraSED, alleSakId, advarsel)
         }
 
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjonFraPesys?.first, bucType)
-        return SaksInfoSamlet(saksIDFraAlleSed?.first, sakInformasjonFraPesys?.first, saktypeFraSedEllerPesys, pesysIDerFraSED, advarsel)
+        return SaksInfoSamlet(sakIdFraSed, sakInformasjonFraPesys?.first, saktypeFraSedEllerPesys, alleSakId, advarsel)
     }
 
     /**

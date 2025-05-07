@@ -13,18 +13,35 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSedIBuc: List<SED>, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        return hentPesysSakIdFraSED(alleSedIBuc, currentSed)?.let { sakId ->
-            if (sakId.first.erGyldigPesysNummer().not()) {
-                logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
-                return null
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
+        if (alleSakIdFraSED != null) {
+            for (sakId in alleSakIdFraSED) {
+                if (sakId.erGyldigPesysNummer().not()) {
+                    logger.warn("Det er registert feil eller ugyldig pesys sakID: $sakId for aktoerid: $aktoerId")
+                    return null
+                }
+                val result = hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId)
+                if (result != null) {
+                    return result
+                }
             }
-            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId.first)
         }
+        return Pair(null, emptyList())
+
+//            return Pair(null, emptyList())
+
+
+//        return hentPesysSakIdFraSED(alleSakIdFraSED, currentSed)?.let { sakId ->
+//            if (sakId.first.erGyldigPesysNummer().not()) {
+//                logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
+//                return null
+//            }
+//            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId.first)
+//        }
     }
 
     fun String?.erGyldigPesysNummer(): Boolean {
-        if(this.isNullOrEmpty()) return false
+        if (this.isNullOrEmpty()) return false
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
@@ -36,13 +53,13 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
 
-        if(saklist.isEmpty()){
+        if (saklist.isEmpty()) {
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ")
             return null
         }
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakId Pensjoninformasjon: ${saklist.toJson()}")
 
-        if(saklist.none { it.sakId == pesysSakId }) {
+        if (saklist.none { it.sakId == pesysSakId }) {
             logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakId fra listen: ${saklist.toJson()}")
             return Pair(null, saklist)
         }
@@ -59,7 +76,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
     }
 
-    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String?>>? {
+    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String>>? {
         val sakIdFraAlleSedIBuc = sedListe
             .mapNotNull { filterEESSIsak(it) }
             .map { trimSakidString(it) }
@@ -70,14 +87,15 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         if (sakIdFraAlleSedIBuc.isEmpty()) {
             logger.warn("Fant ingen sakId i SED")
-            return Pair(null, listOf(null))
+            return Pair(null, emptyList())
         }
-        if(sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
+        if (sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
 
         val sakID = sakIdFraAlleSedIBuc.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
         return Pair(sakID ?: sakIdFraAlleSedIBuc.firstOrNull(), sakIdFraAlleSedIBuc)
 
     }
+
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
         val sakIdFraSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }
             ?.map { id -> trimSakidString(id) }
@@ -99,7 +117,6 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     //TODO: replace 11 sifre med * i tilfelle det er et fnr
     private fun trimSakidString(saknummerAsString: String) = saknummerAsString.replace("[^0-9]".toRegex(), "")
-
 
 
 }
