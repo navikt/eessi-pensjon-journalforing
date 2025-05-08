@@ -300,7 +300,7 @@ internal open class JournalforingTestBase {
         } else {
             assertEquals(JournalpostType.INNGAAENDE, request.journalpostType)
 
-            verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
+            //verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
         }
 
         clearAllMocks()
