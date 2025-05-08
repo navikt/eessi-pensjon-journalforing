@@ -14,44 +14,42 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
+        val pensjonsInformasjon = hentPesysSakId(aktoerId)
+        val collectedResults = mutableListOf<Pair<SakInformasjon?, List<SakInformasjon>>>()
+
         if (alleSakIdFraSED != null) {
             for (sakId in alleSakIdFraSED) {
                 if (sakId.erGyldigPesysNummer().not()) {
                     logger.warn("Det er registert feil eller ugyldig pesys sakID: $sakId for aktoerid: $aktoerId")
                     return null
                 }
-                val result = hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId)
+                val result = hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
                 if (result != null) {
-                    return result
+                    collectedResults.add(result)
                 }
             }
         }
-        return Pair(null, emptyList())
 
-//            return Pair(null, emptyList())
-
-
-//        return hentPesysSakIdFraSED(alleSakIdFraSED, currentSed)?.let { sakId ->
-//            if (sakId.first.erGyldigPesysNummer().not()) {
-//                logger.warn("Det er registert feil eller ugyldig pesys sakID: ${sakId.first} for aktoerid: $aktoerId")
-//                return null
-//            }
-//            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId.first)
-//        }
+        //return if (collectedResults.isNotEmpty()) collectedResults.first() else Pair(null, emptyList())
+        return collectedResults.find { it.first != null } ?: collectedResults.firstOrNull() ?: Pair(null, emptyList())
     }
+
+    fun hentPesysSakId(aktoerId: String): List<SakInformasjon> {
+        val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
+
+        return fagmodulKlient.hentPensjonSaklist(aktoerId)
+            .filter { it.sakType in eessipenSakTyper }.also {
+                secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
+            }
+    }
+
 
     fun String?.erGyldigPesysNummer(): Boolean {
         if (this.isNullOrEmpty()) return false
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentGyldigSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
-
-        val saklist: List<SakInformasjon> = fagmodulKlient.hentPensjonSaklist(aktoerId)
-            .filter { it.sakType in eessipenSakTyper }
-
-        secureLog.info("Svar fra pensjonsinformasjon: ${saklist.toJson()}")
+    private fun hentGyldigSakInformasjonFraPensjonSak(aktoerId: String, pesysSakId: String?, saklist: List<SakInformasjon>): Pair<SakInformasjon?, List<SakInformasjon>>? {
 
         if (saklist.isEmpty()) {
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakId ")
