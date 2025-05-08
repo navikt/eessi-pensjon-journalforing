@@ -77,7 +77,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             .mapNotNull { filterEESSIsak(it) }
             .map { trimSakidString(it) }
             .filter { it.erGyldigPesysNummer() }
-            .filter { it in (currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer } ?: emptyList()) }
+            .filter { eessiSak -> eessiSak in (currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer } ?: emptyList()) }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
