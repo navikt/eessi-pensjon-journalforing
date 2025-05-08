@@ -14,10 +14,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
     fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        val pensjonsInformasjon = hentPesysSakId(aktoerId)
         val collectedResults = mutableListOf<Pair<SakInformasjon?, List<SakInformasjon>>>()
 
-        if (alleSakIdFraSED != null) {
+        if (alleSakIdFraSED.isNullOrEmpty().not()) {
+            val pensjonsInformasjon = hentPesysSakId(aktoerId)
             for (sakId in alleSakIdFraSED) {
                 if (sakId.erGyldigPesysNummer().not()) {
                     logger.warn("Det er registert feil eller ugyldig pesys sakID: $sakId for aktoerid: $aktoerId")
@@ -30,7 +30,11 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             }
         }
 
-        //return if (collectedResults.isNotEmpty()) collectedResults.first() else Pair(null, emptyList())
+        // ved treff mot pesys sakID fra SED så bruker vi dette resultatet
+        collectedResults.find { currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }?.contains(it.first?.sakId) == true}?.takeIf {
+            return it
+        }
+
         return collectedResults.find { it.first != null } ?: collectedResults.firstOrNull() ?: Pair(null, emptyList())
     }
 

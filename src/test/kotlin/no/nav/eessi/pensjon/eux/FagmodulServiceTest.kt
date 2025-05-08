@@ -53,9 +53,9 @@ internal class FagmodulServiceTest {
     fun `Gitt at det finnes eessisak der land ikke er Norge så returneres null`() {
         val sedP2000 = javaClass.getResource("/sed/P2000-ugyldigFNR-NAV.json")!!.readText()
         val mockAllSediBuc = listOf(mapJsonToAny<SED>(sedP2000))
-        val eessisakList = mockAllSediBuc.first().nav?.eessisak?.mapNotNull { it.saksnummer }
-        val result = helper.hentPensjonSakFraPesys("123123", eessisakList, null)
-        assertNull(result)
+        val eessisakList = helper.hentPesysSakIdFraSED(mockAllSediBuc, null)
+        val result = helper.hentPensjonSakFraPesys("123123", eessisakList?.second, null)
+        assertNull(result?.first)
 
         verify { fagmodulKlient wasNot Called }
     }
@@ -63,9 +63,9 @@ internal class FagmodulServiceTest {
     @Test
     fun `Gitt at det finnes eessisak der land er Norge og saksnummer er på feil format så skal null returneres`() {
         val mockAlleSedIBuc = listOf(mockSED(P2000, eessiSakId = "UGYLDIG SAK ID"))
-        val eessisakList = mockAlleSedIBuc.first().nav?.eessisak?.mapNotNull { it.saksnummer }
-        val result = helper.hentPensjonSakFraPesys("123123", eessisakList, null)
-        assertNull(result)
+        val eessisakList =  helper.hentPesysSakIdFraSED(mockAlleSedIBuc, null)
+        val result = helper.hentPensjonSakFraPesys("123123", eessisakList?.second, null)
+        assertNull(result?.first)
 
         verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -123,12 +123,9 @@ internal class FagmodulServiceTest {
     @Test
     fun `Gitt flere sed i buc har forskjellige saknr hents ingen for oppslag, ingen SakInformasjon returneres`() {
         val mockAllSediBuc = listOf(mockSED(P2000, "111"), mockSED(P4000, "222"), mockSED(P6000, "333"))
-        val eessisakList =  mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }
-
-        assertNull(
-                helper.hentPensjonSakFraPesys("111", eessisakList, null),
-                "Skal ikke få noe i retur dersom det finnes flere unike EessiSakIDer."
-        )
+        val eessisakList =  helper.hentPesysSakIdFraSED(mockAllSediBuc, null)
+        val result = helper.hentPensjonSakFraPesys("111", eessisakList?.second, null)?.first
+        assertNull(result, "Skal ikke få noe i retur dersom det finnes flere unike EessiSakIDer.")
 
         verify { fagmodulKlient wasNot Called }
     }
