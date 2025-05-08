@@ -112,31 +112,30 @@ abstract class SedListenerBase(
             )
         }.also { logger.debug("SakInformasjon: $it") }
         val pesysSakListe = sakInformasjonFraPesys?.second ?: emptyList()
-//        val pesysIDerFraSED = alleSakId
+        val pensjoninfo = sakInformasjonFraPesys?.first
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
-        val advarsel = if(sakInformasjonFraPesys?.second.isNullOrEmpty()) false else hentAdvarsel(alleSakId, sakInformasjonFraPesys?.second!!)
+        val advarsel = if(pesysSakListe.isEmpty()) false else hentAdvarsel(alleSakId, pesysSakListe)
 
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
         if (sakIdFraSed != null && sakInformasjonFraPesys == null) {
             logger.warn("SakId fra Sed: ${sakIdFraSed}, pensjonsinformasjon returnerer null")
             return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
         }
-
-        //Dersom pesysSakid i innkommende Sed finnes så skal vi bruke pesysID fra pensjonsinformasjon og ikke pesysId fra sed
-        if(sakInformasjonFraPesys?.first == null && pesysSakListe.size > 1 && hendelseType == MOTTATT) {
-            logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${pesysSakListe.toJson()}, men ingen treff mot saksid fra sed")
-            return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
+        if(pensjoninfo == null && hendelseType == MOTTATT) {
+            if(pesysSakListe.size > 1) {
+                logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${pesysSakListe.toJson()}, men ingen treff mot saksid fra sed")
+                //TODO: val pesysPensjonInformasjon = pesysSakListe.find { it.sakStatus == SakStatus.LOPENDE } ?: pesysSakListe.first()
+                return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
+            }
+            if(pesysSakListe.size == 1) {
+                logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed} har ikke treff i pensjonsinformasjon fra pesys: ${pesysSakListe.toJson()}")
+                return SaksInfoSamlet(null, pesysSakListe.first(), sakTypeFraSED, alleSakId, advarsel)
+            }
         }
 
-        if(pesysSakListe.isNotEmpty() && hendelseType == MOTTATT) {
-            logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed}, pensjonsinformasjon fra pesys: ${pesysSakListe.first().sakId}")
-            val pesysPensjonInfromasjon = sakInformasjonFraPesys?.first ?: pesysSakListe.first()
-            return SaksInfoSamlet(null, pesysPensjonInfromasjon, sakTypeFraSED, alleSakId, advarsel)
-        }
-
-        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakInformasjonFraPesys?.first, bucType)
-        return SaksInfoSamlet(sakIdFraSed, sakInformasjonFraPesys?.first, saktypeFraSedEllerPesys, alleSakId, advarsel)
+        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, pensjoninfo, bucType)
+        return SaksInfoSamlet(sakIdFraSed, pensjoninfo, saktypeFraSedEllerPesys, alleSakId, advarsel)
     }
 
     /**

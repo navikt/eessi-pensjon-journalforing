@@ -11,23 +11,22 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.P8000
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
-import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
-import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 class SedListenerBaseTest {
 
-    private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
+    private val fagmodulKlient = mockk<FagmodulKlient>()
     private val fagmodulService = FagmodulService(fagmodulKlient)
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
     private val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
@@ -94,4 +93,46 @@ class SedListenerBaseTest {
 
         assertEquals(expectedAdvarsel, result.advarsel)
     }
+
+    @DisplayName("Vurder om pesys sakId er gyldig gitt flere pesys sak id fra Pesys: ")
+    @ParameterizedTest
+    @CsvSource(
+        "22975232, true, true",
+        "22223332, false, true",
+        ", false, false"
+    )
+    fun testHentSaksInformasjonForEessi(sakIdFraPesys: String?, harSakIdFraSed: Boolean, harPesysSakId: Boolean) {
+        val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_flere_pesysId.json")!!.readText())
+        val alleSedIBucList = listOf(sed)
+
+        val sedHendelse = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
+        val identifisertPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
+
+        every { euxService.hentSaktypeType(any(), any()) } returns SakType.ALDER
+
+        val saksInfo = if (!sakIdFraPesys.isNullOrEmpty()) {
+            listOf(mockk<SakInformasjon>().apply {
+                every { sakId } returns sakIdFraPesys
+                every { sakStatus } returns SakStatus.LOPENDE
+                every { sakType } returns SakType.GJENLEV
+                every { saksbehandlendeEnhetId } returns "NFP_UTLAND_AALESUND"
+                every { nyopprettet } returns false
+            })
+        } else {
+            emptyList()
+        }
+        every { fagmodulKlient.hentPensjonSaklist(any()) } returns saksInfo
+
+        val result = sedListenerBase.hentSaksInformasjonForEessi(
+            alleSedIBucList,
+            sedHendelse,
+            BucType.P_BUC_10,
+            identifisertPerson,
+            HendelseType.MOTTATT,
+            sed
+        )
+
+        assertEquals(if (harSakIdFraSed) "22975232" else null, result.saksIdFraSed)
+        assertEquals(if (harPesysSakId) sakIdFraPesys else null, result.sakInformasjonFraPesys?.sakId)
+     }
 }
