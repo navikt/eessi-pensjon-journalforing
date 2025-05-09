@@ -100,7 +100,7 @@ abstract class SedListenerBase(
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             }
-            return SaksInfoSamlet(gjennySakId, null, null, emptyList())
+            return SaksInfoSamlet(gjennySakId)
         }
 
         val (sakIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(null, emptyList())
@@ -125,22 +125,26 @@ abstract class SedListenerBase(
         //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
         if (sakIdFraSed != null && sakInformasjonFraPesys == null) {
             logger.warn("SakId fra Sed: ${sakIdFraSed}, pensjonsinformasjon returnerer null")
-            return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
+            return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
         }
         if(sakFraPesysSomMatcherSed == null && hendelseType == MOTTATT) {
             if(listeOverSakerPesys.size > 1) {
                 logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${listeOverSakerPesys.toJson()}, men ingen treff mot saksid fra sed")
                 //TODO: val pesysPensjonInformasjon = pesysSakListe.find { it.sakStatus == SakStatus.LOPENDE } ?: pesysSakListe.first()
-                return SaksInfoSamlet(null, null, sakTypeFraSED, alleSakId, advarsel)
+                return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
             }
             if(listeOverSakerPesys.size == 1) {
                 logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed} har ikke treff i pensjonsinformasjon fra pesys: ${listeOverSakerPesys.toJson()}")
-                return SaksInfoSamlet(null, listeOverSakerPesys.first(), sakTypeFraSED, alleSakId, advarsel)
+                return SaksInfoSamlet(
+                    sakInformasjonFraPesys = listeOverSakerPesys.first(),
+                    saktypeFraSed = sakTypeFraSED,
+                    advarsel = advarsel
+                )
             }
         }
 
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed, bucType)
-        return SaksInfoSamlet(sakIdFraSed, sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, alleSakId, advarsel)
+        return SaksInfoSamlet(sakIdFraSed, sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
     }
 
     /**

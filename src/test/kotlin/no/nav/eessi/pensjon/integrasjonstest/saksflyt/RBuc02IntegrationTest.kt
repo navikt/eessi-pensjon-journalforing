@@ -83,8 +83,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                         nyopprettet = false,
                         tilknyttedeSaker = emptyList()
                     ),
-                    saktypeFraSed = GJENLEV,
-                    pesysSaker = emptyList()
+                    saktypeFraSed = GJENLEV
                 ),
                 harAdressebeskyttelse = false,
                 identifisertePersoner = 2,
@@ -164,8 +163,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                     nyopprettet = false,
                     tilknyttedeSaker = emptyList()
                 ),
-                saktypeFraSed = GJENLEV,
-                pesysSaker = emptyList()
+                saktypeFraSed = GJENLEV
             ),
             harAdressebeskyttelse = false,
             identifisertePersoner = 2,
