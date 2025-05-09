@@ -97,11 +97,11 @@ class SedListenerBaseTest {
     @DisplayName("Vurder om pesys sakId er gyldig gitt flere pesys sak id fra Pesys: ")
     @ParameterizedTest
     @CsvSource(
-        "22975232, true, true",
-        "22223332, false, true",
-        ", false, false"
+        "22975232, true, true, '22975710;22975232'",
+        "22223332, false, true, '22975710;22975232'",
+        ", false, false, '22975710;22975232'"
     )
-    fun testHentSaksInformasjonForEessi(sakIdFraPesys: String?, harSakIdFraSed: Boolean, harPesysSakId: Boolean) {
+    fun testHentSaksInformasjonForEessi(sakIdFraPesys: String?, harSakIdFraSed: Boolean, harPesysSakId: Boolean, pesysIdListe: String) {
         val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_flere_pesysId.json")!!.readText())
         val alleSedIBucList = listOf(sed)
 
@@ -132,7 +132,10 @@ class SedListenerBaseTest {
             sed
         )
 
+        val listeAvPesysId = pesysIdListe.split(";")
+
         assertEquals(if (harSakIdFraSed) "22975232" else null, result.saksIdFraSed)
         assertEquals(if (harPesysSakId) sakIdFraPesys else null, result.sakInformasjonFraPesys?.sakId)
+//        assertEquals(listeAvPesysId.sorted(), result.pesysSaker.sorted())
      }
 }
