@@ -55,11 +55,14 @@ abstract class SedListenerBase(
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSakIdFraSED, currentSed).let { pensjonsinformasjon ->
-            if (pensjonsinformasjon?.first?.sakId != null || pensjonsinformasjon?.second?.isNotEmpty() == true) {
-                logger.info("Velger sakType ${pensjonsinformasjon.first?.sakType} fra pensjonsinformasjon, for sakid: ${pensjonsinformasjon.first?.sakId}")
-                return pensjonsinformasjon
+        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSakIdFraSED, currentSed)?.let { pensjonsinformasjon ->
+            pensjonsinformasjon.first?.sakId?.let {
+                logger.info("Velger pensjonsinformasjon: ${pensjonsinformasjon.first}")
+            } ?: run {
+                logger.warn("Sakid: ${pensjonsinformasjon.second.map { it.sakId }} matcher ikke med sakid fra sed: " +
+                        "${alleSakIdFraSED?.toJson()}, men da vi har svar fra pesys så går vi ikke videre med bestemsak")
             }
+            return pensjonsinformasjon
         }
         bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let {
             if (it?.sakType != null) {
