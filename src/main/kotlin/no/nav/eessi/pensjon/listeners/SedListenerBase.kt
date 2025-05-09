@@ -43,7 +43,7 @@ abstract class SedListenerBase(
     private var gyldigeSed: MetricsHelper.Metric = metricsHelper.init("gyldigeSed")
     private var ugyldigeSed: MetricsHelper.Metric = metricsHelper.init("ugyldigeSed")
 
-    /** Velger saktype fra enten bestemSak eller pensjonsinformasjon der det finnes */
+    /** Velger SakInformasjon fra enten bestemSak eller pensjonsinformasjon der det finnes */
     private fun pensjonSakInformasjon(
         identifisertPerson: IdentifisertPerson?,
         bucType: BucType,
