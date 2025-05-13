@@ -106,7 +106,7 @@ dependencies {
 	testImplementation("com.ninja-squad:springmockk:4.0.2")
 
 	// Architecture tests
-	testImplementation 'com.tngtech.archunit:archunit:1.4.0'
+	testImplementation 'com.tngtech.archunit:archunit:1.4.1'
 
 
 
