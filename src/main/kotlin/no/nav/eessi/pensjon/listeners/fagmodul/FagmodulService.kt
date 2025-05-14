@@ -37,6 +37,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
         return fagmodulKlient.hentPensjonSaklist(aktoerId)
+            .filter { it.sakId != null }
             .filter { it.sakType in eessipenSakTyper }.also {
                 secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
             }
