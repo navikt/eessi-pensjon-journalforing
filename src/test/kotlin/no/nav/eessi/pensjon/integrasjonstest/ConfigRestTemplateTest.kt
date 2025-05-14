@@ -21,6 +21,8 @@ import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.listeners.SedSendtListener
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
+import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
@@ -70,6 +72,8 @@ internal class ConfigRestTemplateTest {
     @MockkBean
     private lateinit var personService: PersonService
 
+    private lateinit var fagmodulService: FagmodulService
+
     @MockkBean
     private lateinit var bestemSakKlient: BestemSakKlient
 
@@ -92,8 +96,14 @@ internal class ConfigRestTemplateTest {
     private lateinit var safClient: SafClient
 
 
+    @MockkBean(relaxed = true)
+    private lateinit var fagmodulKlient: FagmodulKlient
+
     @BeforeEach
     fun setup() {
+        every { fagmodulKlient.hentPensjonSaklist(any()) } returns emptyList()
+        fagmodulService = FagmodulService(fagmodulKlient)
+
         every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
@@ -116,7 +126,6 @@ internal class ConfigRestTemplateTest {
         every { gcpStorageService.gjennyFinnes(any())} returns false
         every { hentSakService.hentSak("147666") } returns mockk(relaxed = true)
     }
-
 
     /**
      * Jackson har en begrensning på 20MB for dokumenter. Dette er en test for å verifisere at RestTemplateConfig
