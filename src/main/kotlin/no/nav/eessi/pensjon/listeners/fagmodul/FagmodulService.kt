@@ -15,10 +15,11 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     /**
      * Henter pensjonssak fra PESYS basert på aktoerId og sakId fra SED.
-     * Vurderer
+     * 1. Om vi ikke har sakId fra SED, henter vi sakId fra PESYS og returnerer listen uten match mot sd
+     * 2. Om vi har sakId fra SED, henter vi sakId fra PESYS og returnerer match mot sakId fra SED om den finnes, og listen
      */
     fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, emptyList())
+        if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, hentPesysSakId(aktoerId))
 
         val pensjonsInformasjon = hentPesysSakId(aktoerId)
         val collectedResults = alleSakIdFraSED.mapNotNull { sakId ->
