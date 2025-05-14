@@ -667,9 +667,9 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         val bucland = if (land === "SWE") "SE" else "NO"
         initCommonMocks(sed, alleDocs, documentFiler, bucLand = bucland)
-        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+
         if (bestemSak != null) {
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe
+            every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         }
 
         val (journalpost, _) = initJournalPostRequestSlot(forsokFerdigStilt)
