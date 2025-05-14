@@ -620,11 +620,9 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 aktorId = AKTOER_ID_2
             )
         }
-        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
 
-        if (bestemSak != null) {
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns bestemSak.sakInformasjonListe
-        }
+        if (bestemSak != null) every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+        else every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns emptyList()
 
         val (journalpost, _) = initJournalPostRequestSlot()
         val hendelse = createHendelseJson(P2100, P_BUC_02)

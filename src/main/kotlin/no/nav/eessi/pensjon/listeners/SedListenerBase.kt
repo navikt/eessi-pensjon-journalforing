@@ -134,7 +134,7 @@ abstract class SedListenerBase(
                 return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
             }
             if(listeOverSakerPesys.size == 1) {
-                logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed} har ikke treff i pensjonsinformasjon fra pesys: ${listeOverSakerPesys.toJson()}")
+                logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed} har ikke treff i pensjonsinformasjon fra pesys, men pesys gir ett svar: ${listeOverSakerPesys.toJson()}")
                 return SaksInfoSamlet(
                     sakInformasjonFraPesys = listeOverSakerPesys.first(),
                     saktypeFraSed = sakTypeFraSED,

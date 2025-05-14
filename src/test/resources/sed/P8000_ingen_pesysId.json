@@ -1,0 +1,28 @@
+{
+  "nav": {
+    "bruker": {
+      "adresse": {
+        "gate": "Grudevegen 83",
+        "land": "NO",
+        "postnummer": "4351",
+        "by": "KLEPPE"
+      },
+      "person": {
+        "kjoenn": "M",
+        "etternavn": "MYGG",
+        "fornavn": "UNDERLIG",
+        "etternavnvedfoedsel": "Resendt 29.04.2025 14:16",
+        "foedselsdato": "1959-03-11",
+        "pin": [
+          {
+            "land": "NO",
+            "identifikator": "11435901370"
+          }
+        ]
+      }
+    }
+  },
+  "sedGVer": "4",
+  "sedVer": "3",
+  "sed": "P8000"
+}
