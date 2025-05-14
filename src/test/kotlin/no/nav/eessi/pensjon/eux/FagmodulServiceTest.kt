@@ -57,7 +57,7 @@ internal class FagmodulServiceTest {
         val result = helper.hentPensjonSakFraPesys("123123", eessisakList?.second, null)
         assertNull(result?.first)
 
-//        verify { fagmodulKlient wasNot Called }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
 
     @Test
@@ -67,7 +67,7 @@ internal class FagmodulServiceTest {
         val result = helper.hentPensjonSakFraPesys("123123", eessisakList?.second, null)
         assertNull(result?.first)
 
-//        verify(exactly = 0) { fagmodulKlient.hentPensjonSaklist(any()) }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
 
     @Test
@@ -127,7 +127,7 @@ internal class FagmodulServiceTest {
         val result = helper.hentPensjonSakFraPesys("111", eessisakList?.second, null)?.first
         assertNull(result, "Skal ikke få noe i retur dersom det finnes flere unike EessiSakIDer.")
 
-//        verify { fagmodulKlient wasNot Called }
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
 
     @Test
