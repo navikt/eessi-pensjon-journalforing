@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import kotlin.collections.firstOrNull
 
 @Service
 class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
@@ -18,15 +19,19 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
      * 1. Om vi ikke har sakId fra SED, henter vi sakId fra PESYS og returnerer listen uten match mot sd
      * 2. Om vi har sakId fra SED, henter vi sakId fra PESYS og returnerer match mot sakId fra SED om den finnes, og listen
      */
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, pesysIdFraSed :List<String>): Pair<SakInformasjon?, List<SakInformasjon>>? {
         if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, hentPesysSakId(aktoerId))
 
         val pensjonsInformasjon = hentPesysSakId(aktoerId)
-        val collectedResults = alleSakIdFraSED.mapNotNull { sakId ->
+        val resultatFraCurrentSedId = pesysIdFraSed.mapNotNull { sakId ->
             hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
         }
 
-        return collectedResults.find { currentSed?.nav?.eessisak?.any { eessiSak -> eessiSak.saksnummer == it.first?.sakId } == true }
+        val resultatFraAlleSedId = alleSakIdFraSED.mapNotNull { sakId ->
+            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
+        }
+        val collectedResults = resultatFraAlleSedId + resultatFraCurrentSedId
+        return collectedResults.find { it.first != null}
             ?: collectedResults.find { alleSakIdFraSED.contains(it.first?.sakId) }
             ?: collectedResults.find { it.first != null }
             ?: collectedResults.firstOrNull()

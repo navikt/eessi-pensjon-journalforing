@@ -49,7 +49,7 @@ abstract class SedListenerBase(
         bucType: BucType,
         saktypeFraSed: SakType?,
         alleSakIdFraSED: List<String>?,
-        currentSed: SED?
+        currentSed: List<String>
     ): Pair<SakInformasjon?, List<SakInformasjon>>? ? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
@@ -103,7 +103,7 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(gjennySakId)
         }
 
-        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(null, emptyList())
+        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(emptyList(), emptyList())
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
@@ -113,7 +113,7 @@ abstract class SedListenerBase(
                 bucType,
                 sakTypeFraSED,
                 alleSakId,
-                currentSed
+                saksIdFraSed
             )
         }.also { logger.debug("SakInformasjon: $it") }
         val listeOverSakerPesys = sakInformasjonFraPesys?.second ?: emptyList()
@@ -125,7 +125,7 @@ abstract class SedListenerBase(
 
         when (hendelseType) {
             MOTTATT -> {
-                if (saksIdFraSed?.isNotEmpty() == true && sakInformasjonFraPesys == null) {
+                if (saksIdFraSed.isNotEmpty() && sakInformasjonFraPesys == null) {
                     logger.warn("SakId fra Sed: $saksIdFraSed, pensjonsinformasjon returnerer null")
                     return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
                 }
@@ -139,11 +139,11 @@ abstract class SedListenerBase(
                         SaksInfoSamlet(sakInformasjonFraPesys = listeOverSakerPesys.first(), saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
                     }
                 }
-                return SaksInfoSamlet(saksIdFraSed?.firstOrNull(), sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
             }
 
             SENDT -> {
-                return SaksInfoSamlet(saksIdFraSed?.firstOrNull(), sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel)
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel)
             }
         }
     }
