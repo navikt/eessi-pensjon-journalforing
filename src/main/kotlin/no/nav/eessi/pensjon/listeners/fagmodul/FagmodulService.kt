@@ -74,24 +74,22 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
     }
 
-    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String>>? {
+    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<List<String>, List<String>>? {
         val sakIdFraAlleSedIBuc = sedListe
             .mapNotNull { filterEESSIsak(it) }
             .map { trimSakidString(it) }
             .filter { it.erGyldigPesysNummer() }
-            .filter { eessiSak -> eessiSak in (currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer } ?: emptyList()) }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
         if (sakIdFraAlleSedIBuc.isEmpty()) {
             logger.warn("Fant ingen sakId i SED")
-            return Pair(null, emptyList())
+            return Pair(emptyList(), emptyList())
         }
         if (sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
 
-        val sakID = sakIdFraAlleSedIBuc.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
-        return Pair(sakID ?: sakIdFraAlleSedIBuc.firstOrNull(), sakIdFraAlleSedIBuc)
-
+        val sakIdCurrentSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }?.distinct() ?: emptyList()
+        return Pair(sakIdCurrentSed, sakIdFraAlleSedIBuc)
     }
 
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
