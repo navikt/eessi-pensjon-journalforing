@@ -97,6 +97,13 @@ class SedListenerBaseTest {
         }
 
         @Test
+        fun `gitt én sakid fra pesys og ingen sakid i SED og ingen match`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200")
+            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        @Test
         fun `gitt flere sakid fra pesys og vi har match med sakid fra SED`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22975200")
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
@@ -113,6 +120,7 @@ class SedListenerBaseTest {
             val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222")
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
         }
+
     }
 
     private fun loadSed(fileName: String): P8000 {
