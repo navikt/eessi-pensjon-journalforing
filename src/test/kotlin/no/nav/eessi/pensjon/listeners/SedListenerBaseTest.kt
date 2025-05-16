@@ -10,22 +10,20 @@ import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.P8000
-import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.api.Test
 
 class SedListenerBaseTest {
 
@@ -39,7 +37,7 @@ class SedListenerBaseTest {
 
     @BeforeEach
     fun setup() {
-
+        every { euxService.hentSaktypeType(any(), any()) } returns SakType.ALDER
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any(), any()) } returns null
 
@@ -54,126 +52,151 @@ class SedListenerBaseTest {
         }
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        "SENDT, P_BUC_10, GJENLEV,22975700, true",
-        "MOTTATT, P_BUC_10, GJENLEV, 22975700, true",
-        "MOTTATT, P_BUC_10, GJENLEV, 22975710, false",
-        "MOTTATT, P_BUC_10, ALDER, 22975710, false",
-        "MOTTATT, P_BUC_10, ALDER, null, true"
-    )
-    fun `hentSaksInformasjonForEessi skal gi advarsel der hvor pesys nr fra pesys ikke stemmer med sed pesys nr 22975710`(
-        hendelseType: HendelseType,
-        bucType: BucType,
-        sakTypeFraSed: SakType?,
-        sakId: String?,
-        expectedAdvarsel: Boolean
-    ) {
-        val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_pesysId.json")!!.readText())
-        val alleSedIBucList = listOf<SED>(sed)
+    /**
+     * Regler: https://confluence.adeo.no/spaces/EP/pages/704513683/Dato+endring+i+PROD+06.05.2025+11+25
+     * PesysSakId er herunder kalt sakId
+     */
+    @Nested
+    @DisplayName("Inngående sed")
+    inner class InngaaendeSed {
+        //1. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
+        @Test
+        fun `Gitt at det finnes flere sakIder i SED og det finnes en sakId fra PenInfo men INGEN match saa skal det IKKE sendes advarsel`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111")
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(null, resultat?.saksIdFraSed)
+            assertEquals(false, resultat?.advarsel)
+        }
 
-        val sedHendelse = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
-        val identifisertPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
-        val saksInfo = listOf(SakInformasjon(
-            sakId = sakId,
-            sakStatus = SakStatus.LOPENDE,
-            sakType = SakType.GJENLEV,
-            saksbehandlendeEnhetId = "NFP_UTLAND_AALESUND",
-            nyopprettet = false
-        ))
+        //2. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
+        @Test
+        fun `Gitt at det finnes flere sakider fra SED og flere sakid fra pesys med en MATCH på første i listen fra sed saa skal det IKKE sendes advarsel`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22975710;22970000")
+            assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
 
-        every { euxService.hentSaktypeType(any(), any()) } returns sakTypeFraSed
-        every { fagmodulKlient.hentPensjonSaklist(any()) } returns saksInfo
+        //3. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
+        @Test
+        fun `Gitt at det er flere sakider i SED og flere sakIder fra PenInfo med MATCH så skal det IKKE sendes advarsel`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22970000")
+            assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
 
-        val result = sedListenerBase.hentSaksInformasjonForEessi(
-            alleSedIBucList,
-            sedHendelse,
-            bucType,
-            identifisertPerson,
-            hendelseType,
-            sed
-        )
+        //4. Manuell journalføring (Oppretter JFR_INN oppgave)
+        @Test
+        fun `Gitt at det finnes flere sakIder i SED og det finnes flere sakIder fra PenInfo men INGEN match saa skal det SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222")
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
 
-        assertEquals(expectedAdvarsel, result.advarsel)
+        //5. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
+        @Test
+        fun `Gitt at gitt at IKKE finnes sakId i SED og det IKKE finnes sakId fra PenInfor saa skal der SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
+
+        //6. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
+        @Test
+        fun `Gitt at det finnes én sakid i SED og det finnes én sakid fra PenInfo men INGEN MATCH saa skal det SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22975200")
+            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //7. Automatisk journalføring (Oppretter BEHANDLE_SED oppgave)
+        @Test
+        fun `Gitt ingen sakId fra SED og en sakId i svar fra PenInfo og INGEN MATCH saa skal det ikke sendes advarsel`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200")
+            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        @Test
+        fun `gitt flere sakid fra pesys og vi har match med sakid fra SED`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22975200")
+            assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+
+        @Test
+        fun `gitt flere sakid fra pesys og én sakid i SED og ingen match`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222")
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
+
     }
 
-    @DisplayName("Vurder om pesys sakId er gyldig gitt flere pesys sak id fra Pesys: ")
-    @ParameterizedTest
-    @CsvSource(
-        "22975232, true, true, '22975710;22975232'",
-        "22223332, false, true, '22975710;22975232'",
-        ", false, false, '22975710;22975232'"
-    )
-    fun testHentSaksInformasjonForEessi(sakIdFraPesys: String?, harSakIdFraSed: Boolean, harPesysSakId: Boolean, pesysIdListe: String) {
-        val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_flere_pesysId.json")!!.readText())
-        val alleSedIBucList = listOf(sed)
-
-        val sedHendelse = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
-        val identifisertPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
-
-        every { euxService.hentSaktypeType(any(), any()) } returns SakType.ALDER
-
-        val saksInfo = if (!sakIdFraPesys.isNullOrEmpty()) {
-            listOf(mockk<SakInformasjon>().apply {
-                every { sakId } returns sakIdFraPesys
-                every { sakStatus } returns SakStatus.LOPENDE
-                every { sakType } returns SakType.GJENLEV
-                every { saksbehandlendeEnhetId } returns "NFP_UTLAND_AALESUND"
-                every { nyopprettet } returns false
-            })
-        } else {
-            emptyList()
+    @Nested
+    @DisplayName("Utgående sed")
+    inner class UtgaaendeSed {
+        @Test
+        fun `gitt én sakid fra pesys og ingen sakid i SED og ingen match`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200", hendelsesType = HendelseType.SENDT)
+            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
         }
-        every { fagmodulKlient.hentPensjonSaklist(any()) } returns saksInfo
 
-        val result = sedListenerBase.hentSaksInformasjonForEessi(
-            alleSedIBucList,
-            sedHendelse,
-            BucType.P_BUC_10,
-            identifisertPerson,
-            HendelseType.MOTTATT,
-            sed
-        )
+        @Test
+        fun `gitt flere sakid fra pesys og flere fra sed og ingen match så velges første fra sed`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
+            assertEquals("22975710", resultat?.saksIdFraSed)
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
 
-        val listeAvPesysId = pesysIdListe.split(";")
+        @Test
+        fun `gitt ingen sakid fra pesys og ingen SED og ingen match så blir det advarsel`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
 
-        assertEquals(if (harSakIdFraSed) "22975232" else null, result.saksIdFraSed)
-        assertEquals(if (harPesysSakId) sakIdFraPesys else null, result.sakInformasjonFraPesys?.sakId)
-     }
+        @Test
+        fun `gitt flere sakid fra pesys og ingen sakid i SED og ingen match`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+    }
 
-    @ParameterizedTest(name = "[{index}] {arguments}")
-    @CsvSource(useHeadersInDisplayName = true, textBlock = """
-        ID FRA PENSJON (PESYS), RESULTAT,         SED FILNAVN
-        '22975232;22975200',    22975232,         P8000_flere_pesysId.json      // sed id matcher pesys; velger første valgte nummer
-        '22111111;22222222',    null,             P8000_flere_pesysId.json      // ingen match, flere pesys id og flere sed id; ikke nok informasjon til å ta et bra val
-        '22111111;22222222',    null,             P8000_pesysId.json            // ingen match, flere pesys og enkel sed id; ikke nok informasjon til å ta et bra val
-        '22975200',             22975200,         P8000_pesysId.json            // ingen match, mem svar (1) fra pesys: velger dette
-        '22975200',             22975200,         P8000_ingen_pesysId.json""")  // ingen match, mangler id i sed, men svar(1) fra pesys: velger dette
-    fun `hentSaksInformasjonForEessi hvor det er flere pesysid fra sed og pesys`(sakIdFraPesys: String?, valgtPesysId: String?, sedFil: String) {
-        val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/$sedFil")!!.readText())
-        val sedHendelse = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
-        val identifisertPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
-
-        every { euxService.hentSaktypeType(any(), any()) } returns SakType.ALDER
-        every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakIdFraPesys?.split(";")?.map { pesysId ->
+    private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {
+        return pesysIds?.split(";")?.map {
             spyk(SakInformasjon(
-                sakId = pesysId,
+                sakId = it,
                 sakStatus = SakStatus.LOPENDE,
                 sakType = SakType.GJENLEV,
                 saksbehandlendeEnhetId = "NFP_UTLAND_AALESUND",
                 nyopprettet = false
             ))
-        }!!
-
-        val result = sedListenerBase.hentSaksInformasjonForEessi(
-            listOf(sed),
-            sedHendelse,
-            BucType.P_BUC_10,
-            identifisertPerson,
-            HendelseType.MOTTATT,
-            sed
-        )
-        assertEquals(valgtPesysId?.takeIf { it != "null" }, result.sakInformasjonFraPesys?.sakId)
+        } ?: emptyList()
     }
 
+    private fun mockHentSakList(pesysIds: String?) {
+        every { fagmodulKlient.hentPensjonSaklist(any()) } returns createPensjonSakList(pesysIds)
+    }
+
+    fun hentResultat(sedFilename: String, pesysIds: String?, hendelsesType: HendelseType = HendelseType.MOTTATT) : SaksInfoSamlet? {
+        val sedJson = javaClass.getResource("/sed/$sedFilename")!!.readText()
+        val sed = mapJsonToAny<P8000>(sedJson)
+        val sedEvent = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
+        val identifiedPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
+
+        mockHentSakList(pesysIds)
+
+        return sedListenerBase.hentSaksInformasjonForEessi(
+            listOf(sed),
+            sedEvent,
+            bucType = BucType.P_BUC_10,
+            identifiedPerson,
+            hendelsesType,
+            sed
+        )
+    }
 }

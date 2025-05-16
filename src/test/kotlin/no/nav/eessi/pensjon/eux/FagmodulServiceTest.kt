@@ -18,6 +18,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.text.orEmpty
 
 internal class FagmodulServiceTest {
 
@@ -40,7 +41,7 @@ internal class FagmodulServiceTest {
 
         val sedP5000 =  mapJsonToAny<SED>(javaClass.getResource("/sed/P5000-medNorskGjenlevende-NAV.json")!!.readText())
         val eessisakList = sedP5000.nav?.eessisak?.mapNotNull { it.saksnummer }
-        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList, sedP5000)
+        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList, sedP5000.nav?.eessisak?.mapNotNull { it.saksnummer } ?: emptyList())
 
         assertNotNull(result)
         assertEquals(expected.sakId, result?.first?.sakId)
@@ -53,7 +54,7 @@ internal class FagmodulServiceTest {
         val sedP2000 = javaClass.getResource("/sed/P2000-ugyldigFNR-NAV.json")!!.readText()
         val mockAllSediBuc = listOf(mapJsonToAny<SED>(sedP2000))
         val eessisakList = fmService.hentPesysSakIdFraSED(mockAllSediBuc, null)
-        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList?.second, null)
+        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList?.second, emptyList())
         assertNull(result?.first)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -63,7 +64,7 @@ internal class FagmodulServiceTest {
     fun `Gitt at det finnes eessisak der land er Norge og saksnummer er på feil format så skal null returneres`() {
         val mockAlleSedIBuc = listOf(mockSED(P2000, eessiSakId = "UGYLDIG SAK ID"))
         val eessisakList =  fmService.hentPesysSakIdFraSED(mockAlleSedIBuc, null)
-        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList?.second, null)
+        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList?.second, emptyList())
         assertNull(result?.first)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -87,7 +88,7 @@ internal class FagmodulServiceTest {
                 mockSED(P6000, "22874955")
         )
         val eessisakList =  mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }
-        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList, mockAllSediBuc.first())!!
+        val result = fmService.hentPensjonSakFraPesys("123123", eessisakList,  mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer })!!
         println("result*****: $result")
         assertNotNull(result)
         assertEquals(expected.sakType, result.first?.sakType)
@@ -110,7 +111,7 @@ internal class FagmodulServiceTest {
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns mockPensjonSaklist
         val mockAllSediBuc = listOf(mockSED(P2000), mockSED(P4000), mockSED(P5000), mockSED(P6000))
         val eessisakList =  mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }
-        val result = fmService.hentPensjonSakFraPesys("aktoerId", eessisakList, mockAllSediBuc.get(0))!!
+        val result = fmService.hentPensjonSakFraPesys("aktoerId", eessisakList,  mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer })!!
         assertNotNull(result)
         assertEquals(expected.sakType, result.first?.sakType)
         assertTrue(result.first?.harGenerellSakTypeMedTilknyttetSaker() == true)
@@ -123,7 +124,7 @@ internal class FagmodulServiceTest {
     fun `Gitt flere sed i buc har forskjellige saknr hents ingen for oppslag, ingen SakInformasjon returneres`() {
         val mockAllSediBuc = listOf(mockSED(P2000, "111"), mockSED(P4000, "222"), mockSED(P6000, "333"))
         val eessisakList =  fmService.hentPesysSakIdFraSED(mockAllSediBuc, null)
-        val result = fmService.hentPensjonSakFraPesys("111", eessisakList?.second, null)?.first
+        val result = fmService.hentPensjonSakFraPesys("111", eessisakList?.second, emptyList())?.first
         assertNull(result, "Skal ikke få noe i retur dersom det finnes flere unike EessiSakIDer.")
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -136,7 +137,7 @@ internal class FagmodulServiceTest {
 
         val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
 
-        assertNull(result?.first)
+        assertEquals(emptyList<String>() ,result?.first)
         assertEquals(emptyList<SED>(), result?.second)
     }
 
@@ -147,7 +148,7 @@ internal class FagmodulServiceTest {
 
         val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
 
-        assertEquals("12345678", result?.first)
+        assertEquals("12345678", result?.first?.first())
         assertEquals(listOf("12345678"), result?.second)
     }
 
@@ -161,7 +162,7 @@ internal class FagmodulServiceTest {
 
         val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
 
-        assertEquals("12345678", result?.first)
+        assertEquals("12345678", result?.first?.first())
         assertEquals(listOf("12345678"), result?.second)
     }
 
@@ -174,7 +175,7 @@ internal class FagmodulServiceTest {
         )
         val result = fmService.hentPesysSakIdFraSED(sedListe, sedListe.first())
 
-        assertEquals("12345678", result?.first)
+        assertEquals("12345678", result?.first?.first())
         assertEquals(listOf("12345678"), result?.second)
     }
 

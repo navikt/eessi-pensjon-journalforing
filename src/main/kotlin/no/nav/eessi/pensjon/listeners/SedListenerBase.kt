@@ -49,7 +49,7 @@ abstract class SedListenerBase(
         bucType: BucType,
         saktypeFraSed: SakType?,
         alleSakIdFraSED: List<String>?,
-        currentSed: SED?
+        currentSed: List<String>
     ): Pair<SakInformasjon?, List<SakInformasjon>>? ? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
@@ -103,7 +103,7 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(gjennySakId)
         }
 
-        val (sakIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(null, emptyList())
+        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(emptyList(), emptyList())
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
@@ -113,49 +113,50 @@ abstract class SedListenerBase(
                 bucType,
                 sakTypeFraSED,
                 alleSakId,
-                currentSed
+                saksIdFraSed
             )
         }.also { logger.debug("SakInformasjon: $it") }
         val listeOverSakerPesys = sakInformasjonFraPesys?.second ?: emptyList()
         val sakFraPesysSomMatcherSed = sakInformasjonFraPesys?.first
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
-        val advarsel = if(listeOverSakerPesys.isEmpty()) false else hentAdvarsel(alleSakId, listeOverSakerPesys)
-
-        //Dersom pesysSakid i Sed finnes, men sakiden ikke finnes i Pesys, så velger vi å journalføre manuelt
-        if (sakIdFraSed != null && sakInformasjonFraPesys == null) {
-            logger.warn("SakId fra Sed: ${sakIdFraSed}, pensjonsinformasjon returnerer null")
-            return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
-        }
-        if(sakFraPesysSomMatcherSed == null && hendelseType == MOTTATT) {
-            if(listeOverSakerPesys.size > 1) {
-                logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${listeOverSakerPesys.toJson()}, men ingen treff mot saksid fra sed")
-                //TODO: val pesysPensjonInformasjon = pesysSakListe.find { it.sakStatus == SakStatus.LOPENDE } ?: pesysSakListe.first()
-                return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
-            }
-            if(listeOverSakerPesys.size == 1) {
-                logger.warn("SakId fra INNKOMMENDE Sed: ${sakIdFraSed} har ikke treff i pensjonsinformasjon fra pesys, men pesys gir ett svar: ${listeOverSakerPesys.toJson()}")
-                return SaksInfoSamlet(
-                    sakInformasjonFraPesys = listeOverSakerPesys.first(),
-                    saktypeFraSed = sakTypeFraSED,
-                    advarsel = advarsel
-                )
-            }
-        }
-
+        val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType)
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed, bucType)
-        return SaksInfoSamlet(sakIdFraSed, sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
+
+        when (hendelseType) {
+            MOTTATT -> {
+                if (saksIdFraSed.isNotEmpty() && sakInformasjonFraPesys == null) {
+                    logger.warn("SakId fra Sed: $saksIdFraSed, pensjonsinformasjon returnerer null")
+                    return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
+                }
+
+                if (sakFraPesysSomMatcherSed == null && listeOverSakerPesys.isNotEmpty()) {
+                    return if (listeOverSakerPesys.size > 1) {
+                        logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${listeOverSakerPesys.toJson()}, men ingen treff mot saksid fra sed")
+                        SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
+                    } else {
+                        logger.warn("SakId fra INNKOMMENDE Sed: ${saksIdFraSed} har ikke treff i pensjonsinformasjon fra pesys, men pesys gir ett svar: ${listeOverSakerPesys.toJson()}")
+                        SaksInfoSamlet(sakInformasjonFraPesys = listeOverSakerPesys.first(), saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
+                    }
+                }
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
+            }
+
+            SENDT -> {
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel)
+            }
+        }
     }
 
     /**
      * Henter ut advarsel dersom vi har pesys sakID i sed som ikke finnes i listen fra pesys
      */
-    private fun hentAdvarsel(pesysIDerFraSED: List<String?>, pesysSakInformasjonListe: List<SakInformasjon>) : Boolean {
+    private fun hentAdvarsel(pesysIDerFraSED: List<String?>, pesysSakInformasjonListe: List<SakInformasjon>, hendesesType: HendelseType) : Boolean {
         val sakIdFraPesys = pesysSakInformasjonListe.map { it.sakId }
         return when {
-            pesysIDerFraSED.isEmpty() -> false
-            pesysIDerFraSED.any { sakIdFraPesys.contains(it) } -> false
-            pesysIDerFraSED.none { it == pesysSakInformasjonListe.first().sakId } -> {
+            pesysSakInformasjonListe.size == 1 -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
+            pesysIDerFraSED.isEmpty()  && pesysSakInformasjonListe.isEmpty()-> true  .also { logger.info("Ingen sakid i sed eller svar fra pensjonsinformasjon") }
+            hendesesType == MOTTATT && pesysIDerFraSED.none { pensjonsinformasjon -> pensjonsinformasjon in pesysSakInformasjonListe.map { it.sakId } } -> {
                 logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys")
                 true
             }

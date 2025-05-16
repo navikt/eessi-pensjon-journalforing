@@ -6,6 +6,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import kotlin.collections.firstOrNull
 
 @Service
 class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
@@ -18,17 +19,20 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
      * 1. Om vi ikke har sakId fra SED, henter vi sakId fra PESYS og returnerer listen uten match mot sd
      * 2. Om vi har sakId fra SED, henter vi sakId fra PESYS og returnerer match mot sakId fra SED om den finnes, og listen
      */
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, currentSed: SED?): Pair<SakInformasjon?, List<SakInformasjon>>? {
+    fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, pesysIdFraSed :List<String>): Pair<SakInformasjon?, List<SakInformasjon>>? {
         if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, hentPesysSakId(aktoerId))
 
         val pensjonsInformasjon = hentPesysSakId(aktoerId)
-        val collectedResults = alleSakIdFraSED.mapNotNull { sakId ->
+        val resultatFraCurrentSedId = pesysIdFraSed.mapNotNull { sakId ->
             hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
         }
 
-        return collectedResults.find { currentSed?.nav?.eessisak?.any { eessiSak -> eessiSak.saksnummer == it.first?.sakId } == true }
+        val resultatFraAlleSedId = alleSakIdFraSED.mapNotNull { sakId ->
+            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
+        }
+        val collectedResults = resultatFraAlleSedId + resultatFraCurrentSedId
+        return collectedResults.find { it.first != null}
             ?: collectedResults.find { alleSakIdFraSED.contains(it.first?.sakId) }
-            ?: collectedResults.find { it.first != null }
             ?: collectedResults.firstOrNull()
             ?: Pair(null, emptyList())
     }
@@ -74,24 +78,22 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
     }
 
-    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<String?, List<String>>? {
+    fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<List<String>, List<String>>? {
         val sakIdFraAlleSedIBuc = sedListe
-            .mapNotNull { filterEESSIsak(it) }
-            .map { trimSakidString(it) }
+            .flatMap { filterEESSIsak(it) ?: emptyList() }
+            .map { sakId: String -> trimSakidString(sakId) }
             .filter { it.erGyldigPesysNummer() }
-            .filter { eessiSak -> eessiSak in (currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer } ?: emptyList()) }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
 
         if (sakIdFraAlleSedIBuc.isEmpty()) {
             logger.warn("Fant ingen sakId i SED")
-            return Pair(null, emptyList())
+            return Pair(emptyList(), emptyList())
         }
         if (sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
 
-        val sakID = sakIdFraAlleSedIBuc.find { it == currentSed?.nav?.eessisak?.firstOrNull()?.saksnummer }
-        return Pair(sakID ?: sakIdFraAlleSedIBuc.firstOrNull(), sakIdFraAlleSedIBuc)
-
+        val sakIdCurrentSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }?.distinct() ?: emptyList()
+        return Pair(sakIdCurrentSed, sakIdFraAlleSedIBuc)
     }
 
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
@@ -104,13 +106,12 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return sakIdFraSed?.firstOrNull().also { logger.info("Gjenny sakId fra SED: $it") }
     }
 
-    private fun filterEESSIsak(sed: SED): String? {
+    private fun filterEESSIsak(sed: SED): List<String>? {
         val sak = sed.nav?.eessisak ?: return null
         logger.info("Sak fra SED: ${sak.toJson()}")
 
         return sak.filter { it.land == "NO" }
             .mapNotNull { it.saksnummer }
-            .lastOrNull()
     }
 
     //TODO: replace 11 sifre med * i tilfelle det er et fnr
