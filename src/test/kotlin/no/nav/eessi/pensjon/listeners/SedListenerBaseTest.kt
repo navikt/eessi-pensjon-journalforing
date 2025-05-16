@@ -54,33 +54,63 @@ class SedListenerBaseTest {
 
     /**
      * Regler: https://confluence.adeo.no/spaces/EP/pages/704513683/Dato+endring+i+PROD+06.05.2025+11+25
+     * PesysSakId er herunder kalt sakId
      */
     @Nested
     @DisplayName("Inngående sed")
     inner class InngaaendeSed {
+        //1. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
         @Test
-        fun `gitt flere sakid fra pesys og flere fra sed og match, med første i listen fra sed`() {
+        fun `Gitt at det finnes flere sakIder i SED og det finnes en sakId fra PenInfo men INGEN match saa skal det IKKE sendes advarsel`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111")
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(null, resultat?.saksIdFraSed)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //2. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
+        @Test
+        fun `Gitt at det finnes flere sakider fra SED og flere sakid fra pesys med en MATCH på første i listen fra sed saa skal det IKKE sendes advarsel`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975710;22970000")
             assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
+        //3. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
         @Test
-        fun `gitt flere sakid fra pesys og flere fra sed og match, med andre i listen fra sed`() {
+        fun `Gitt at det er flere sakider i SED og flere sakIder fra PenInfo med MATCH så skal det IKKE sendes advarsel`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22970000")
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
+        //4. Manuell journalføring (Oppretter JFR_INN oppgave)
         @Test
-        fun `gitt én sakid fra pesys og én sakid i SED og ingen match`() {
+        fun `Gitt at det finnes flere sakIder i SED og det finnes flere sakIder fra PenInfo men INGEN match saa skal det SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222")
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
+
+        //5. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
+        @Test
+        fun `Gitt at gitt at IKKE finnes sakId i SED og det IKKE finnes sakId fra PenInfor saa skal der SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
+
+        //6. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
+        @Test
+        fun `Gitt at det finnes én sakid i SED og det finnes én sakid fra PenInfo men INGEN MATCH saa skal det SENDES ADVARSEL`() {
             val resultat = hentResultat("P8000_pesysId.json", "22975200")
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
+        //7. Automatisk journalføring (Oppretter BEHANDLE_SED oppgave)
         @Test
-        fun `gitt én sakid fra pesys og ingen sakid i SED og ingen match`() {
+        fun `Gitt ingen sakId fra SED og en sakId i svar fra PenInfo og INGEN MATCH saa skal det ikke sendes advarsel`() {
             val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200")
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
@@ -93,12 +123,6 @@ class SedListenerBaseTest {
             assertEquals(false, resultat?.advarsel)
         }
 
-        @Test
-        fun `gitt flere sakid fra pesys og flere fra sed og ingen match`() {
-            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222")
-            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
-            assertEquals(true, resultat?.advarsel)
-        }
 
         @Test
         fun `gitt flere sakid fra pesys og én sakid i SED og ingen match`() {
@@ -107,12 +131,6 @@ class SedListenerBaseTest {
             assertEquals(true, resultat?.advarsel)
         }
 
-        @Test
-        fun `gitt ingen sakid fra pesys og ingen SED og ingen match`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", null)
-            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
-            assertEquals(true, resultat?.advarsel)
-        }
     }
 
     @Nested
