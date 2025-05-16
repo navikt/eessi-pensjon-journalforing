@@ -33,7 +33,6 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         val collectedResults = resultatFraAlleSedId + resultatFraCurrentSedId
         return collectedResults.find { it.first != null}
             ?: collectedResults.find { alleSakIdFraSED.contains(it.first?.sakId) }
-            ?: collectedResults.find { it.first != null }
             ?: collectedResults.firstOrNull()
             ?: Pair(null, emptyList())
     }
@@ -81,8 +80,8 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
     fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<List<String>, List<String>>? {
         val sakIdFraAlleSedIBuc = sedListe
-            .mapNotNull { filterEESSIsak(it) }
-            .map { trimSakidString(it) }
+            .flatMap { filterEESSIsak(it) ?: emptyList() }
+            .map { sakId: String -> trimSakidString(sakId) }
             .filter { it.erGyldigPesysNummer() }
             .distinct()
             .also { sakId -> logger.info("Fant sakId i SED: $sakId.") }
@@ -107,13 +106,12 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return sakIdFraSed?.firstOrNull().also { logger.info("Gjenny sakId fra SED: $it") }
     }
 
-    private fun filterEESSIsak(sed: SED): String? {
+    private fun filterEESSIsak(sed: SED): List<String>? {
         val sak = sed.nav?.eessisak ?: return null
         logger.info("Sak fra SED: ${sak.toJson()}")
 
         return sak.filter { it.land == "NO" }
             .mapNotNull { it.saksnummer }
-            .lastOrNull()
     }
 
     //TODO: replace 11 sifre med * i tilfelle det er et fnr

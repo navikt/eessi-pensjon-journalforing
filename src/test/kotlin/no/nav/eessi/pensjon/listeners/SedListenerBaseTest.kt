@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 
 class SedListenerBaseTest {
 
@@ -54,26 +52,9 @@ class SedListenerBaseTest {
         }
     }
 
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-        SENDT, GJENLEV,22975700, true"""
-    )
-    fun `hentSaksInformasjonForEessi skal gi advarsel der hvor pesys nr fra pesys ikke stemmer med sed pesys nr 22975710`(
-        hendelsesType: HendelseType,
-        sakTypeFraSed: SakType?,
-        sakId: String?,
-        expectedAdvarsel: Boolean
-    ) {
-        every { euxService.hentSaktypeType(any(), any()) } returns sakTypeFraSed
-        every { fagmodulKlient.hentPensjonSaklist(any()) } returns createPensjonSakList(sakId)
-
-        hentResultat("P8000_pesysId.json", sakId, hendelsesType).also {
-            assertEquals(sakId, it?.sakInformasjonFraPesys?.sakId)
-            assertEquals(expectedAdvarsel, it?.advarsel)
-        }
-    }
-
-
+    /**
+     * Regler: https://confluence.adeo.no/spaces/EP/pages/704513683/Dato+endring+i+PROD+06.05.2025+11+25
+     */
     @Nested
     @DisplayName("Inngående sed")
     inner class InngaaendeSed {
@@ -81,19 +62,21 @@ class SedListenerBaseTest {
         fun `gitt flere sakid fra pesys og flere fra sed og match, med første i listen fra sed`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975710;22970000")
             assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
         }
 
         @Test
         fun `gitt flere sakid fra pesys og flere fra sed og match, med andre i listen fra sed`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22970000")
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
         }
 
         @Test
         fun `gitt én sakid fra pesys og én sakid i SED og ingen match`() {
             val resultat = hentResultat("P8000_pesysId.json", "22975200")
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
-            assertEquals(true, resultat?.advarsel)
+            assertEquals(false, resultat?.advarsel)
         }
 
         @Test
@@ -107,25 +90,35 @@ class SedListenerBaseTest {
         fun `gitt flere sakid fra pesys og vi har match med sakid fra SED`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22975200")
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
         }
 
         @Test
         fun `gitt flere sakid fra pesys og flere fra sed og ingen match`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222")
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
         }
 
         @Test
         fun `gitt flere sakid fra pesys og én sakid i SED og ingen match`() {
             val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222")
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
         }
 
+        @Test
+        fun `gitt ingen sakid fra pesys og ingen SED og ingen match`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
     }
 
-    private fun loadSed(fileName: String): P8000 {
-        val sedJson = javaClass.getResource("/sed/$fileName")!!.readText()
-        return mapJsonToAny(sedJson)
+    @Nested
+    @DisplayName("Utgående sed")
+    inner class UtgaaendeSed {
+
     }
 
     private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {
@@ -145,7 +138,8 @@ class SedListenerBaseTest {
     }
 
     fun hentResultat(sedFilename: String, pesysIds: String?, hendelsesType: HendelseType = HendelseType.MOTTATT) : SaksInfoSamlet? {
-        val sed = loadSed(sedFilename)
+        val sedJson = javaClass.getResource("/sed/$sedFilename")!!.readText()
+        val sed = mapJsonToAny<P8000>(sedJson)
         val sedEvent = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
         val identifiedPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
 
