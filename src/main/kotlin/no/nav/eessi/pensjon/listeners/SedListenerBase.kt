@@ -143,7 +143,7 @@ abstract class SedListenerBase(
             }
 
             SENDT -> {
-                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel)
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel)
             }
         }
     }

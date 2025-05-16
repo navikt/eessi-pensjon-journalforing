@@ -118,7 +118,34 @@ class SedListenerBaseTest {
     @Nested
     @DisplayName("Utgående sed")
     inner class UtgaaendeSed {
+        @Test
+        fun `gitt én sakid fra pesys og ingen sakid i SED og ingen match`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200", hendelsesType = HendelseType.SENDT)
+            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
 
+        @Test
+        fun `gitt flere sakid fra pesys og flere fra sed og ingen match så velges første fra sed`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
+            assertEquals("22975710", resultat?.saksIdFraSed)
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        @Test
+        fun `gitt ingen sakid fra pesys og ingen SED og ingen match så blir det advarsel`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
+
+        @Test
+        fun `gitt flere sakid fra pesys og ingen sakid i SED og ingen match`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
     }
 
     private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {
