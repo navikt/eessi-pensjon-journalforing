@@ -61,32 +61,34 @@ class SedListenerBaseTest {
     inner class InngaaendeSed {
         //1. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
         @Test
-        fun `Gitt at det finnes flere sakIder i SED og det finnes en sakId fra PenInfo men INGEN match saa skal det IKKE sendes advarsel`() {
-            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111")
-            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+        fun `Gitt at det finnes én sakId i SED og det finnes én sakId fra PenInfo men INGEN match saa skal det SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111")
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(null, resultat?.saksIdFraSed)
-            assertEquals(false, resultat?.advarsel)
+            assertEquals(true, resultat?.advarsel)
         }
 
         //2. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
         @Test
         fun `Gitt at det finnes flere sakider fra SED og flere sakid fra pesys med en MATCH på første i listen fra sed saa skal det IKKE sendes advarsel`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975710;22970000")
+            assertEquals("22975710", resultat?.saksIdFraSed)
             assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         //3. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
         @Test
-        fun `Gitt at det er flere sakider i SED og flere sakIder fra PenInfo med MATCH så skal det IKKE sendes advarsel`() {
+        fun `Gitt at det er flere sakider i SED og flere sakIder fra PenInfo med MATCH så skal det IKKE sendes ADVARSEL`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22970000")
+            assertEquals("22975232", resultat?.saksIdFraSed)
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         //4. Manuell journalføring (Oppretter JFR_INN oppgave)
         @Test
-        fun `Gitt at det finnes flere sakIder i SED og det finnes flere sakIder fra PenInfo men INGEN match saa skal det SENDES ADVARSEL`() {
+        fun `Gitt at det finnes flere sakIder i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det SENDES ADVARSEL`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222")
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(true, resultat?.advarsel)
@@ -94,38 +96,39 @@ class SedListenerBaseTest {
 
         //5. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
         @Test
-        fun `Gitt at gitt at IKKE finnes sakId i SED og det IKKE finnes sakId fra PenInfor saa skal der SENDES ADVARSEL`() {
+        fun `Gitt at gitt at IKKE finnes sakId i SED og det IKKE finnes sakId fra PenInfo saa skal det IKKE sendes ADVARSEL`() {
             val resultat = hentResultat("P8000_ingen_pesysId.json", null)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
-            assertEquals(true, resultat?.advarsel)
+            assertEquals(false, resultat?.advarsel)
         }
 
         //6. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
         @Test
-        fun `Gitt at det finnes én sakid i SED og det finnes én sakid fra PenInfo men INGEN MATCH saa skal det SENDES ADVARSEL`() {
-            val resultat = hentResultat("P8000_pesysId.json", "22975200")
+        fun `Gitt at det finnes IKKE sakid i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200;22970000")
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         //7. Automatisk journalføring (Oppretter BEHANDLE_SED oppgave)
         @Test
-        fun `Gitt ingen sakId fra SED og en sakId i svar fra PenInfo og INGEN MATCH saa skal det ikke sendes advarsel`() {
+        fun `Gitt ingen sakId fra SED og én sakId i svar fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
             val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200")
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         @Test
-        fun `gitt flere sakid fra pesys og vi har match med sakid fra SED`() {
+        fun `gitt flere sakid fra pesys og vi har MATCH med sakid fra SED`() {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22975200")
+            assertEquals("22975232", resultat?.saksIdFraSed)
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
 
         @Test
-        fun `gitt flere sakid fra pesys og én sakid i SED og ingen match`() {
+        fun `gitt flere sakid fra pesys og én sakid i SED og INGEN MATCH`() {
             val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222")
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(true, resultat?.advarsel)
@@ -136,34 +139,55 @@ class SedListenerBaseTest {
     @Nested
     @DisplayName("Utgående sed")
     inner class UtgaaendeSed {
+
+        //8. Manuell journalføring INGEN advarsel
         @Test
-        fun `gitt én sakid fra pesys og ingen sakid i SED og ingen match`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200", hendelsesType = HendelseType.SENDT)
-            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+        fun `Gitt at det ikke finnes sakId fra SED med det ikke finnes sakId fra PenInfo saa skal det IKKE sendes ADVARSEL`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
+        //9. Manuell journalføring ADVARSEL sendes
         @Test
-        fun `gitt flere sakid fra pesys og flere fra sed og ingen match så velges første fra sed`() {
-            val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
-            assertEquals("22975710", resultat?.saksIdFraSed)
+        fun `Gitt at det finnes flere sakId fra SED én sakid fra PenInfo INGEN match saa skal det SENDES ADVARSEL`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111", hendelsesType = HendelseType.SENDT)
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
+        }
+
+        //10. Automatisk journalføring Ingen ADVARSEL
+        @Test
+        fun `Gitt at det ikke finnes sakId i SED men finnes én sakId fra PenInfo og INGEN MATCH så blir det IKKE sendt ADVARSEL`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22111111", hendelsesType = HendelseType.SENDT)
             assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
+        //11. Automatisk journalføring Ingen ADVARSEL
         @Test
-        fun `gitt ingen sakid fra pesys og ingen SED og ingen match så blir det advarsel`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
-            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
-            assertEquals(true, resultat?.advarsel)
-        }
-
-        @Test
-        fun `gitt flere sakid fra pesys og ingen sakid i SED og ingen match`() {
+        fun `Gitt at det ikke finnes saksId i SED men flere sakider fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
             val resultat = hentResultat("P8000_ingen_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
             assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
+
+        //12. Automatisk journalføring Ingen ADVARSEL
+        @Test
+        fun `Gitt at det finnes flere saksIder i SED og flere sakIder fra PenInfo med MATCH saa skal det IKKE sendes ADVARSEL`() {
+            val resultat = hentResultat("P8000_pesysId.json", "22975710;22222222", hendelsesType = HendelseType.SENDT)
+            assertEquals("22975710", resultat?.saksIdFraSed)
+            assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        @Test
+        fun `gitt ingen sakid fra pesys og ingen SED og INGEN MATCH så blir det advarsel`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
     }
 
     private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {

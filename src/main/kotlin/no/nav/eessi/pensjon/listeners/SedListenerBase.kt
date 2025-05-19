@@ -120,21 +120,25 @@ abstract class SedListenerBase(
         val sakFraPesysSomMatcherSed = sakInformasjonFraPesys?.first
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
-        val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType)
+        val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType, sakFraPesysSomMatcherSed != null)
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed, bucType)
 
         when (hendelseType) {
             MOTTATT -> {
+                if(sakFraPesysSomMatcherSed != null){
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
+                }
                 if (saksIdFraSed.isNotEmpty() && sakInformasjonFraPesys == null) {
                     logger.warn("SakId fra Sed: $saksIdFraSed, pensjonsinformasjon returnerer null")
                     return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
                 }
 
-                if (sakFraPesysSomMatcherSed == null && listeOverSakerPesys.isNotEmpty()) {
-                    return if (listeOverSakerPesys.size > 1) {
-                        logger.warn("SakId fra INNKOMMENDE, vi har flere svar fra pesys: ${listeOverSakerPesys.toJson()}, men ingen treff mot saksid fra sed")
+                if (listeOverSakerPesys.isNotEmpty()) {
+                    return if(saksIdFraSed.isNotEmpty()) {
+                        logger.warn("SakId fra INNKOMMENDE Sed: ${saksIdFraSed} har ikke treff i pensjonsinform")
                         SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
-                    } else {
+                    }
+                    else {
                         logger.warn("SakId fra INNKOMMENDE Sed: ${saksIdFraSed} har ikke treff i pensjonsinformasjon fra pesys, men pesys gir ett svar: ${listeOverSakerPesys.toJson()}")
                         SaksInfoSamlet(sakInformasjonFraPesys = listeOverSakerPesys.first(), saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
                     }
@@ -151,14 +155,25 @@ abstract class SedListenerBase(
     /**
      * Henter ut advarsel dersom vi har pesys sakID i sed som ikke finnes i listen fra pesys
      */
-    private fun hentAdvarsel(pesysIDerFraSED: List<String?>, pesysSakInformasjonListe: List<SakInformasjon>, hendesesType: HendelseType) : Boolean {
-        val sakIdFraPesys = pesysSakInformasjonListe.map { it.sakId }
+    private fun hentAdvarsel(
+        pesysIDerFraSED: List<String?>,
+        pesysSakInformasjonListe: List<SakInformasjon>,
+        hendesesType: HendelseType,
+        match: Boolean
+    ) : Boolean {
         return when {
-            pesysSakInformasjonListe.size == 1 -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
-            pesysIDerFraSED.isEmpty()  && pesysSakInformasjonListe.isEmpty()-> true  .also { logger.info("Ingen sakid i sed eller svar fra pensjonsinformasjon") }
+//            pesysSakInformasjonListe.size == 1 -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
+            match -> false .also { logger.info("Ingen advarsel; sakID fra sed matcher sakID fra pesys") }
+            pesysIDerFraSED.isNotEmpty() && pesysSakInformasjonListe.isNotEmpty() && hendesesType == SENDT && !match -> true .also { logger.warn("Ingen match ved flere sakId i SED, men finner én sak fra pesys; Advarsel") }
+            pesysSakInformasjonListe.size == 1 && hendesesType == SENDT -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
+            pesysIDerFraSED.isEmpty()  && pesysSakInformasjonListe.isEmpty()-> false  .also { logger.info("Ingen sakid i sed eller svar fra pensjonsinformasjon") }
             hendesesType == MOTTATT && pesysIDerFraSED.none { pensjonsinformasjon -> pensjonsinformasjon in pesysSakInformasjonListe.map { it.sakId } } -> {
-                logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys")
-                true
+                if (pesysSakInformasjonListe.isNotEmpty() && pesysIDerFraSED.isEmpty()) {
+                    false
+                } else {
+                    logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys")
+                    true
+                }
             }
             else -> false
         }
