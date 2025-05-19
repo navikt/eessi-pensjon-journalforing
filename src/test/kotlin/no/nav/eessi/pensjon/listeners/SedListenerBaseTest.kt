@@ -191,11 +191,11 @@ class SedListenerBaseTest {
     }
 
     private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {
-        return pesysIds?.split(";")?.map {
+        return pesysIds?.split(";")?.mapIndexed { index, it ->
             spyk(SakInformasjon(
                 sakId = it,
                 sakStatus = SakStatus.LOPENDE,
-                sakType = SakType.GJENLEV,
+                sakType = if (index == 0) SakType.ALDER else SakType.UFOREP,
                 saksbehandlendeEnhetId = "NFP_UTLAND_AALESUND",
                 nyopprettet = false
             ))
