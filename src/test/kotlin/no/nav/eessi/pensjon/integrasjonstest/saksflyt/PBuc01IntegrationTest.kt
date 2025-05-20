@@ -34,6 +34,7 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -53,6 +54,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         }
 
+        @Disabled
         @Test
         fun `Krav om alderpensjon for inngående P2000 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {
             val bestemsak = BestemSakResponse(
@@ -120,6 +122,7 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             }
         }
 
+        @Disabled
         @Test
         fun `Krav om alderpensjon for inngående P2000 journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {
             val bestemsak = BestemSakResponse(

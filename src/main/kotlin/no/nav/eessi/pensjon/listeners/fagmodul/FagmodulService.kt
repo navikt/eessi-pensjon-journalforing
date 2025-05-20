@@ -42,7 +42,9 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         return fagmodulKlient.hentPensjonSaklist(aktoerId)
             .filter { it.sakId != null }
-            .filter { it.sakType in eessipenSakTyper }.also {
+            .filter { it.sakType in eessipenSakTyper }
+            .sortedBy { if(it.sakType == ALDER) 0 else 1 }
+            .also {
                 secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
             }
     }
