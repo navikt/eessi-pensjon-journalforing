@@ -280,10 +280,9 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 alleDocs = allDocuemtActions,
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = MOTTATT,
-                norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
                 Assertions.assertEquals(Tema.PENSJON, it.tema)
-                Assertions.assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
+                Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
 

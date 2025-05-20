@@ -1,12 +1,14 @@
 package no.nav.eessi.pensjon.integrasjonstest.saksflyt
 
 import io.mockk.*
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.P2200
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.document.ForenkletSED
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedStatus
@@ -225,6 +227,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
                 assertEquals(JOURNALFORING, it.oppgaveMelding?.oppgaveType)
             }
         }
+
+
 
         @Test
         fun `Krav om Alder P2000 uten gyldig validering fnr-fato og sed-fdato går til ID og Fordeling`() {

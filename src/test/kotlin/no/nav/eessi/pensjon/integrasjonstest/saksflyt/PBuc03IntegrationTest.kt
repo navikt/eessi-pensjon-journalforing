@@ -309,14 +309,15 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         if (fnrVoksen != null) {
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID) }
-        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         sakId?.let {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
         } ?: run {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
         }
         if (bestemSak != null) {
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe
+            every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+        }else{
+            //every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak?.sakInformasjonListe!!
         }
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot(forsokFerdigStilt)

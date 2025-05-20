@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.listeners.fagmodul
 
+import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -19,10 +20,15 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
      * 1. Om vi ikke har sakId fra SED, henter vi sakId fra PESYS og returnerer listen uten match mot sd
      * 2. Om vi har sakId fra SED, henter vi sakId fra PESYS og returnerer match mot sakId fra SED om den finnes, og listen
      */
-    fun hentPensjonSakFraPesys(aktoerId: String, alleSakIdFraSED: List<String>?, pesysIdFraSed :List<String>): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, hentPesysSakId(aktoerId))
+    fun hentPensjonSakFraPesys(
+        aktoerId: String,
+        alleSakIdFraSED: List<String>?,
+        pesysIdFraSed: List<String>,
+        bucType: BucType
+    ): Pair<SakInformasjon?, List<SakInformasjon>>? {
+        val pensjonsInformasjon = hentPesysSakId(aktoerId, bucType)
+        if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, pensjonsInformasjon)
 
-        val pensjonsInformasjon = hentPesysSakId(aktoerId)
         val resultatFraCurrentSedId = pesysIdFraSed.mapNotNull { sakId ->
             hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
         }
@@ -37,25 +43,31 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             ?: Pair(null, emptyList())
     }
 
-    fun hentPesysSakId(aktoerId: String): List<SakInformasjon> {
+    fun hentPesysSakId(aktoerId: String, bucType: BucType): List<SakInformasjon> {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
-        return fagmodulKlient.hentPensjonSaklist(aktoerId)
+        val sak = fagmodulKlient.hentPensjonSaklist(aktoerId)
             .filter { it.sakId != null }
             .filter { it.sakType in eessipenSakTyper }
-            .sortedBy { if(it.sakType == ALDER) 0 else 1 }
             .also {
                 secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
             }
-    }
+        if (bucType == BucType.P_BUC_03) {
+            sak.sortedBy { it.sakType == UFOREP }
+        } else {
+            sak.sortedBy { it.sakType == UFOREP }
+        }
 
+        return sak
+
+    }
 
     fun String?.erGyldigPesysNummer(): Boolean {
         if (this.isNullOrEmpty()) return false
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    private fun hentGyldigSakInformasjonFraPensjonSak(aktoerId: String, pesysSakIdFraSed: String?, saklistFraPesys: List<SakInformasjon>): Pair<SakInformasjon?, List<SakInformasjon>>? {
+    fun hentGyldigSakInformasjonFraPensjonSak(aktoerId: String, pesysSakIdFraSed: String?, saklistFraPesys: List<SakInformasjon>): Pair<SakInformasjon?, List<SakInformasjon>>? {
 
         if (saklistFraPesys.isEmpty()) {
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")

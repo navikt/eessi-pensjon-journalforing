@@ -31,7 +31,7 @@ class BestemSakService(private val klient: BestemSakKlient) {
         bucType: BucType,
         saktypeFraSed: SakType? = null,
         identifisertPerson: IdentifisertPerson? = null
-    ): SakInformasjon? {
+    ): List<SakInformasjon>? {
         val saksType = bestemSaktypeFraSed(saktypeFraSed, identifisertPerson, bucType)
         logger.info("Prøver å finne saksInformasjon for bucType: $bucType, saksType: $saksType")
 
@@ -41,15 +41,7 @@ class BestemSakService(private val klient: BestemSakKlient) {
             else -> saksType?: return null  //Vi returnerer null her, da vi ikke har saksType. Sakstype er obligatorisk ved kall til bestemSak for å få Saksinformasjon.
         }
 
-        val resp = kallBestemSak(aktoerId, saktype)
-        if (resp != null && resp.sakInformasjonListe.size == 1) {
-            return resp.sakInformasjonListe
-                    .first()
-                    .also { logger.info("BestemSak respons: ${it.toJson()}") }
-        }
-
-        logger.info("SakInformasjonListe er null eller større enn 1: ${resp?.sakInformasjonListe?.toJson()}")
-        return null
+        return kallBestemSak(aktoerId, saktype)?.sakInformasjonListe.also { logger.info("BestemSak respons: ${it?.toJson()}") }
     }
 
     private fun bestemSaktypeFraSed(saktypeFraSed: SakType?,identifisertPerson: IdentifisertPerson?, bucType: BucType ): SakType? {

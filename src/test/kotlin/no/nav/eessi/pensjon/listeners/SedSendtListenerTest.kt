@@ -43,7 +43,7 @@ internal class SedSendtListenerTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
+        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any(), any()) } returns null
         every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
     }
 
@@ -135,7 +135,7 @@ internal class SedSendtListenerTest {
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedSendt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         every { fagmodulService.hentPesysSakIdFraSED(any(), any()) } returns null
-        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
+        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any(), any()) } returns null
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }

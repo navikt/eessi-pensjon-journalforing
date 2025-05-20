@@ -55,7 +55,7 @@ abstract class SedListenerBase(
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSakIdFraSED, currentSed)?.let { pensjonsinformasjon ->
+        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSakIdFraSED, currentSed, bucType)?.let { pensjonsinformasjon ->
             val (sakId, sakListe) = pensjonsinformasjon
             if (sakId?.sakId != null) {
                 logger.info("Velger pensjonsinformasjon med sakId: $sakId ")
@@ -66,10 +66,16 @@ abstract class SedListenerBase(
                 return pensjonsinformasjon
             }
         }
-        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let {
-            if (it?.sakType != null) {
-                logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
-                return Pair(it, emptyList())
+        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let { sakInformasjon ->
+            if (sakInformasjon != null) {
+                val collectedBestemSakListe = sakInformasjon.mapNotNull { sak ->
+                    fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sak.sakId, sakInformasjon)
+                }
+                //logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
+                return collectedBestemSakListe.find { it.first != null}
+                    ?: collectedBestemSakListe.find { alleSakIdFraSED?.contains(it.first?.sakId) == true }
+                    ?: collectedBestemSakListe.firstOrNull()
+                    ?: Pair(null, emptyList())
             }
         }
         logger.info("Finner ingen sakType(fra bestemsak og pensjonsinformasjon) returnerer null.")
@@ -131,6 +137,11 @@ abstract class SedListenerBase(
         val sakInformasjonFraPesysFirst = sakInformasjonFraPesys?.second?.firstOrNull()
         when (hendelseType) {
             MOTTATT -> {
+                //0. TODO: Skal denne beskrives mer? ev legges til en av de andre ?
+                if(!pesysSakIdISED && match) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
                 //1.
                 if(pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel)
