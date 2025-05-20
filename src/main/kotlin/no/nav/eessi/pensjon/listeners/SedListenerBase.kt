@@ -123,30 +123,77 @@ abstract class SedListenerBase(
         val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType, sakFraPesysSomMatcherSed != null)
         val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed, bucType)
 
+        val pesysSakIdISED = saksIdFraSed.isNotEmpty()
+        val match = sakFraPesysSomMatcherSed != null
+        val svarFraPenInfo = sakInformasjonFraPesys?.second?.isNotEmpty()
+        val flereSakerfraPenInfo = (svarFraPenInfo == true && sakInformasjonFraPesys.second.size > 1)
+
+        val sakInformasjonFraPesysFirst = sakInformasjonFraPesys?.second?.firstOrNull()
         when (hendelseType) {
             MOTTATT -> {
-                if(sakFraPesysSomMatcherSed != null){
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
-                }
-                if (saksIdFraSed.isNotEmpty() && sakInformasjonFraPesys == null) {
-                    logger.warn("SakId fra Sed: $saksIdFraSed, pensjonsinformasjon returnerer null")
-                    return SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
+                //1.
+                if(pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel)
                 }
 
-                if (listeOverSakerPesys.isNotEmpty()) {
-                    return if(saksIdFraSed.isNotEmpty()) {
-                        logger.warn("SakId fra INNKOMMENDE Sed: ${saksIdFraSed} har ikke treff i pensjonsinform")
-                        SaksInfoSamlet(saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
-                    }
-                    else {
-                        logger.warn("SakId fra INNKOMMENDE Sed: ${saksIdFraSed} har ikke treff i pensjonsinformasjon fra pesys, men pesys gir ett svar: ${listeOverSakerPesys.toJson()}")
-                        SaksInfoSamlet(sakInformasjonFraPesys = listeOverSakerPesys.first(), saktypeFraSed = sakTypeFraSED, advarsel = advarsel)
-                    }
+                //2.
+                if(!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(saksIdFraSed.toString(), sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
                 }
-                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed, saktypeFraSedEllerPesys, advarsel)
+
+                //3.
+                if(pesysSakIdISED && match && svarFraPenInfo == true) {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //4.
+                if(pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //5.
+                if(!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //6.
+                if(!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), null, saktypeFraSedEllerPesys, advarsel)
             }
 
             SENDT -> {
+                //7.
+                if(!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //8.
+                if(pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //9.
+                if(!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //10.
+                if(!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //11.
+                if(pesysSakIdISED && match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
+
+                //12.
+                if(pesysSakIdISED && match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                }
                 return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel)
             }
         }
@@ -162,7 +209,6 @@ abstract class SedListenerBase(
         match: Boolean
     ) : Boolean {
         return when {
-//            pesysSakInformasjonListe.size == 1 -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
             match -> false .also { logger.info("Ingen advarsel; sakID fra sed matcher sakID fra pesys") }
             pesysIDerFraSED.isNotEmpty() && pesysSakInformasjonListe.isNotEmpty() && hendesesType == SENDT && !match -> true .also { logger.warn("Ingen match ved flere sakId i SED, men finner én sak fra pesys; Advarsel") }
             pesysSakInformasjonListe.size == 1 && hendesesType == SENDT -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
