@@ -53,12 +53,11 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
                 secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
             }
         if (bucType == BucType.P_BUC_03) {
-            sak.sortedBy { it.sakType == UFOREP }
+            return sak.sortedBy { if(it.sakType == UFOREP) 0 else 1 }
         } else {
-            sak.sortedBy { it.sakType == UFOREP }
+            logger.info("Velger ALDER før UFOERE dersom begge finnes")
+            return sak.sortedBy { if (it.sakType == ALDER) 0 else 1 }
         }
-
-        return sak
 
     }
 

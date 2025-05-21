@@ -20,6 +20,8 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class FagmodulServiceTest {
 
@@ -51,6 +53,41 @@ internal class FagmodulServiceTest {
         assertEquals(expected.sakId, result?.first?.sakId)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(BucType::class, names = ["P_BUC_01", "P_BUC_02", "P_BUC_05", "P_BUC_07", "P_BUC_10"])
+    fun `Gitt at det finnes flere saker som returneres fra pensjonsinformasjon saa skal Alder prioriteres foer UFOERE`(bucType: BucType) {
+        val pensjonsinformasjonsList = listOf(
+            sakInformasjon("22874955", ALDER, LOPENDE),
+            sakInformasjon("22874901", UFOREP, LOPENDE),
+            sakInformasjon("22874123", GJENLEV, LOPENDE),
+        )
+
+        every { fagmodulKlient.hentPensjonSaklist(any()) } returns pensjonsinformasjonsList
+
+        val resultat = fmService.hentPesysSakId("13245678912", bucType)
+
+        assertEquals("ALDER", resultat.firstOrNull()?.sakType.toString())
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+
+    }
+
+    @Test
+    fun `Gitt at det finnes flere saker i svar fra pensjonsinformasjon på en P_BUC_03 saa skal UFOERE returneres`() {
+        val pensjonsinformasjonsList = listOf(
+            sakInformasjon("22874955", ALDER, LOPENDE),
+            sakInformasjon("22874901", UFOREP, LOPENDE),
+            sakInformasjon("22874123", GJENLEV, LOPENDE),
+        )
+
+        every { fagmodulKlient.hentPensjonSaklist(any()) } returns pensjonsinformasjonsList
+
+        val resultat = fmService.hentPesysSakId("13245678912", P_BUC_03)
+
+        assertEquals("UFOREP", resultat.firstOrNull()?.sakType.toString())
+        verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
+
     }
 
     @Test
