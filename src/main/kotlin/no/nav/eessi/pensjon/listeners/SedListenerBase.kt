@@ -79,8 +79,7 @@ abstract class SedListenerBase(
         return collectedResults.find { it.first != null }
             ?: collectedResults.find { sakIdsFraAlleSed.contains(it.first?.sakId) }
             ?: collectedResults.firstOrNull()
-            ?: Pair(null, emptyList())
-    }
+2    }
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
 
