@@ -16,6 +16,7 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.RelasjonsHandler
+import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -52,7 +53,7 @@ class SedMottattListener(
         consumeIncomingSed = metricsHelper.init("consumeIncomingSed")
     }
 
-    private val offsetsToSkip = listOf(1403596L, 1421358L, 1421595L, 1433863L, 1433889L, 1434851L, 1558391L, 1901041L, 1940742L)
+    private val offsetsToSkip = listOf(1403596L, 1421358L, 1421595L, 1433863L, 1433889L, 1434851L, 1558391L, 1901041L)
 
 
     @KafkaListener(
