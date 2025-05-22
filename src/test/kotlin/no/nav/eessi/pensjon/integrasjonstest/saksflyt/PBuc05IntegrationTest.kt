@@ -120,8 +120,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         }
     }
 
-
-    @Disabled
     @Nested
     @DisplayName("Utgående - Scenario 2")
     inner class Scenario2Utgaende {
@@ -339,7 +337,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
     }
 
 
-    @Disabled
     @Nested
     @DisplayName("Utgående - Scenario 6")
     inner class Scenario6Utgaende {
@@ -1348,8 +1345,6 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         }
     }
 
-
-    @Disabled
     @Nested
     @DisplayName("Inngående - Scenario 4")
     inner class Scenario4Inngaende{
