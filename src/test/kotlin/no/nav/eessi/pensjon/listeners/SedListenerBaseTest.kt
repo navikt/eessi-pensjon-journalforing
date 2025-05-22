@@ -100,10 +100,10 @@ class SedListenerBaseTest {
 
     @DisplayName("Vurder om pesys sakId er gyldig gitt flere pesys sak id fra Pesys: ")
     @ParameterizedTest
-    @CsvSource(
-        "22975232, true, true, '22975710;22975232'",
-        "22223332, false, true, '22975710;22975232'",
-        ", false, false, '22975710;22975232'"
+    @CsvSource(textBlock = """
+        22975232, true, true, '22975710;22975232'
+        22223332, false, true, '22975710;22975232'
+        , false, false, '22975710;22975232'"""
     )
     fun testHentSaksInformasjonForEessi(sakIdFraPesys: String?, harSakIdFraSed: Boolean, harPesysSakId: Boolean, pesysIdListe: String) {
         val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/P8000_flere_pesysId.json")!!.readText())
@@ -144,12 +144,12 @@ class SedListenerBaseTest {
 
     @ParameterizedTest(name = "[{index}] {arguments}")
     @CsvSource(useHeadersInDisplayName = true, textBlock = """
-        ID FRA PENSJON (PESYS), RESULTAT,         SED FILNAVN
-        '22975232;22975200',    22975232,         P8000_flere_pesysId.json      // sed id matcher pesys; velger første valgte nummer
-        '22111111;22222222',    null,             P8000_flere_pesysId.json      // ingen match, flere pesys id og flere sed id; ikke nok informasjon til å ta et bra val
-        '22111111;22222222',    null,             P8000_pesysId.json            // ingen match, flere pesys og enkel sed id; ikke nok informasjon til å ta et bra val
-        '22975200',             22975200,         P8000_pesysId.json            // ingen match, mem svar (1) fra pesys: velger dette
-        '22975200',             22975200,         P8000_ingen_pesysId.json""")  // ingen match, mangler id i sed, men svar(1) fra pesys: velger dette
+        ID FRA PENSJON ,        RESULTAT,         SED FILNAVN
+        '22975232;22975200',    22975232,         P8000_flere_pesysId.json      
+        '22111111;22222222',    null,             P8000_flere_pesysId.json      
+        '22111111;22222222',    null,             P8000_pesysId.json            
+        '22975200',             22975200,         P8000_pesysId.json            
+        '22975200',             22975200,         P8000_ingen_pesysId.json""")
     fun `hentSaksInformasjonForEessi hvor det er flere pesysid fra sed og pesys`(sakIdFraPesys: String?, valgtPesysId: String?, sedFil: String) {
         val sed = mapJsonToAny<P8000>(javaClass.getResource("/sed/$sedFil")!!.readText())
         val sedHendelse = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
