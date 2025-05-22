@@ -39,9 +39,16 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
             return null
         }
 
-        return hentGjennySak(sakIdFraSed, euxCaseId).also { logger.info("hentSak: sjekker gjenny-API: rinasakId: $euxCaseId, og sakID: $sakIdFraSed") }
+        return hentGjennySak(
+            sakIdFraSed,
+            euxCaseId
+        ).also { logger.info("hentSak: sjekker gjenny-API: rinasakId: $euxCaseId, og sakID: $sakIdFraSed") }
             ?: hentGjennyFraGCP(euxCaseId).also { logger.info("hentSak: sjekker GCP $euxCaseId") }
-            ?: validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId).also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
+            ?: validerPesysSak(
+                sakInformasjon,
+                sakIdFraSed,
+                euxCaseId
+            ).also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
             ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
     }
 
@@ -60,9 +67,16 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
     }
 
     private fun hentGjennyFraGCP(euxCaseId: String): Sak? {
+        val gjennysakMedIdFraGjenny = gcpStorageService.hentFraGjenny(euxCaseId)
+        if (gjennysakMedIdFraGjenny != null) {
+            val gjennySak = mapJsonToAny<GjennySak>(gjennysakMedIdFraGjenny)
+            if (gjennySak.sakId.isNullOrEmpty())
+                return null
+        }
         return gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }?.sakId
             ?.let { Sak(FAGSAK, it, EY) }
     }
+
 
     private fun validerPesysSak(sakInfo: SakInformasjon?, sakIdFromSed: String?, euxCaseId: String): Sak? {
         // Hvis det finnes en gjenny sak, returner null

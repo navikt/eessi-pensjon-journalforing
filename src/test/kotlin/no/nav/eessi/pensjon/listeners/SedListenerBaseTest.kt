@@ -21,6 +21,7 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
@@ -145,7 +146,6 @@ class SedListenerBaseTest {
             assertEquals(true, resultat?.advarsel)
         }
     }
-
 
     @Nested
     @DisplayName("Utgående sed")
@@ -274,7 +274,11 @@ class SedListenerBaseTest {
         val sedEvent = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
         val identifiedPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
 
-        mockHentSakList(pesysIds, bestemSak)
+        val listeAvPesysId = pesysIdListe.split(";")
+
+        assertEquals(if (harSakIdFraSed) "22975232" else null, result.saksIdFraSed)
+        assertEquals(if (harPesysSakId) sakIdFraPesys else null, result.sakInformasjonFraPesys?.sakId)
+     }
 
         return sedListenerBase.hentSaksInformasjonForEessi(
             listOf(sed),

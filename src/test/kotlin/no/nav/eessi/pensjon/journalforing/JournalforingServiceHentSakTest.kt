@@ -32,6 +32,19 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     }
 
     @Test
+    fun `Gitt at vi oppretter en ny gjennysak og lagrer i bucket saa skal det returneres null ved tom saksid i gjennybucket`() {
+        val euxCaseId = "1234567"
+        val gjennySakJson = """{ "sakId": "", "sakType": "EY"}""".trimIndent()
+        val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
+
+        every { gcpStorageService.hentFraGjenny(euxCaseId) } returns gjennySakJson
+        val result = hentSakService.hentSak(euxCaseId, identifisertPersonFnr = fnr)
+
+        assertNull(result)
+        verify { gcpStorageService.hentFraGjenny(euxCaseId) }
+    }
+
+    @Test
     fun `hentSak skal returnere null det finnes gjennysak men bruker er null`() {
         val euxCaseId = "123"
         val gjennySakJson = """{ "sakId": "sakId123", "sakType": "EY"}""".trimIndent()
