@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import kotlin.collections.firstOrNull
 
 @Service
 class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
@@ -15,35 +14,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     private val logger = LoggerFactory.getLogger(FagmodulService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    /**
-     * Henter pensjonssak fra PESYS basert på aktoerId og sakId fra SED.
-     * 1. Om vi ikke har sakId fra SED, henter vi sakId fra PESYS og returnerer listen uten match mot sd
-     * 2. Om vi har sakId fra SED, henter vi sakId fra PESYS og returnerer match mot sakId fra SED om den finnes, og listen
-     */
-    fun hentPensjonSakFraPesys(
-        aktoerId: String,
-        alleSakIdFraSED: List<String>?,
-        pesysIdFraSed: List<String>,
-        bucType: BucType
-    ): Pair<SakInformasjon?, List<SakInformasjon>>? {
-        val pensjonsInformasjon = hentPesysSakId(aktoerId, bucType)
-        if (alleSakIdFraSED.isNullOrEmpty()) return Pair(null, pensjonsInformasjon)
-
-        val resultatFraCurrentSedId = pesysIdFraSed.mapNotNull { sakId ->
-            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
-        }
-
-        val resultatFraAlleSedId = alleSakIdFraSED.mapNotNull { sakId ->
-            hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, pensjonsInformasjon)
-        }
-        val collectedResults = resultatFraAlleSedId + resultatFraCurrentSedId
-        return collectedResults.find { it.first != null}
-            ?: collectedResults.find { alleSakIdFraSED.contains(it.first?.sakId) }
-            ?: collectedResults.firstOrNull()
-            ?: Pair(null, emptyList())
-    }
-
-    fun hentPesysSakId(aktoerId: String, bucType: BucType): List<SakInformasjon> {
+    fun hentPesysSakId(aktoerId: String, bucType: BucType): List<SakInformasjon>? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
         val sak = fagmodulKlient.hentPensjonSaklist(aktoerId)
@@ -58,7 +29,6 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             logger.info("Velger ALDER før UFOERE dersom begge finnes")
             return sak.sortedBy { if (it.sakType == ALDER) 0 else 1 }
         }
-
     }
 
     fun String?.erGyldigPesysNummer(): Boolean {

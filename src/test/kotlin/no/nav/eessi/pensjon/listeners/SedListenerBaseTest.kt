@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 class SedListenerBaseTest {
 
@@ -39,7 +40,6 @@ class SedListenerBaseTest {
     fun setup() {
         every { euxService.hentSaktypeType(any(), any()) } returns SakType.ALDER
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-        every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any(), any()) } returns null
 
         sedListenerBase = object : SedListenerBase(
             fagmodulService,
@@ -60,175 +60,229 @@ class SedListenerBaseTest {
     @DisplayName("Inngående sed")
     inner class InngaaendeSed {
         //1. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
-        @Test
-        fun `Gitt at det finnes én sakId i SED og det finnes én sakId fra PenInfo men INGEN match saa skal det SENDES ADVARSEL`() {
-            val resultat = hentResultat("P8000_pesysId.json", "22111111")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes én sakId i SED og det finnes én sakId fra PenInfo men INGEN match saa skal det SENDES ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111", bestemSak = bestemSak)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(null, resultat?.saksIdFraSed)
             assertEquals(true, resultat?.advarsel)
         }
 
         //2. Automatisk journalføring (Oppretter BEHANDLE_SED oppgave)
-        @Test
-        fun `Gitt ingen sakId fra SED og én sakId i svar fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt ingen sakId fra SED og én sakId i svar fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200", bestemSak = bestemSak)
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         //3. Automatiskk journalføring med opprettelse av BEHANDLE_SED oppgave
-        @Test
-        fun `Gitt at det er flere sakider i SED og flere sakIder fra PenInfo med MATCH så skal det IKKE sendes ADVARSEL`() {
-            val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22970000")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det er flere sakider i SED og flere sakIder fra PenInfo med MATCH så skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22970000", bestemSak = bestemSak)
             assertEquals("22975232", resultat?.saksIdFraSed)
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         //4. Manuell journalføring (Oppretter JFR_INN oppgave)
-        @Test
-        fun `Gitt at det finnes flere sakIder i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det SENDES ADVARSEL`() {
-            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes flere sakIder i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det SENDES ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222", bestemSak = bestemSak)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(true, resultat?.advarsel)
         }
 
         //5. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
-        @Test
-        fun `Gitt at gitt at IKKE finnes sakId i SED og det IKKE finnes sakId fra PenInfo saa skal det IKKE sendes ADVARSEL`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", null)
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at gitt at IKKE finnes sakId i SED og det IKKE finnes sakId fra PenInfo saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, bestemSak = bestemSak)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
         //6. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
-        @Test
-        fun `Gitt at det finnes IKKE sakid i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200;22970000")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes IKKE sakid i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200;22970000", bestemSak = bestemSak)
             assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
-        @Test
-        fun `gitt flere sakid fra pesys og vi har MATCH med sakid fra SED`() {
-            val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22975200")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `gitt flere sakid fra pesys og vi har MATCH med sakid fra SED`(bestemSak: Boolean) {
+            val resultat = hentResultat("P8000_flere_pesysId.json", "22975232;22975200", bestemSak = bestemSak)
             assertEquals("22975232", resultat?.saksIdFraSed)
             assertEquals("22975232", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
 
-        @Test
-        fun `gitt flere sakid fra pesys og én sakid i SED og INGEN MATCH`() {
-            val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222")
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `gitt flere sakid fra pesys og én sakid i SED og INGEN MATCH`(bestemSak: Boolean) {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111;22222222", bestemSak = bestemSak)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(true, resultat?.advarsel)
         }
+    }
 
 
-        @Nested
-        @DisplayName("Utgående sed")
-        inner class UtgaaendeSed {
+    @Nested
+    @DisplayName("Utgående sed")
+    inner class UtgaaendeSed {
 
-            //7. Manuell journalføring INGEN advarsel
-            @Test
-            fun `Gitt at det ikke finnes sakId fra SED med det ikke finnes sakId fra PenInfo saa skal det IKKE sendes ADVARSEL`() {
-                val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
-                assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(false, resultat?.advarsel)
-            }
-
-            //8. Manuell journalføring ADVARSEL sendes
-            @Test
-            fun `Gitt at det finnes flere sakId fra SED én sakid fra PenInfo INGEN match saa skal det SENDES ADVARSEL`() {
-                val resultat = hentResultat("P8000_pesysId.json", "22111111", hendelsesType = HendelseType.SENDT)
-                assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(true, resultat?.advarsel)
-            }
-
-            //9. Automatisk journalføring Ingen ADVARSEL
-            @Test
-            fun `Gitt at det ikke finnes sakId i SED men finnes én sakId fra PenInfo og INGEN MATCH så blir det IKKE sendt ADVARSEL`() {
-                val resultat = hentResultat("P8000_ingen_pesysId.json", "22111111", hendelsesType = HendelseType.SENDT)
-                assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(false, resultat?.advarsel)
-            }
-
-            //10. Automatisk journalføring Ingen ADVARSEL
-            @Test
-            fun `Gitt at det ikke finnes saksId i SED men flere sakider fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
-                val resultat =
-                    hentResultat("P8000_ingen_pesysId.json", "22111111;22222222", hendelsesType = HendelseType.SENDT)
-                assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(false, resultat?.advarsel)
-            }
-
-            //11. Automatisk journalføring Ingen ADVARSEL
-            @Test
-            fun `Gitt at det finnes flere saksIder i SED og flere sakIder fra PenInfo med MATCH saa skal det IKKE sendes ADVARSEL`() {
-                val resultat =
-                    hentResultat("P8000_pesysId.json", "22975710;22222222", hendelsesType = HendelseType.SENDT)
-                assertEquals("22975710", resultat?.saksIdFraSed)
-                assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(false, resultat?.advarsel)
-            }
-
-            //12. Automatisk journalføring Ingen ADVARSEL
-            @Test
-            fun `Gitt at det finnes flere saksIder i SED og én sakId fra PenInfo med MATCH saa skal det IKKE sendes ADVARSEL`() {
-                val resultat = hentResultat("P8000_pesysId.json", "22975710", hendelsesType = HendelseType.SENDT)
-                assertEquals("22975710", resultat?.saksIdFraSed)
-                assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(false, resultat?.advarsel)
-            }
-
-            @Test
-            fun `gitt ingen sakid fra pesys og ingen SED og INGEN MATCH så blir det advarsel`() {
-                val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT)
-                assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
-                assertEquals(false, resultat?.advarsel)
-            }
-
+        //7. Manuell journalføring INGEN advarsel
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det ikke finnes sakId fra SED med det ikke finnes sakId fra PenInfo saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT, bestemSak)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
         }
 
-        private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {
-            return pesysIds?.split(";")?.mapIndexed { index, it ->
-                spyk(
-                    SakInformasjon(
-                        sakId = it,
-                        sakStatus = SakStatus.LOPENDE,
-                        sakType = if (index == 0) SakType.ALDER else SakType.UFOREP,
-                        saksbehandlendeEnhetId = "NFP_UTLAND_AALESUND",
-                        nyopprettet = false
-                    )
-                )
-            } ?: emptyList()
+        //8. Manuell journalføring ADVARSEL sendes
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes flere sakId fra SED én sakid fra PenInfo INGEN match saa skal det SENDES ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_pesysId.json", "22111111", hendelsesType = HendelseType.SENDT, bestemSak)
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(true, resultat?.advarsel)
         }
 
-        private fun mockHentSakList(pesysIds: String?) {
-            every { fagmodulKlient.hentPensjonSaklist(any()) } returns createPensjonSakList(pesysIds)
-        }
-
-        fun hentResultat(
-            sedFilename: String,
-            pesysIds: String?,
-            hendelsesType: HendelseType = HendelseType.MOTTATT
-        ): SaksInfoSamlet? {
-            val sedJson = javaClass.getResource("/sed/$sedFilename")!!.readText()
-            val sed = mapJsonToAny<P8000>(sedJson)
-            val sedEvent = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
-            val identifiedPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
-
-            mockHentSakList(pesysIds)
-
-            return sedListenerBase.hentSaksInformasjonForEessi(
-                listOf(sed),
-                sedEvent,
-                bucType = BucType.P_BUC_10,
-                identifiedPerson,
-                hendelsesType,
-                sed
+        //9. Automatisk journalføring Ingen ADVARSEL
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det ikke finnes sakId i SED men finnes én sakId fra PenInfo og INGEN MATCH så blir det IKKE sendt ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat(
+                "P8000_ingen_pesysId.json",
+                "22111111",
+                hendelsesType = HendelseType.SENDT,
+                false
             )
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
         }
+
+        //10. Automatisk journalføring Ingen ADVARSEL
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det ikke finnes saksId i SED men flere sakider fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat(
+                "P8000_ingen_pesysId.json",
+                "22111111;22222222",
+                hendelsesType = HendelseType.SENDT,
+                bestemSak
+            )
+            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //11. Automatisk journalføring Ingen ADVARSEL
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes flere saksIder i SED og flere sakIder fra PenInfo med MATCH saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat =
+                hentResultat("P8000_pesysId.json", "22975710;22222222", hendelsesType = HendelseType.SENDT, false)
+            assertEquals("22975710", resultat?.saksIdFraSed)
+            assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //12. Automatisk journalføring Ingen ADVARSEL
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes flere saksIder i SED og én sakId fra PenInfo med MATCH saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_pesysId.json", "22975710", hendelsesType = HendelseType.SENDT, false)
+            assertEquals("22975710", resultat?.saksIdFraSed)
+            assertEquals("22975710", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `gitt ingen sakid fra pesys og ingen SED og INGEN MATCH så blir det advarsel`(bestemSak: Boolean) {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT, false)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+    }
+
+    private fun createPensjonSakList(pesysIds: String?): List<SakInformasjon> {
+        return pesysIds?.split(";")?.mapIndexed { index, it ->
+            spyk(
+                SakInformasjon(
+                    sakId = it,
+                    sakStatus = SakStatus.LOPENDE,
+                    sakType = if (index == 0) SakType.ALDER else SakType.UFOREP,
+                    saksbehandlendeEnhetId = "NFP_UTLAND_AALESUND",
+                    nyopprettet = false
+                )
+            )
+        } ?: emptyList()
+    }
+
+    private fun mockHentSakList(pesysIds: String?, bestemSak: Boolean) {
+        if (!bestemSak) {
+            every { fagmodulKlient.hentPensjonSaklist(any()) } returns createPensjonSakList(pesysIds)
+            every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any(), any()) } returns null
+        } else {
+            every { fagmodulKlient.hentPensjonSaklist(any()) } returns emptyList()
+            every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any(), any()) } returns createPensjonSakList(pesysIds)
+        }
+    }
+
+    fun hentResultat(
+        sedFilename: String,
+        pesysIds: String?,
+        hendelsesType: HendelseType = HendelseType.MOTTATT,
+        bestemSak: Boolean = false
+    ): SaksInfoSamlet? {
+        val sedJson = javaClass.getResource("/sed/$sedFilename")!!.readText()
+        val sed = mapJsonToAny<P8000>(sedJson)
+        val sedEvent = mockk<SedHendelse> { every { rinaSakId } returns "12345" }
+        val identifiedPerson = mockk<IdentifisertPDLPerson> { every { aktoerId } returns "123456799" }
+
+        mockHentSakList(pesysIds, bestemSak)
+
+        return sedListenerBase.hentSaksInformasjonForEessi(
+            listOf(sed),
+            sedEvent,
+            bucType = BucType.P_BUC_10,
+            identifiedPerson,
+            hendelsesType,
+            sed
+        )
     }
 }

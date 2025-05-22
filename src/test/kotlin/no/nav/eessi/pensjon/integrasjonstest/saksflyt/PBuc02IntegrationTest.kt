@@ -400,7 +400,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Test
+        @Test //TODO
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
             every { gcpStorageService.gjennyFinnes("147729") } returns false
             val allDocuemtActions = listOf(
@@ -518,7 +518,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Test
+        @Test //TODO lik som over
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
@@ -621,8 +621,15 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             )
         }
 
-        if (bestemSak != null) every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-        else every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns emptyList()
+        if (bestemSak != null) {
+            every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+            every { fagmodulKlient.hentPensjonSaklist(any()) } returns emptyList()
+        }
+        else {
+            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns emptyList()
+            every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+
+        }
 
         val (journalpost, _) = initJournalPostRequestSlot()
         val hendelse = createHendelseJson(P2100, P_BUC_02)

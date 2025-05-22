@@ -25,7 +25,6 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.support.Acknowledgment
@@ -44,42 +43,43 @@ abstract class SedListenerBase(
     private var ugyldigeSed: MetricsHelper.Metric = metricsHelper.init("ugyldigeSed")
 
     /** Velger SakInformasjon fra enten bestemSak eller pensjonsinformasjon der det finnes */
-    private fun pensjonSakInformasjon(
+    fun pensjonSakInformasjon(
         identifisertPerson: IdentifisertPerson?,
         bucType: BucType,
         saktypeFraSed: SakType?,
-        alleSakIdFraSED: List<String>?,
-        currentSed: List<String>
-    ): Pair<SakInformasjon?, List<SakInformasjon>>? ? {
+        sakIdsFraAlleSed: List<String>?,
+        sakIdsFraCurrentSed: List<String> ?
+    ): Pair<SakInformasjon?, List<SakInformasjon>>?? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        fagmodulService.hentPensjonSakFraPesys(aktoerId, alleSakIdFraSED, currentSed, bucType)?.let { pensjonsinformasjon ->
-            val (sakId, sakListe) = pensjonsinformasjon
-            if (sakId?.sakId != null) {
-                logger.info("Velger pensjonsinformasjon med sakId: $sakId ")
-                return pensjonsinformasjon
-            }
-            if (sakListe.isNotEmpty()) {
-                logger.warn("Sakid fra pensjonsinformasjon: ${sakListe.map { it.sakId }} matcher ikke med sakid fra sed. Benytter da listen fra pensjonsinformasjon: ${alleSakIdFraSED?.toJson()}")
-                return pensjonsinformasjon
-            }
+        // Ser først om vi det eksisterer saktype fra pensjonsinformasjon før vi prøver bestemsak
+        val sakInformasjon = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
+            ?: bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson)
+
+        if (sakInformasjon.isNullOrEmpty()) {
+            logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
+            return null
         }
-        bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson).let { sakInformasjon ->
-            if (sakInformasjon != null) {
-                val collectedBestemSakListe = sakInformasjon.mapNotNull { sak ->
-                    fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sak.sakId, sakInformasjon)
-                }
-                //logger.info("Velger sakType ${it.sakType} fra bestemsak, for sak med sakid: ${it.sakId}")
-                return collectedBestemSakListe.find { it.first != null}
-                    ?: collectedBestemSakListe.find { alleSakIdFraSED?.contains(it.first?.sakId) == true }
-                    ?: collectedBestemSakListe.firstOrNull()
-                    ?: Pair(null, emptyList())
-            }
+        if (sakIdsFraAlleSed.isNullOrEmpty()) return Pair(null, sakInformasjon)
+
+        // Ser først om vi har treff fre sakliste fra current sed
+        sakIdsFraCurrentSed?.mapNotNull { sakId ->
+            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
+        }?.find { it.first != null }?.let {
+            return Pair(it.first, it.second)
         }
-        logger.info("Finner ingen sakType(fra bestemsak og pensjonsinformasjon) returnerer null.")
-        return null
+
+        // Ser så om vi har treff fra sakliste fra alle sed
+        val collectedResults = sakIdsFraAlleSed.mapNotNull { sakId ->
+            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
+        }
+
+        return collectedResults.find { it.first != null }
+            ?: collectedResults.find { sakIdsFraAlleSed.contains(it.first?.sakId) }
+            ?: collectedResults.firstOrNull()
+            ?: Pair(null, emptyList())
     }
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
@@ -127,7 +127,7 @@ abstract class SedListenerBase(
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
         val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType, sakFraPesysSomMatcherSed != null)
-        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed, bucType)
+        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), bucType)
 
         val pesysSakIdISED = saksIdFraSed.isNotEmpty()
         val match = sakFraPesysSomMatcherSed != null
