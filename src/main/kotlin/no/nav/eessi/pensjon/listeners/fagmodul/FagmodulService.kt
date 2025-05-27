@@ -17,14 +17,13 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     fun hentPesysSakId(aktoerId: String, bucType: BucType): List<SakInformasjon>? {
         val eessipenSakTyper = listOf(UFOREP, GJENLEV, BARNEP, ALDER, GENRL, OMSORG)
 
-        val sak = fagmodulKlient.hentPensjonSaklist(aktoerId)
-            .filter { it.sakId != null }
-            .filter { it.sakType in eessipenSakTyper }
+        val sak = fagmodulKlient.hentPensjonSaklist(aktoerId).also {secureLog.info("Svar fra pensjonsinformasjon, før filtrering: ${it.toJson()}")}
+            .filter { it.sakId != null && it.sakType in eessipenSakTyper }
             .also {
                 secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
             }
         if (bucType == BucType.P_BUC_03) {
-            return sak.sortedBy { if(it.sakType == UFOREP) 0 else 1 }
+            return sak.sortedBy { if (it.sakType == UFOREP) 0 else 1 }
         } else {
             logger.info("Velger ALDER før UFOERE dersom begge finnes")
             return sak.sortedBy { if (it.sakType == ALDER) 0 else 1 }
@@ -36,7 +35,11 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         return this.length == 8 && this.first() in listOf('1', '2') && this.all { it.isDigit() }
     }
 
-    fun hentGyldigSakInformasjonFraPensjonSak(aktoerId: String, pesysSakIdFraSed: String?, saklistFraPesys: List<SakInformasjon>): Pair<SakInformasjon?, List<SakInformasjon>>? {
+    fun hentGyldigSakInformasjonFraPensjonSak(
+        aktoerId: String,
+        pesysSakIdFraSed: String?,
+        saklistFraPesys: List<SakInformasjon>
+    ): Pair<SakInformasjon?, List<SakInformasjon>>? {
 
         if (saklistFraPesys.isEmpty()) {
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")
@@ -55,7 +58,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         // saker med flere tilknyttede saker
         return if (saklistFraPesys.size > 1) {
-            Pair(gyldigSak.copy(tilknyttedeSaker = saklistFraPesys.filterNot { it.sakId == gyldigSak.sakId }), saklistFraPesys)
+            Pair(
+                gyldigSak.copy(tilknyttedeSaker = saklistFraPesys.filterNot { it.sakId == gyldigSak.sakId }),
+                saklistFraPesys
+            )
         } else {
             Pair(gyldigSak, saklistFraPesys)
         }
