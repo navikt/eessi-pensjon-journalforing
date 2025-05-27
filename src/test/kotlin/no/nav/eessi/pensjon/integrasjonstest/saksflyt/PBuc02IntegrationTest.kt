@@ -174,16 +174,14 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
-                )
+            val sakInfoList = listOf(
+                SakInformasjon(sakId = "22332211", sakType = UFOREP, sakStatus = LOPENDE)
             )
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.GJENLEV,
                 land = "SWE",
                 alleDocs = allDocuemtActions,
@@ -202,16 +200,13 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
-                )
-            )
+
+            val sakInfoList = listOf(SakInformasjon(sakId = "22332211", sakType = UFOREP, sakStatus = LOPENDE))
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.GJENLEV,
                 land = "NOR",
                 alleDocs = allDocuemtActions,
@@ -292,16 +287,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2200, SedStatus.RECEIVED)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
-                )
-            )
+            val sakInfoList = listOf(SakInformasjon(sakId = "22332211", sakType = UFOREP, sakStatus = LOPENDE))
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.UFOREP,
                 land = "NOR",
                 alleDocs = allDocuemtActions,
@@ -406,16 +397,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.SENT)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
-                )
-            )
+            val sakInfoList = listOf(SakInformasjon(sakId = "22332211", sakType = UFOREP, sakStatus = LOPENDE))
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.GJENLEV,
                 land = "SWE",
                 alleDocs = allDocuemtActions,
@@ -468,16 +455,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2000, SedStatus.SENT)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE)
-                )
-            )
+            val sakInfoList = listOf(SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE))
 
             testRunnerVoksen(
                 FNR_VOKSEN_2,
                 FNR_OVER_62,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.ALDER,
                 land = "NOR",
                 alleDocs = allDocuemtActions,
@@ -496,16 +479,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2000, SedStatus.SENT)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = ALDER, sakStatus = LOPENDE)
-                )
-            )
+            val sakInfoList = listOf(SakInformasjon(sakId = SAK_ID, sakType = ALDER, sakStatus = LOPENDE))
 
             testRunnerVoksen(
                 FNR_VOKSEN_2,
                 FNR_OVER_62,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.ALDER,
                 land = "NOR",
                 alleDocs = allDocuemtActions,
@@ -524,16 +503,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2200, SedStatus.SENT)
             )
-            val bestemsak = BestemSakResponse(
-                null, listOf(
-                    SakInformasjon(sakId = null, sakType = UFOREP, sakStatus = LOPENDE)
-                )
-            )
+            val sakInfoList = listOf(SakInformasjon(sakId = "22332211", sakType = UFOREP, sakStatus = LOPENDE))
 
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
                 FNR_VOKSEN_2,
-                bestemsak,
+                sakInfo = sakInfoList,
                 krav = KravType.UFOREP,
                 land = "NOR",
                 alleDocs = allDocuemtActions,
@@ -584,6 +559,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fnrVoksen: String,
         fnrVoksenSoker: String?,
         bestemSak: BestemSakResponse? = null,
+        sakInfo: List<SakInformasjon>? = null,
         land: String = "NOR",
         krav: KravType = KravType.GJENLEV,
         alleDocs: List<ForenkletSED>,
@@ -626,9 +602,8 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             every { fagmodulKlient.hentPensjonSaklist(any()) } returns emptyList()
         }
         else {
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns emptyList()
+            every { fagmodulKlient.hentPensjonSaklist(any()) } returns (sakInfo ?: emptyList())
             every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-
         }
 
         val (journalpost, _) = initJournalPostRequestSlot()
