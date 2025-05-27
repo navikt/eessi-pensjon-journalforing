@@ -77,6 +77,10 @@ class EuxService(
             .also { logger.info("Fant ${it.size} kansellerte SED ") }
     }
 
+    /**
+     * Henter saktype fra SED basert på hendelse og BUC type.
+     * Det er kun R_BUC_02 og P_BUC_10 som har saktype i SED.
+     */
     fun hentSaktypeType(sedHendelse: SedHendelse, alleSedIBuc: List<SED>): SakType? {
         //hent saktype fra R_BUC_02 - R005 sed
         if (sedHendelse.bucType == R_BUC_02) {
