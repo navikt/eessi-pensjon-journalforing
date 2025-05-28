@@ -54,21 +54,9 @@ abstract class SedListenerBase(
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        val sakFraPenInfo = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
-
-        val sakInformasjon = sakFraPenInfo?.let { listFraPenInfo ->
-            when {
-                bucType == BucType.P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == SakType.ALDER } -> listFraPenInfo
-                bucType == BucType.P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == SakType.UFOREP } -> listFraPenInfo
-                bucType == BucType.P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == SakType.UFOREP } ->
-                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, SakType.ALDER, identifisertPerson)
-                bucType == BucType.P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == SakType.ALDER } ->
-                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, SakType.UFOREP, identifisertPerson)
-                else -> listFraPenInfo
-            }
-        } ?: saktypeFraSed?.let {
-            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, it, identifisertPerson)
-        }
+        // Ser først om vi det eksisterer saktype fra pensjonsinformasjon før vi prøver bestemsak
+        val sakInformasjon = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
+            ?: bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson)
 
         if (sakInformasjon.isNullOrEmpty()) {
             logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
@@ -91,13 +79,12 @@ abstract class SedListenerBase(
         return collectedResults.find { it.first != null }
             ?: collectedResults.find { sakIdsFraAlleSed.contains(it.first?.sakId) }
             ?: collectedResults.firstOrNull()
-    }
+2    }
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
 
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
         return when {
-            bucType == BucType.P_BUC_03 -> UFOREP
             bucType == BucType.P_BUC_02 && sakInformasjon?.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET -> null
             bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
             else -> saktypeFraSED ?: sakInformasjon?.sakType
