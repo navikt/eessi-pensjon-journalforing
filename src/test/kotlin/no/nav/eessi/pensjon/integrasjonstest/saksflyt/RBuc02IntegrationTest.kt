@@ -80,8 +80,7 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                         sakType = GJENLEV,
                         sakStatus = LOPENDE,
                         saksbehandlendeEnhetId = "4812",
-                        nyopprettet = false,
-                        tilknyttedeSaker = emptyList()
+                        nyopprettet = false
                     ),
                     saktypeFraSed = GJENLEV
                 ),
@@ -161,7 +160,6 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
                     sakStatus = LOPENDE,
                     saksbehandlendeEnhetId = "4812",
                     nyopprettet = false,
-                    tilknyttedeSaker = emptyList()
                 ),
                 saktypeFraSed = GJENLEV
             ),
