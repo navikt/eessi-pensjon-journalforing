@@ -168,7 +168,7 @@ class SedListenerBaseTest {
             bestemSak: Boolean
         ) {
             val resultat = hentResultat("P8000_pesysId.json", "22111111", hendelsesType = HendelseType.SENDT, bestemSak)
-            assertEquals("22111111", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(true, resultat?.advarsel)
         }
 

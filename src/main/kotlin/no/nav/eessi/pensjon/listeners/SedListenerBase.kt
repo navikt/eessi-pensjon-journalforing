@@ -196,7 +196,7 @@ abstract class SedListenerBase(
 
                 //8.
                 if(pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel)
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel)
                 }
 
                 //9.
