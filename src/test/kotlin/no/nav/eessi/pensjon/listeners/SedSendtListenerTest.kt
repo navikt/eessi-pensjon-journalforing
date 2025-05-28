@@ -43,7 +43,7 @@ internal class SedSendtListenerTest {
     @BeforeEach
     fun setup() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
-        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
+        every { fagmodulService.hentPesysSakId(any(), any()) } returns null
         every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
     }
 
@@ -99,43 +99,10 @@ internal class SedSendtListenerTest {
         verify(exactly = 1) { jouralforingService.journalfor(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
     }
 
-//    @Test
-//    fun `gitt sed sendt`() {
-//        val enHendelse =
-//            """
-//                {
-//                  "id": 1869,
-//                  "sedId": "H070_9498fc46933548518712e4a1d5133113_2",
-//                  "sektorKode": "P",
-//                  "bucType": "P_BU:",
-//                  "rinaSakId": "747729177",
-//                  "avsenderId": "NO:NAVT003",
-//                  "avsenderNavn": "NAVT003",
-//                  "avsenderLand": "NO",
-//                  "mottakerId": "NO:NAVT007",
-//                  "mottakerNavn": "NAV Test 07",
-//                  "mottakerLand": "NO",
-//                  "rinaDokumentId": "9498fc46933548518712e4a1d5133113",
-//                  "rinaDokumentVersjon": "2",
-//                  "sedType": "$sedType",
-//                  "navBruker": "09035225916"
-//                }
-//            """.trimIndent()
-//
-//        val hendelse = javaClass.getResource("/sed/P8000_ugyldig_pesysId.json")?.readText()
-//        every { fagmodulService.hentSakIdFraSED(any(), any()) } returns null
-//        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
-//        sedListener.consumeSedSendt(enHendelse, cr, acknowledgment)
-//
-//        verify(exactly = 1) { acknowledgment.acknowledge() }
-//    }
-
-
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedSendt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
         every { fagmodulService.hentPesysSakIdFraSED(any(), any()) } returns null
-        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any()) } returns null
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
@@ -166,5 +133,4 @@ internal class SedSendtListenerTest {
         verify(exactly = 1) { acknowledgment.acknowledge() }
         verify { jouralforingService wasNot Called }
     }
-
 }

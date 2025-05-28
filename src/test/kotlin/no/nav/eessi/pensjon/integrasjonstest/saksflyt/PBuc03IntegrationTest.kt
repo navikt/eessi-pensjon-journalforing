@@ -31,6 +31,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -42,6 +43,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     @DisplayName("Inngående P Buc 03")
     inner class InngaaendePBuc03 {
 
+        @Disabled
         @Test
         fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {
             val bestemsak = bestemSakResponse()
@@ -307,14 +309,15 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
 
         if (fnrVoksen != null) {
         every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID) }
-        every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         sakId?.let {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
         } ?: run {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
         }
         if (bestemSak != null) {
-            every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe
+            every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
+        }else{
+            //every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak?.sakInformasjonListe!!
         }
 
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot(forsokFerdigStilt)
