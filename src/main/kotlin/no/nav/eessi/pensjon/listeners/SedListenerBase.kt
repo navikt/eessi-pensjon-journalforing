@@ -3,13 +3,13 @@ package no.nav.eessi.pensjon.listeners
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
@@ -58,12 +58,12 @@ abstract class SedListenerBase(
 
         val sakInformasjon = sakFraPenInfo?.let { listFraPenInfo ->
             when {
-                bucType == P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == ALDER } -> listFraPenInfo.filter { it.sakType == ALDER }
-                bucType == P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == UFOREP } -> listFraPenInfo.filter { it.sakType == UFOREP }
-                bucType == P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == UFOREP } ->
-                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ALDER, identifisertPerson)
-                bucType == P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == ALDER } ->
-                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, UFOREP, identifisertPerson)
+                bucType == BucType.P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == SakType.ALDER } -> listFraPenInfo
+                bucType == BucType.P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == SakType.UFOREP } -> listFraPenInfo
+                bucType == BucType.P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == SakType.UFOREP } ->
+                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, SakType.ALDER, identifisertPerson)
+                bucType == BucType.P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == SakType.ALDER } ->
+                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, SakType.UFOREP, identifisertPerson)
                 else -> listFraPenInfo
             }
         } ?: saktypeFraSed?.let {
@@ -78,14 +78,14 @@ abstract class SedListenerBase(
 
         // Ser først om vi har treff fre sakliste fra current sed
         sakIdsFraCurrentSed?.mapNotNull { sakId ->
-            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon, null)
+            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
         }?.find { it.first != null }?.let {
             return Pair(it.first, it.second)
         }
 
         // Ser så om vi har treff fra sakliste fra alle sed
         val collectedResults = sakIdsFraAlleSed.mapNotNull { sakId ->
-            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon, null)
+            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
         }
 
         return collectedResults.find { it.first != null }
@@ -97,9 +97,9 @@ abstract class SedListenerBase(
 
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
         return when {
-            bucType == P_BUC_03 -> UFOREP
-            bucType == P_BUC_02 && sakInformasjon?.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET -> null
-            bucType == P_BUC_10 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
+            bucType == BucType.P_BUC_03 -> UFOREP
+            bucType == BucType.P_BUC_02 && sakInformasjon?.sakType == UFOREP && sakInformasjon.sakStatus == AVSLUTTET -> null
+            bucType == BucType.P_BUC_10 && saktypeFraSED == GJENLEV -> sakInformasjon?.sakType ?: saktypeFraSED
             else -> saktypeFraSED ?: sakInformasjon?.sakType
         }
     }
@@ -123,7 +123,7 @@ abstract class SedListenerBase(
 
         val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(emptyList(), emptyList())
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
-            .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
+            .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
 
         val sakInformasjonFraPesys = if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
             pensjonSakInformasjon(

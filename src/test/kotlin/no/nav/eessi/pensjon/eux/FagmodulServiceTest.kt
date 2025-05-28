@@ -169,7 +169,7 @@ internal class FagmodulServiceTest {
         println("result*****: $result")
         assertNotNull(result)
         assertEquals(expected.sakType, result.first?.sakType)
-//        assertEquals(3, result.first?.tilknyttedeSaker?.size)
+        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -198,8 +198,9 @@ internal class FagmodulServiceTest {
             mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }, eessisakList)!!
 
         assertNotNull(result)
-//        assertTrue(result.first?.harGenerellSakTypeMedTilknyttetSaker() == true)
-//        assertEquals(3, result.first?.tilknyttedeSaker?.size)
+        assertEquals(expected.sakType, result.first?.sakType)
+        assertTrue(result.first?.harGenerellSakTypeMedTilknyttetSaker() == true)
+        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
