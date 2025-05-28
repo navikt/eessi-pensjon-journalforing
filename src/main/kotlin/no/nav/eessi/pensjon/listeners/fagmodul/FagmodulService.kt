@@ -38,7 +38,8 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     fun hentGyldigSakInformasjonFraPensjonSak(
         aktoerId: String,
         pesysSakIdFraSed: String?,
-        saklistFraPesys: List<SakInformasjon>
+        saklistFraPesys: List<SakInformasjon>,
+        bucType: BucType? = null
     ): Pair<SakInformasjon?, List<SakInformasjon>>? {
 
         if (saklistFraPesys.isEmpty()) {
@@ -49,6 +50,12 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
 
         if (saklistFraPesys.none { it.sakId == pesysSakIdFraSed }) {
             logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakIdFraSed fra listen: ${saklistFraPesys.toJson()}")
+            if(bucType == BucType.P_BUC_01 && saklistFraPesys.any { sak -> sak.sakType == ALDER } ) {
+                return Pair(saklistFraPesys.first(), saklistFraPesys)
+            }
+            if(bucType == BucType.P_BUC_03 && saklistFraPesys.any { sak -> sak.sakType == UFOREP } ) {
+                return Pair(saklistFraPesys.first(), saklistFraPesys)
+            }
             return Pair(null, saklistFraPesys)
         }
 
@@ -56,15 +63,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
             logger.info("Returnerer første match for pesys sakID: $pesysSakIdFraSed da flere saker ble funnet")
         }
 
-        // saker med flere tilknyttede saker
-        return if (saklistFraPesys.size > 1) {
-            Pair(
-                gyldigSak.copy(tilknyttedeSaker = saklistFraPesys.filterNot { it.sakId == gyldigSak.sakId }),
-                saklistFraPesys
-            )
-        } else {
-            Pair(gyldigSak, saklistFraPesys)
-        }
+        return Pair(gyldigSak, saklistFraPesys)
     }
 
     fun hentPesysSakIdFraSED(sedListe: List<SED>, currentSed: SED?): Pair<List<String>, List<String>>? {

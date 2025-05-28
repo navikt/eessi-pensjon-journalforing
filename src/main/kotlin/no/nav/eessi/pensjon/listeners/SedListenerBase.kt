@@ -3,18 +3,13 @@ package no.nav.eessi.pensjon.listeners
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_02
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_03
-import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
-import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
-import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.gcp.GjennySak
@@ -59,9 +54,21 @@ abstract class SedListenerBase(
         val aktoerId = identifisertPerson?.aktoerId ?: return null
             .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
 
-        // Ser først om vi det eksisterer saktype fra pensjonsinformasjon før vi prøver bestemsak
-        val sakInformasjon = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
-            ?: bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, saktypeFraSed, identifisertPerson)
+        val sakFraPenInfo = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
+
+        val sakInformasjon = sakFraPenInfo?.let { listFraPenInfo ->
+            when {
+                bucType == P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == ALDER } -> listFraPenInfo.filter { it.sakType == ALDER }
+                bucType == P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == UFOREP } -> listFraPenInfo.filter { it.sakType == UFOREP }
+                bucType == P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == UFOREP } && saktypeFraSed == null->
+                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ALDER, identifisertPerson)
+                bucType == P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == ALDER } && saktypeFraSed == null->
+                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, UFOREP, identifisertPerson)
+                else -> listFraPenInfo
+            }
+        } ?: saktypeFraSed?.let {
+            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, it, identifisertPerson)
+        }
 
         if (sakInformasjon.isNullOrEmpty()) {
             logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
@@ -87,6 +94,7 @@ abstract class SedListenerBase(
     }
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
+
     private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
         return when {
             bucType == P_BUC_03 -> UFOREP
@@ -116,7 +124,7 @@ abstract class SedListenerBase(
 
         val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(emptyList(), emptyList())
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
-            .takeIf { bucType == BucType.P_BUC_10 || bucType == BucType.R_BUC_02 }
+            .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
 
         val sakInformasjonFraPesys = if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
             pensjonSakInformasjon(
