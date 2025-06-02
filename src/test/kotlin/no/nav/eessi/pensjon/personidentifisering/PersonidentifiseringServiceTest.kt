@@ -54,45 +54,32 @@ class PersonidentifiseringServiceTest {
         val forsikretFnr = SLAPP_SKILPADDE
         val gjenlevFnr = STERK_BUSK
 
-        every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(
-            etternavn = "ŠIMAITIS",
-            fornavn = "ERNESTAS",
-            fnr = gjenlevFnr,
-            aktoerId = AktoerId("123213"),
-            landkoder = true
-        )
+        every { personService.hentPerson(NorskIdent(gjenlevFnr)) } returns PersonMock.createWith(etternavn = "ŠIMAITIS", fornavn = "ERNESTAS", fnr = gjenlevFnr, aktoerId = AktoerId("123213"), landkoder = true)
+        every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(etternavn = "ŠIMAITIS", fornavn = "ERNESTAS", fnr = forsikretFnr, aktoerId = AktoerId("321211"), landkoder = true)
 
-        every { personService.hentPerson(NorskIdent(forsikretFnr)) } returns PersonMock.createWith(
-            fnr = forsikretFnr,
-            aktoerId = AktoerId("321211"),
-            landkoder = true
-        )
-
-        val sokKriterier = SokKriterier(
-            etternavn = "SIMAITIS",
-            fornavn = "ERNESTAS",
-            foedselsdato = LocalDate.of(1980, 1, 1)
-        )
+        val sokKriterier = SokKriterier(etternavn = "SIMAITIS", fornavn =  "ERNESTAS", foedselsdato =  LocalDate.of(1980, 1, 1))
         val actual = personidentifiseringService.hentIdentifisertPersonFraPDL(
-            SEDPersonRelasjon(
-                Fodselsnummer.fra(forsikretFnr),
-                Relasjon.FORSIKRET,
-                null,
-                SedType.P2000,
-                sokKriterier,
-                rinaDocumentId = "3123123"
-            )
+            createSEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, SedType.P2000, sokKriterier)
         )
 
-        val expected = SEDPersonRelasjon(
-            Fodselsnummer.fra(forsikretFnr),
-            Relasjon.FORSIKRET,
+        val expected = createSEDPersonRelasjon(forsikretFnr, Relasjon.FORSIKRET, SedType.P2000, sokKriterier)
+        assertEquals(expected, actual?.personRelasjon)
+    }
+
+    private fun createSEDPersonRelasjon(
+        fnr: String,
+        relasjon: Relasjon,
+        sedType: SedType,
+        sokKriterier: SokKriterier
+    ): SEDPersonRelasjon {
+        return SEDPersonRelasjon(
+            Fodselsnummer.fra(fnr),
+            relasjon,
             null,
-            SedType.P2000,
-             sokKriterier,
+            sedType,
+            sokKriterier,
             rinaDocumentId = "3123123"
         )
-        assertEquals(expected, actual?.personRelasjon)
     }
 
 
@@ -973,28 +960,24 @@ class PersonidentifiseringServiceTest {
 
         //JERZY, etternavn: PŁOCHARSKI navn i SED: fornavn: JERZY, etternavn: PLOCHARSKI
         @ParameterizedTest
-        @CsvSource(
-//            "Ola , Testing, Ola, Testing",
-            "JERZY, PŁOCHARSKI, JERZY, PLOCHARSKI",
-//            "Ola, Testing, Ola, Mariussen Testing",
-//            "Ola Mariussen, Testing, Ola, Testing",
-//            "Annette ,BRANGER, ANNETTE Mildred, BRANGER"
+        @CsvSource(textBlock = """    
+            Ola , Testing, Ola, Testing, true
+            JERZY, PŁOCHARSKI, JERZY, PLOCHARSKI, false
+            Ola, Testing, Ola, Mariussen Testing, true
+            Ola Mariussen, Testing, Ola, Testing, true
+            Annette ,BRANGER, ANNETTE Mildred, BRANGER, true"""
         )
         fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`(
             sokFornavn: String,
             sokEtternavn: String,
             pdlFornavn: String,
-            pdlEtternavn: String
+            pdlEtternavn: String,
+            validering: Boolean
         ) {
             val sokKriterier = SokKriterier(sokFornavn, sokEtternavn, LocalDate.of(1960, 3, 11))
             val navn = Navn(fornavn = pdlFornavn, etternavn = pdlEtternavn, metadata = metadata())
 
-            assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
-
-            val sokKriterier1 = SokKriterier("Ola Mariussen", "Testing", LocalDate.of(1960, 3, 11))
-            val navn1 = Navn(fornavn = "Ola", etternavn = "Testing Mariussen", metadata = metadata())
-
-            assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier1, navn1))
+            assert(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn) == validering)
         }
 
         @Test
