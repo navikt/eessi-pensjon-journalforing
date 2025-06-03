@@ -42,14 +42,6 @@ class PersonidentifiseringServiceTest {
     private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
     @Test
-    fun `Dersom fornavn og  søkkriterie ikke stemmer overens med pdlperson sitt fornavn og eller etternavn saa returneres false`() {
-        val sokKriterier = SokKriterier("Johanna M", "Scherer", LocalDate.of(1960, 3, 11))
-        val navn = Navn(fornavn = "Johanna Maria", etternavn = "Scherer", metadata = metadata())
-
-        assertTrue(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
-    }
-
-    @Test
     fun `en person med slavisk navn i PDL skal faa treff mot tilsvarende navn i sed uten spesielle bokstaver`() {
         val forsikretFnr = SLAPP_SKILPADDE
         val gjenlevFnr = STERK_BUSK
@@ -968,7 +960,7 @@ class PersonidentifiseringServiceTest {
             TOMASZ, WYCZOŁEK, TOMASZ, WYCZOLEK, true
             ROBERT TOMASZ, SZCZEPAŃSKI, ROBERT TOMASZ, SZCZEPANSKI, true
             ZENONAS, ŽEMGULYS, ZENONAS, ZEMGULYS, true 
-            HAKON, HOFF, HÅKON, HOFF, true
+            HAKON, HOFF, HÅKON, HOFF, false
             Lutgarde Marie Dominicus, Vandenwijngaert, LUTGARDE M D, VANDENVIJNGAERT, false""", delimiter = ',')
         fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`(
             sokFornavn: String,

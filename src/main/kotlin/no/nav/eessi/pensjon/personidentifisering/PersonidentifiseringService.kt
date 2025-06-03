@@ -162,6 +162,9 @@ class PersonidentifiseringService(
      * Normaliserer navn ved å fjerne aksenter og konvertere til store bokstaver
      */
     fun normalizeName(name: String): String {
+        val norskeBokstaver = setOf('Æ', 'Ø', 'Å', 'æ', 'ø', 'å')
+        if(name.any { it in norskeBokstaver }) return name
+
         val transliterator = Transliterator.getInstance("Any-Latin; Latin-ASCII")
         return transliterator.transliterate(name).uppercase(Locale.getDefault())
     }
