@@ -957,16 +957,19 @@ class PersonidentifiseringServiceTest {
             assertEquals(ident, valid)
         }
 
-
-        //JERZY, etternavn: PŁOCHARSKI navn i SED: fornavn: JERZY, etternavn: PLOCHARSKI
         @ParameterizedTest
         @CsvSource(textBlock = """    
             Ola , Testing, Ola, Testing, true
-            JERZY, PŁOCHARSKI, JERZY, PLOCHARSKI, false
+            JERZY, PŁOCHARSKI, JERZY, PLOCHARSKI, true
             Ola, Testing, Ola, Mariussen Testing, true
             Ola Mariussen, Testing, Ola, Testing, true
-            Annette ,BRANGER, ANNETTE Mildred, BRANGER, true"""
-        )
+            Annette,BRANGER, ANNETTE Mildred, BRANGER, true
+            Stein, Olsen, Steiner, Berg, false
+            TOMASZ, WYCZOŁEK, TOMASZ, WYCZOLEK, true
+            ROBERT TOMASZ, SZCZEPAŃSKI, ROBERT TOMASZ, SZCZEPANSKI, true
+            ZENONAS, ŽEMGULYS, ZENONAS, ZEMGULYS, true 
+            HAKON, HOFF, HÅKON, HOFF, true
+            Lutgarde Marie Dominicus, Vandenwijngaert, LUTGARDE M D, VANDENVIJNGAERT, false""", delimiter = ',')
         fun `Dersom fornavn og etternavn fra søkkriterie stemmer overens med pdlperson sitt fornavn og etternavn saa returneres true`(
             sokFornavn: String,
             sokEtternavn: String,
@@ -978,14 +981,6 @@ class PersonidentifiseringServiceTest {
             val navn = Navn(fornavn = pdlFornavn, etternavn = pdlEtternavn, metadata = metadata())
 
             assert(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn) == validering)
-        }
-
-        @Test
-        fun `Dersom fornavn og eller etternavn fra søkkriterie ikke stemmer overens med pdlperson sitt fornavn og eller etternavn saa returneres false`() {
-            val sokKriterier = SokKriterier("JERZY", "PŁOCHARSKI", LocalDate.of(1960, 3, 11))
-            val navn = Navn(fornavn = "JERZY", etternavn = "PLOCHARSKI", metadata = metadata())
-
-            assertFalse(personidentifiseringService.erSokKriterieOgPdlNavnLikt(sokKriterier, navn))
         }
     }
 

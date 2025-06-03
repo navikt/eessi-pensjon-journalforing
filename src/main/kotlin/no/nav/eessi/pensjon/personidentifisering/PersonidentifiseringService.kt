@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.personidentifisering
 
+import com.ibm.icu.text.Transliterator
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.kanInneholdeIdentEllerFdato
 import no.nav.eessi.pensjon.eux.model.BucType
@@ -26,7 +27,10 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.text.Normalizer
 import java.time.LocalDate
+import java.util.Locale
+import java.util.Locale.getDefault
 
 @Component
 class PersonidentifiseringService(
@@ -154,13 +158,31 @@ class PersonidentifiseringService(
         }
     }
 
+    /**
+     * Normaliserer navn ved å fjerne aksenter og konvertere til store bokstaver
+     */
+    fun normalizeName(name: String): String {
+        val transliterator = Transliterator.getInstance("Any-Latin; Latin-ASCII")
+        return transliterator.transliterate(name).uppercase(Locale.getDefault())
+    }
 
+    /**
+     * Sammenligner søkekriterier med navn fra PDL
+     * Normaliserer både søkekriterier og PDL navn for å håndtere aksenter og store/små bokstaver
+     */
     fun erSokKriterieOgPdlNavnLikt(sokKriterier: SokKriterier, pdlPersonNavn: Navn): Boolean {
-        val sokKriterieFornavn = sokKriterier.fornavn.contains(pdlPersonNavn.fornavn, ignoreCase = true)
-        val pdlPersonFornavn = pdlPersonNavn.fornavn.contains(sokKriterier.fornavn, ignoreCase = true)
-        val sokKriterieEtternavn = sokKriterier.etternavn.contains(pdlPersonNavn.etternavn, ignoreCase = true)
-        val pdlPersonEtternavn = pdlPersonNavn.etternavn.contains(sokKriterier.etternavn, ignoreCase = true)
-        return (sokKriterieFornavn || pdlPersonFornavn) && (sokKriterieEtternavn || pdlPersonEtternavn)
+        val normalizedSokFornavn = normalizeName(sokKriterier.fornavn)
+        val normalizedPdlFornavn = normalizeName(pdlPersonNavn.fornavn)
+        val normalizedSokEtternavn = normalizeName(sokKriterier.etternavn)
+        val normalizedPdlEtternavn = normalizeName(pdlPersonNavn.etternavn)
+
+        val sokKriterieFornavn = normalizedSokFornavn.contains(normalizedPdlFornavn, ignoreCase = true)
+        val pdlPersonFornavn = normalizedPdlFornavn.contains(normalizedSokFornavn, ignoreCase = true)
+        val sokKriterieEtternavn = normalizedSokEtternavn.contains(normalizedPdlEtternavn, ignoreCase = true)
+        val pdlPersonEtternavn = normalizedPdlEtternavn.contains(normalizedSokEtternavn, ignoreCase = true)
+
+        return (sokKriterieFornavn || pdlPersonFornavn ) && (sokKriterieEtternavn || pdlPersonEtternavn)
+                .also { logger.info("SøkKriterier: $sokKriterier, PDL PersonNavn: $pdlPersonNavn, erSokKriterieOgPdlNavnLikt: $it") }
     }
 
 
