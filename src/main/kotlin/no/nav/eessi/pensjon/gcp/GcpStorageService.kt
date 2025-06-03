@@ -65,7 +65,6 @@ class GcpStorageService(
                 return jsonHendelse.getContent().decodeToString()
             }
         } catch (ex: Exception) {
-            logger.warn("En feil oppstod under henting av objekt: $storageKey i bucket")
         }
         return null
     }
