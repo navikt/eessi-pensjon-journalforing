@@ -101,6 +101,7 @@ class SedListenerBaseTest {
             bestemSak: Boolean
         ) {
             val resultat = hentResultat("P8000_flere_pesysId.json", "22111111;22222222", bestemSak = bestemSak)
+            assertEquals(null, resultat?.saksIdFraSed)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(true, resultat?.advarsel)
         }
