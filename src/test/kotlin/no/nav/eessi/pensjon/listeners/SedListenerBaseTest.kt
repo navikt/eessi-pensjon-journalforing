@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.EnumSource
 
 class SedListenerBaseTest {
 
@@ -39,7 +40,6 @@ class SedListenerBaseTest {
 
     @BeforeEach
     fun setup() {
-        every { euxService.hentSaktypeType(any(), any()) } returns SakType.ALDER
         every { gcpStorageService.gjennyFinnes(any()) } returns false
 
         sedListenerBase = object : SedListenerBase(
@@ -118,11 +118,14 @@ class SedListenerBaseTest {
             assertEquals(false, resultat?.advarsel)
         }
 
-        //6 ++ Automatisk journalføring ved hjelp av benstemSak INGEN ADVARSEL
-        @Test
-        fun `Gitt at det IKKE sakid i SED og det finnes IKKE sakId fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", null, bestemSak = true)
-            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+        //6 + Automatisk journalføring ved hjelp av benstemSak INGEN ADVARSEL
+        @ParameterizedTest
+        @EnumSource(BucType::class, names = ["P_BUC_01", "P_BUC_03"])
+        fun `Gitt at det IKKE sakid i SED og det finnes IKKE sakId fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`(bucType: BucType) {
+            every { euxService.hentSaktypeType(any(), any()) } returns null
+
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "12345", bestemSak = true, bucType = bucType)
+            assertEquals("12345", resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
@@ -276,7 +279,8 @@ class SedListenerBaseTest {
         sedFilename: String,
         pesysIds: String?,
         hendelsesType: HendelseType = HendelseType.MOTTATT,
-        bestemSak: Boolean = false
+        bestemSak: Boolean = false,
+        bucType: BucType = BucType.P_BUC_10
     ): SaksInfoSamlet? {
         val sedJson = javaClass.getResource("/sed/$sedFilename")!!.readText()
         val sed = mapJsonToAny<P8000>(sedJson)
@@ -288,7 +292,7 @@ class SedListenerBaseTest {
         return sedListenerBase.hentSaksInformasjonForEessi(
             listOf(sed),
             sedEvent,
-            bucType = BucType.P_BUC_10,
+            bucType = bucType,
             identifiedPerson,
             hendelsesType,
             sed
