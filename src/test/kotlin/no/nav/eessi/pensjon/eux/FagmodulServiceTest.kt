@@ -17,8 +17,8 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
-import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.utils.mapJsonToAny
@@ -116,7 +116,9 @@ internal class FagmodulServiceTest {
             },
             bucType = BucType.P_BUC_01,
             SakType.ALDER,
-            sakIdFraSed, eessisakList?.second)
+            sakIdFraSed, eessisakList?.second,
+            HendelseType.SENDT
+        )
         assertNull(result)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -134,7 +136,9 @@ internal class FagmodulServiceTest {
             },
             bucType = BucType.P_BUC_01,
             SakType.ALDER,
-            sakIdFraSed, eessisakList?.second)
+            sakIdFraSed, eessisakList?.second,
+            HendelseType.SENDT
+        )
 
         assertNull(result?.first)
 
@@ -165,7 +169,7 @@ internal class FagmodulServiceTest {
             },
             bucType = BucType.P_BUC_01,
             SakType.ALDER,
-            mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }, eessisakList)!!
+            mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }, eessisakList, HendelseType.SENDT)!!
         println("result*****: $result")
         assertNotNull(result)
         assertEquals(expected.sakType, result.first?.sakType)
@@ -195,11 +199,10 @@ internal class FagmodulServiceTest {
             },
             bucType = BucType.P_BUC_01,
             SakType.ALDER,
-            mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }, eessisakList)!!
+            mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }, eessisakList,
+            HendelseType.SENDT)!!
 
         assertNotNull(result)
-//        assertTrue(result.first?.harGenerellSakTypeMedTilknyttetSaker() == true)
-//        assertEquals(3, result.first?.tilknyttedeSaker?.size)
 
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
     }
@@ -232,8 +235,8 @@ internal class FagmodulServiceTest {
             mockSED(P2000, eessiSakId = "12345678"),
             mockSED(P4000, eessiSakId = "87654321")
         )
-        val currentSed = mockSED(P2000, eessiSakId = "12345678")
 
+        val currentSed = mockSED(P2000, eessiSakId = "12345678")
         val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertEquals("12345678", result?.first?.first())
@@ -263,9 +266,7 @@ internal class FagmodulServiceTest {
     private fun mockSED(sedType: SedType, eessiSakId: String? = "22874456"): SED {
         return SED(
                 type = sedType,
-                nav = Nav(
-                        eessisak = listOf(EessisakItem(saksnummer = eessiSakId, land = "NO"))
-                )
+                nav = Nav(eessisak = listOf(EessisakItem(saksnummer = eessiSakId, land = "NO")))
         )
     }
 

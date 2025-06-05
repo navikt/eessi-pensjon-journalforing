@@ -48,7 +48,8 @@ abstract class SedListenerBase(
         bucType: BucType,
         saktypeFraSed: SakType?,
         sakIdsFraAlleSed: List<String>?,
-        sakIdsFraCurrentSed: List<String> ?
+        sakIdsFraCurrentSed: List<String>?,
+        retning: HendelseType
     ): Pair<SakInformasjon?, List<SakInformasjon>>?? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null
@@ -68,6 +69,16 @@ abstract class SedListenerBase(
             }
         } ?: saktypeFraSed?.let {
             bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, it, identifisertPerson)
+        }
+
+        if (sakInformasjon.isNullOrEmpty() && bucType == P_BUC_01 && retning == MOTTATT) {
+            logger.info("Ingen saktype fra buc er ALDER bruker bestemsak")
+            bestemSakService.hentSakInformasjonViaBestemSakMottatt(aktoerId, bucType)
+        }
+
+        if (sakInformasjon.isNullOrEmpty() && bucType == P_BUC_03 && retning == MOTTATT) {
+            logger.info("Ingen saktype fra buc er UFOERE bruker bestemsak")
+            bestemSakService.hentSakInformasjonViaBestemSakMottatt(aktoerId, bucType)
         }
 
         if (sakInformasjon.isNullOrEmpty()) {
@@ -132,7 +143,8 @@ abstract class SedListenerBase(
                 bucType,
                 sakTypeFraSED,
                 alleSakId,
-                saksIdFraSed
+                saksIdFraSed,
+                hendelseType
             )
         }.also { logger.debug("SakInformasjon: $it") }
         val listeOverSakerPesys = sakInformasjonFraPesys?.second ?: emptyList()

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
@@ -113,6 +114,14 @@ class SedListenerBaseTest {
             bestemSak: Boolean
         ) {
             val resultat = hentResultat("P8000_ingen_pesysId.json", null, bestemSak = bestemSak)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //6 ++ Automatisk journalføring ved hjelp av benstemSak INGEN ADVARSEL
+        @Test
+        fun `Gitt at det IKKE sakid i SED og det finnes IKKE sakId fra PenInfo og INGEN MATCH saa skal det IKKE sendes ADVARSEL`() {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, bestemSak = true)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }

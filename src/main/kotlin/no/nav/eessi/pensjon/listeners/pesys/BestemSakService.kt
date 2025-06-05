@@ -44,6 +44,25 @@ class BestemSakService(private val klient: BestemSakKlient) {
         return kallBestemSak(aktoerId, saktype)?.sakInformasjonListe.also { logger.info("BestemSak respons: ${it?.toJson()}") }
     }
 
+    /**
+    brukes kun ved for bruk av bestemsak for P_BUC_01 og P_BUC_03, da vi vet saktypen for disse bucTypene.
+    OBS gjelder kun innkommende Seder
+     */
+    fun hentSakInformasjonViaBestemSakMottatt(
+        aktoerId: String,
+        bucType: BucType,
+    ): List<SakInformasjon>? {
+        logger.info("Oppretter sak i Pesys via Bestemsak for innkommende sed i $bucType")
+
+        val saktype = when (bucType) {
+            P_BUC_01 -> ALDER
+            P_BUC_03 -> UFOREP
+            else -> return null  //Vi returnerer null her, da vi ikke vet saksType
+        }
+
+        return kallBestemSak(aktoerId, saktype)?.sakInformasjonListe.also { logger.info("BestemSak respons for innkommende sed i $bucType: ${it?.toJson()}") }
+    }
+
     private fun bestemSaktypeFraSed(saktypeFraSed: SakType?,identifisertPerson: IdentifisertPerson?, bucType: BucType ): SakType? {
         val saktype = identifisertPerson?.personRelasjon?.saktype
         logger.info("Saktype fra SED: ${saktypeFraSed?.name} identPersonYtelse: ${saktype?.name}")
