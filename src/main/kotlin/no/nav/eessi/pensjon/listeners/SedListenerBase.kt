@@ -52,39 +52,24 @@ abstract class SedListenerBase(
         retning: HendelseType
     ): Pair<SakInformasjon?, List<SakInformasjon>>?? {
 
-        val aktoerId = identifisertPerson?.aktoerId ?: return null
-            .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
-
+        val aktoerId = identifisertPerson?.aktoerId ?: return null.also {
+            logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon")
+        }
         val sakFraPenInfo = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
-
-        val sakInformasjon = sakFraPenInfo?.let { list ->
-            when {
-                bucType == P_BUC_01 && list.any { it.sakType == ALDER } -> list.filter { it.sakType == ALDER }
-                bucType == P_BUC_03 && list.any { it.sakType == UFOREP } -> list.filter { it.sakType == UFOREP }
-                saktypeFraSed == null && bucType == P_BUC_01 && list.any { it.sakType == UFOREP } -> bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ALDER, identifisertPerson)
-                saktypeFraSed == null && bucType == P_BUC_03 && list.any { it.sakType == ALDER } -> bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, UFOREP, identifisertPerson)
-                else -> list
-            }
-        } ?: saktypeFraSed?.let { infoBestemSak ->
-            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, infoBestemSak, identifisertPerson)
-                .also { logger.info("Mangler sakinfo fra PenInfo, men har saktype fra SED, benytter bestemSak: $it") }
-        } ?: if ((bucType == P_BUC_01 || bucType == P_BUC_03) && retning == MOTTATT) {
-            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType)
-                .also { logger.info("Mangler sakinfo og saktype, men buctype er ${bucType }og retning er MOTTATT, benytter bestemSak: $it") }
-        } else null
+        val sakInformasjon = hentSakInformasjon(sakFraPenInfo, bucType, saktypeFraSed, aktoerId, identifisertPerson, retning)
 
         if (sakInformasjon.isNullOrEmpty()) {
-            logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
-            return null
+            return null.also {
+                logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
+            }
         }
         if (sakIdsFraAlleSed.isNullOrEmpty()) return Pair(null, sakInformasjon)
 
         // Ser først om vi har treff fre sakliste fra current sed
-        sakIdsFraCurrentSed?.mapNotNull { sakId ->
-            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
-        }?.find { it.first != null }?.let {
-            return Pair(it.first, it.second)
-        }
+        sakIdsFraCurrentSed?.asSequence()
+            ?.mapNotNull { sakId -> fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon) }
+            ?.find { it.first != null }
+            ?.let { return Pair(it.first, it.second) }
 
         // Ser så om vi har treff fra sakliste fra alle sed
         val collectedResults = sakIdsFraAlleSed.mapNotNull { sakId ->
@@ -94,6 +79,34 @@ abstract class SedListenerBase(
         return collectedResults.find { it.first != null }
             ?: collectedResults.find { sakIdsFraAlleSed.contains(it.first?.sakId) }
             ?: collectedResults.firstOrNull()
+    }
+
+    private fun hentSakInformasjon(
+        sakFraPenInfo: List<SakInformasjon>?,
+        bucType: BucType,
+        saktypeFraSed: SakType?,
+        aktoerId: String,
+        identifisertPerson: IdentifisertPerson,
+        retning: HendelseType
+    ): List<SakInformasjon>? {
+        val sakInformasjon = sakFraPenInfo?.let { list ->
+            when {
+                bucType == P_BUC_01 && list.any { it.sakType == ALDER } -> list.filter { it.sakType == ALDER }
+                bucType == P_BUC_03 && list.any { it.sakType == UFOREP } -> list.filter { it.sakType == UFOREP }
+                saktypeFraSed == null && bucType == P_BUC_01 && list.any { it.sakType == UFOREP } -> bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ALDER, identifisertPerson)
+                saktypeFraSed == null && bucType == P_BUC_03 && list.any { it.sakType == ALDER } -> bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, UFOREP, identifisertPerson)
+                else -> list
+            }
+        } ?: saktypeFraSed?.let { infoBestemSak ->
+            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, infoBestemSak, identifisertPerson).also {
+                logger.info("Mangler sakinfo fra PenInfo, men har saktype fra SED, benytter bestemSak: $it")
+            }
+        } ?: if ((bucType == P_BUC_01 || bucType == P_BUC_03) && retning == MOTTATT) {
+            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType).also {
+                logger.info("Mangler sakinfo og saktype, men buctype er ${bucType}og retning er MOTTATT, benytter bestemSak: $it")
+            }
+        } else null
+        return sakInformasjon
     }
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
