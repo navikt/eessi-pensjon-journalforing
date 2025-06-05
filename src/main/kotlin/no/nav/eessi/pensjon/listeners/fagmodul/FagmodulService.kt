@@ -80,7 +80,11 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         }
         if (sakIdFraAlleSedIBuc.size > 1) logger.warn("Fant flere sakId i SED: $sakIdFraAlleSedIBuc, filtrer bort de som ikke er i seden som behandles")
 
-        val sakIdCurrentSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }?.distinct() ?: emptyList()
+        val sakIdCurrentSed = currentSed?.nav?.eessisak
+            ?.mapNotNull { it.saksnummer }
+            ?.filter { it.erGyldigPesysNummer() }
+            ?.distinct()
+            ?: emptyList()
         return Pair(sakIdCurrentSed, sakIdFraAlleSedIBuc)
     }
 
