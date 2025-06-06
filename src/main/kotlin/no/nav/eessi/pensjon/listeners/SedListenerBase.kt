@@ -273,7 +273,7 @@ abstract class SedListenerBase(
         }
     }
 
-    fun logScenario(string: scenario, hendelseType: HendelseType, advarsel: Boolean, samlet: SaksInfoSamlet){
+    fun logScenario(scenario: String, hendelseType: HendelseType, advarsel: Boolean, samlet: SaksInfoSamlet){
         logger.info("Scenario: $scenario, hendelseType: $hendelseType, advarsel: $advarsel, sakId fra sed: $samlet")
     }
 
