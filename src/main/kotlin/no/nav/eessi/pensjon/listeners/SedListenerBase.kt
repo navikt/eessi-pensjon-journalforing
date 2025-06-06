@@ -174,156 +174,101 @@ abstract class SedListenerBase(
             MOTTATT -> {
                 //0. TODO: Skal denne beskrives mer? ev legges til en av de andre ?
                 if (!pesysSakIdISED && match) {
-                    return SaksInfoSamlet(
-                        null,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("0", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("0", hendelseType, advarsel, it) }
                 }
 
                 //1.
                 if (pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
-                        logScenario(
-                            "1",
-                            hendelseType,
-                            advarsel,
-                            it
-                        )
+                        logScenario("1", hendelseType, advarsel, it)
                     }
                 }
 
                 //2.
                 if (!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        saksIdFraSed.toString(),
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("2", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(saksIdFraSed.toString(), sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("2", hendelseType, advarsel, it)
+                    }
                 }
 
                 //3.
                 if (pesysSakIdISED && match && svarFraPenInfo == true) {
-                    return SaksInfoSamlet(
-                        sakFraPesysSomMatcherSed?.sakId,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("3", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("3", hendelseType, advarsel, it)
+                    }
                 }
 
                 //4.
                 if (pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
-                        logScenario(
-                            "4",
-                            hendelseType,
-                            advarsel,
-                            it
-                        )
+                        logScenario("4", hendelseType, advarsel, it)
                     }
                 }
 
                 //5.
                 if (!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
-                        logScenario(
-                            "5",
-                            hendelseType,
-                            advarsel,
-                            it
-                        )
+                        logScenario("5", hendelseType, advarsel, it)
                     }
                 }
 
                 //6.
                 if (!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        null,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("5", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("5", hendelseType, advarsel, it)
+                    }
                 }
 
-                return SaksInfoSamlet(
-                    saksIdFraSed.firstOrNull(),
-                    null,
-                    saktypeFraSedEllerPesys,
-                    advarsel
-                ).also { logScenario("Default inn", hendelseType, advarsel, it) }
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), null, saktypeFraSedEllerPesys, advarsel).also {
+                    logScenario("Default inn", hendelseType, advarsel, it)
+                }
             }
 
             SENDT -> {
                 //7.
                 if (!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        null,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("7", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("7", hendelseType, advarsel, it)
+                    }
                 }
 
                 //8.
                 if (pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
-                        logScenario(
-                            "8",
-                            hendelseType,
-                            advarsel,
-                            it
-                        )
+                        logScenario("8", hendelseType, advarsel, it)
                     }
                 }
 
                 //9.
                 if (!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        null,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("9", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("9", hendelseType, advarsel, it)
+                    }
                 }
 
                 //10.
                 if (!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        null,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("10", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("10", hendelseType, advarsel, it)
+                    }
                 }
 
                 //11.
                 if (pesysSakIdISED && match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        sakFraPesysSomMatcherSed?.sakId,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("11", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("11", hendelseType, advarsel, it)
+                    }
                 }
 
                 //12.
                 if (pesysSakIdISED && match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(
-                        sakFraPesysSomMatcherSed?.sakId,
-                        sakInformasjonFraPesysFirst,
-                        saktypeFraSedEllerPesys,
-                        advarsel
-                    ).also { logScenario("12", hendelseType, advarsel, it) }
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("12", hendelseType, advarsel, it)
+                    }
                 }
-                return SaksInfoSamlet(
-                    saksIdFraSed.firstOrNull(),
-                    sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(),
-                    saktypeFraSedEllerPesys,
-                    advarsel
-                ).also { logScenario("Default ut", hendelseType, advarsel, it) }
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel).also {
+                    logScenario("Default ut", hendelseType, advarsel, it)
+                }
             }
         }
     }

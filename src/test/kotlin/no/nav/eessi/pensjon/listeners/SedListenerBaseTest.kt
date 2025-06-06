@@ -118,6 +118,17 @@ class SedListenerBaseTest {
             assertEquals(false, resultat?.advarsel)
         }
 
+        //6. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
+        @ParameterizedTest
+        @CsvSource(value = ["true", "false"])
+        fun `Gitt at det finnes IKKE sakid i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det IKKE sendes ADVARSEL`(
+            bestemSak: Boolean
+        ) {
+            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200;22970000", bestemSak = bestemSak)
+            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
         //6 + Automatisk journalføring ved hjelp av benstemSak INGEN ADVARSEL
         @ParameterizedTest
         @EnumSource(BucType::class, names = ["P_BUC_01", "P_BUC_03"])
@@ -129,14 +140,14 @@ class SedListenerBaseTest {
             assertEquals(false, resultat?.advarsel)
         }
 
-        //6. Manuell journalføring (Oppretter JFR_INN oppgave) MED ADVARSEL
+        //6 ++ Manuell JFR, ingen pesys i SED og ikke svar fra pesys eller bestem sak; INGEN ADVARSEL
         @ParameterizedTest
-        @CsvSource(value = ["true", "false"])
-        fun `Gitt at det finnes IKKE sakid i SED og det finnes flere sakIder fra PenInfo men INGEN MATCH saa skal det IKKE sendes ADVARSEL`(
-            bestemSak: Boolean
-        ) {
-            val resultat = hentResultat("P8000_ingen_pesysId.json", "22975200;22970000", bestemSak = bestemSak)
-            assertEquals("22975200", resultat?.sakInformasjonFraPesys?.sakId)
+        @EnumSource(BucType::class, names = ["P_BUC_01", "P_BUC_03", "P_BUC_10"])
+        fun `Gitt at det IKKE sakid i SED og det finnes IKKE sakId fra PenInfo og INGEN MATCH og ikke svar fra bestemsak saa skal det IKKE sendes ADVARSEL`(bucType: BucType) {
+            every { euxService.hentSaktypeType(any(), any()) } returns null
+
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, bestemSak = false, bucType = bucType)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
 
@@ -246,6 +257,17 @@ class SedListenerBaseTest {
         @CsvSource(value = ["true", "false"])
         fun `gitt ingen sakid fra pesys og ingen SED og INGEN MATCH så blir det advarsel`(bestemSak: Boolean) {
             val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT, false)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //13. Manuell JFR, ingen pesys i SED og ikke svar fra pesys eller bestem sak; INGEN ADVARSEL
+        @ParameterizedTest
+        @EnumSource(BucType::class, names = ["P_BUC_01", "P_BUC_03", "P_BUC_10"])
+        fun `Gitt at det IKKE sakid i SED og det finnes IKKE sakId fra PenInfo og INGEN MATCH og ikke svar fra bestemsak saa skal det IKKE sendes ADVARSEL`(bucType: BucType) {
+            every { euxService.hentSaktypeType(any(), any()) } returns null
+
+            val resultat = hentResultat("P8000_ingen_pesysId.json", null, hendelsesType = HendelseType.SENDT,  bestemSak = false, bucType = bucType)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
