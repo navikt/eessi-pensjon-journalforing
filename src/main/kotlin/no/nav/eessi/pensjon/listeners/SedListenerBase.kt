@@ -48,40 +48,28 @@ abstract class SedListenerBase(
         bucType: BucType,
         saktypeFraSed: SakType?,
         sakIdsFraAlleSed: List<String>?,
-        sakIdsFraCurrentSed: List<String> ?
+        sakIdsFraCurrentSed: List<String>?,
+        retning: HendelseType
     ): Pair<SakInformasjon?, List<SakInformasjon>>?? {
 
-        val aktoerId = identifisertPerson?.aktoerId ?: return null
-            .also { logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon") }
-
-        val sakFraPenInfo = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
-
-        val sakInformasjon = sakFraPenInfo?.let { listFraPenInfo ->
-            when {
-                bucType == P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == ALDER } -> listFraPenInfo.filter { it.sakType == ALDER }
-                bucType == P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == UFOREP } -> listFraPenInfo.filter { it.sakType == UFOREP }
-                bucType == P_BUC_01 && listFraPenInfo.any { sak -> sak.sakType == UFOREP } && saktypeFraSed == null->
-                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ALDER, identifisertPerson)
-                bucType == P_BUC_03 && listFraPenInfo.any { sak -> sak.sakType == ALDER } && saktypeFraSed == null->
-                    bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, UFOREP, identifisertPerson)
-                else -> listFraPenInfo
-            }
-        } ?: saktypeFraSed?.let {
-            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, it, identifisertPerson)
+        val aktoerId = identifisertPerson?.aktoerId ?: return null.also {
+            logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon")
         }
+        val sakFraPenInfo = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
+        val sakInformasjon = hentSakInformasjon(sakFraPenInfo, bucType, saktypeFraSed, aktoerId, identifisertPerson, retning)
 
         if (sakInformasjon.isNullOrEmpty()) {
-            logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
-            return null
+            return null.also {
+                logger.info("Ingen saktype fra pensjonsinformasjon eller bestemsak. Ingen saktype å velge mellom.")
+            }
         }
         if (sakIdsFraAlleSed.isNullOrEmpty()) return Pair(null, sakInformasjon)
 
         // Ser først om vi har treff fre sakliste fra current sed
-        sakIdsFraCurrentSed?.mapNotNull { sakId ->
-            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
-        }?.find { it.first != null }?.let {
-            return Pair(it.first, it.second)
-        }
+        sakIdsFraCurrentSed?.asSequence()
+            ?.mapNotNull { sakId -> fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon) }
+            ?.find { it.first != null }
+            ?.let { return Pair(it.first, it.second) }
 
         // Ser så om vi har treff fra sakliste fra alle sed
         val collectedResults = sakIdsFraAlleSed.mapNotNull { sakId ->
@@ -91,6 +79,34 @@ abstract class SedListenerBase(
         return collectedResults.find { it.first != null }
             ?: collectedResults.find { sakIdsFraAlleSed.contains(it.first?.sakId) }
             ?: collectedResults.firstOrNull()
+    }
+
+    private fun hentSakInformasjon(
+        sakFraPenInfo: List<SakInformasjon>?,
+        bucType: BucType,
+        saktypeFraSed: SakType?,
+        aktoerId: String,
+        identifisertPerson: IdentifisertPerson,
+        retning: HendelseType
+    ): List<SakInformasjon>? {
+        val sakInformasjon = sakFraPenInfo?.let { list ->
+            when {
+                bucType == P_BUC_01 && list.any { it.sakType == ALDER } -> list.filter { it.sakType == ALDER }
+                bucType == P_BUC_03 && list.any { it.sakType == UFOREP } -> list.filter { it.sakType == UFOREP }
+                saktypeFraSed == null && bucType == P_BUC_01 && list.any { it.sakType == UFOREP } -> bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, ALDER, identifisertPerson)
+                saktypeFraSed == null && bucType == P_BUC_03 && list.any { it.sakType == ALDER } -> bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, UFOREP, identifisertPerson)
+                else -> list
+            }
+        } ?: saktypeFraSed?.let { infoBestemSak ->
+            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType, infoBestemSak, identifisertPerson).also {
+                logger.info("Mangler sakinfo fra PenInfo, men har saktype fra SED, benytter bestemSak: $it")
+            }
+        } ?: if ((bucType == P_BUC_01 || bucType == P_BUC_03) && retning == MOTTATT) {
+            bestemSakService.hentSakInformasjonViaBestemSak(aktoerId, bucType).also {
+                logger.info("Mangler sakinfo og saktype, men buctype er ${bucType}og retning er MOTTATT, benytter bestemSak: $it")
+            }
+        } else null
+        return sakInformasjon
     }
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
@@ -122,25 +138,31 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(gjennySakId)
         }
 
-        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(emptyList(), emptyList())
+        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(
+            emptyList(),
+            emptyList()
+        )
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
 
-        val sakInformasjonFraPesys = if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
-            pensjonSakInformasjon(
-                identifisertPerson,
-                bucType,
-                sakTypeFraSED,
-                alleSakId,
-                saksIdFraSed
-            )
-        }.also { logger.debug("SakInformasjon: $it") }
+        val sakInformasjonFraPesys =
+            if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
+                pensjonSakInformasjon(
+                    identifisertPerson,
+                    bucType,
+                    sakTypeFraSED,
+                    alleSakId,
+                    saksIdFraSed,
+                    hendelseType
+                )
+            }.also { logger.debug("SakInformasjon: $it") }
         val listeOverSakerPesys = sakInformasjonFraPesys?.second ?: emptyList()
         val sakFraPesysSomMatcherSed = sakInformasjonFraPesys?.first
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
         val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType, sakFraPesysSomMatcherSed != null)
-        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), bucType)
+        val saktypeFraSedEllerPesys =
+            populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), bucType)
 
         val pesysSakIdISED = saksIdFraSed.isNotEmpty()
         val match = sakFraPesysSomMatcherSed != null
@@ -151,80 +173,108 @@ abstract class SedListenerBase(
         when (hendelseType) {
             MOTTATT -> {
                 //0. TODO: Skal denne beskrives mer? ev legges til en av de andre ?
-                if(!pesysSakIdISED && match) {
+                if (!pesysSakIdISED && match) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("0", hendelseType, advarsel, it) }
                 }
 
                 //1.
-                if(pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also { logScenario("1", hendelseType, advarsel, it) }
+                if (pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("1", hendelseType, advarsel, it)
+                    }
                 }
 
                 //2.
-                if(!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(saksIdFraSed.toString(), sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("2", hendelseType, advarsel, it) }
+                if (!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(saksIdFraSed.toString(), sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("2", hendelseType, advarsel, it)
+                    }
                 }
 
                 //3.
-                if(pesysSakIdISED && match && svarFraPenInfo == true) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("3", hendelseType, advarsel, it) }
+                if (pesysSakIdISED && match && svarFraPenInfo == true) {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("3", hendelseType, advarsel, it)
+                    }
                 }
 
                 //4.
-                if(pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also { logScenario("4", hendelseType, advarsel, it) }
+                if (pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("4", hendelseType, advarsel, it)
+                    }
                 }
 
                 //5.
-                if(!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also { logScenario("5", hendelseType, advarsel, it) }
+                if (!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("5", hendelseType, advarsel, it)
+                    }
                 }
 
                 //6.
-                if(!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("5", hendelseType, advarsel, it) }
+                if (!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("5", hendelseType, advarsel, it)
+                    }
                 }
 
-                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), null, saktypeFraSedEllerPesys, advarsel).also { logScenario("Default inn", hendelseType, advarsel, it) }
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), null, saktypeFraSedEllerPesys, advarsel).also {
+                    logScenario("Default inn", hendelseType, advarsel, it)
+                }
             }
 
             SENDT -> {
                 //7.
-                if(!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("7", hendelseType, advarsel, it) }
+                if (!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("7", hendelseType, advarsel, it)
+                    }
                 }
 
                 //8.
-                if(pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also { logScenario("8", hendelseType, advarsel, it) }
+                if (pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("8", hendelseType, advarsel, it)
+                    }
                 }
 
                 //9.
-                if(!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("9", hendelseType, advarsel, it) }
+                if (!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("9", hendelseType, advarsel, it)
+                    }
                 }
 
                 //10.
-                if(!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("10", hendelseType, advarsel, it) }
+                if (!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("10", hendelseType, advarsel, it)
+                    }
                 }
 
                 //11.
-                if(pesysSakIdISED && match && svarFraPenInfo == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("11", hendelseType, advarsel, it) }
+                if (pesysSakIdISED && match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("11", hendelseType, advarsel, it)
+                    }
                 }
 
                 //12.
-                if(pesysSakIdISED && match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("12", hendelseType, advarsel, it) }
+                if (pesysSakIdISED && match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                        logScenario("12", hendelseType, advarsel, it)
+                    }
                 }
-                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel).also { logScenario("Default ut", hendelseType, advarsel, it) }
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel).also {
+                    logScenario("Default ut", hendelseType, advarsel, it)
+                }
             }
         }
     }
 
-    fun logScenario(string: String, hendelseType: HendelseType, advarsel: Boolean, samlet: SaksInfoSamlet){
-        logger.info("Scenario: $string, hendelseType: $hendelseType, advarsel: $advarsel, sakId fra sed: $samlet")
+    fun logScenario(scenario: String, hendelseType: HendelseType, advarsel: Boolean, samlet: SaksInfoSamlet){
+        logger.info("Scenario: $scenario, hendelseType: $hendelseType, advarsel: $advarsel, sakId fra sed: $samlet")
     }
 
     /**
@@ -235,12 +285,17 @@ abstract class SedListenerBase(
         pesysSakInformasjonListe: List<SakInformasjon>,
         hendesesType: HendelseType,
         match: Boolean
-    ) : Boolean {
+    ): Boolean {
         return when {
-            match -> false .also { logger.info("Ingen advarsel; sakID fra sed matcher sakID fra pesys") }
-            pesysIDerFraSED.isNotEmpty() && pesysSakInformasjonListe.isNotEmpty() && hendesesType == SENDT && !match -> true .also { logger.warn("Ingen match ved flere sakId i SED, men finner én sak fra pesys; Advarsel") }
-            pesysSakInformasjonListe.size == 1 && hendesesType == SENDT -> false .also { logger.info("Kun én sak fra pesys; ingen advarsel") }
-            pesysIDerFraSED.isEmpty()  && pesysSakInformasjonListe.isEmpty()-> false  .also { logger.info("Ingen sakid i sed eller svar fra pensjonsinformasjon") }
+            match -> false.also { logger.info("Ingen advarsel; sakID fra sed matcher sakID fra pesys") }
+            pesysIDerFraSED.isNotEmpty() && pesysSakInformasjonListe.isNotEmpty() && hendesesType == SENDT && !match -> true.also {
+                logger.warn(
+                    "Ingen match ved flere sakId i SED, men finner én sak fra pesys; Advarsel"
+                )
+            }
+
+            pesysSakInformasjonListe.size == 1 && hendesesType == SENDT -> false.also { logger.info("Kun én sak fra pesys; ingen advarsel") }
+            pesysIDerFraSED.isEmpty() && pesysSakInformasjonListe.isEmpty() -> false.also { logger.info("Ingen sakid i sed eller svar fra pensjonsinformasjon") }
             hendesesType == MOTTATT && pesysIDerFraSED.none { pensjonsinformasjon -> pensjonsinformasjon in pesysSakInformasjonListe.map { it.sakId } } -> {
                 if (pesysSakInformasjonListe.isNotEmpty() && pesysIDerFraSED.isEmpty()) {
                     false
@@ -249,6 +304,7 @@ abstract class SedListenerBase(
                     true
                 }
             }
+
             else -> false
         }
     }
@@ -292,7 +348,8 @@ abstract class SedListenerBase(
         } else {
             logger.warn("SED: ${sedHendelse.sedType}, ${sedHendelse.sedId} er ikke med i listen over gyldige hendelser")
             val sedSendt = (sedRetning == SENDT && sedHendelse.bucType in GyldigeHendelser.gyldigUtgaaendeBucType)
-            val sedMottatt = (sedRetning == MOTTATT && sedHendelse.bucType in GyldigeHendelser.gyldigeInnkommendeBucTyper)
+            val sedMottatt =
+                (sedRetning == MOTTATT && sedHendelse.bucType in GyldigeHendelser.gyldigeInnkommendeBucTyper)
 
             if (sedMottatt || sedSendt) {
                 throw RuntimeException("Sed ${sedHendelse.sedType}, buc: ${sedHendelse.bucType} burde vært håndtert")
@@ -304,7 +361,7 @@ abstract class SedListenerBase(
 
     private fun metricForGyldigSed(retning: String, bucType: BucType?, sedType: SedType?) {
         try {
-            if(bucType == null || sedType == null) return //ikke nødvendig å logge null verdier
+            if (bucType == null || sedType == null) return //ikke nødvendig å logge null verdier
 
             Metrics.counter("behandled_sed_${retning.lowercase()}_gyldig", "bucSed", "${bucType}, $sedType").increment()
         } catch (e: Exception) {
@@ -314,9 +371,10 @@ abstract class SedListenerBase(
 
     private fun metricForUgyldigSed(retning: String, bucType: BucType?, sedType: SedType?) {
         try {
-            if(bucType == null || sedType == null) return //ikke nødvendig å logge null verdier
+            if (bucType == null || sedType == null) return //ikke nødvendig å logge null verdier
 
-            Metrics.counter("behandled_sed_${retning.lowercase()}_ugyldig", "bucSed", "${bucType}, $sedType").increment()
+            Metrics.counter("behandled_sed_${retning.lowercase()}_ugyldig", "bucSed", "${bucType}, $sedType")
+                .increment()
         } catch (e: Exception) {
             logger.warn("Metrics feilet med melding", e)
         }
