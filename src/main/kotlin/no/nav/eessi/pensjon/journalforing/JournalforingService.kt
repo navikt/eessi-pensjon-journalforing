@@ -260,7 +260,7 @@ class JournalforingService(
                         throw Exception("Utgående P_BUC_02, oppretter IKKE journalføringsoppgave, slett ${sedHendelse.rinaSakId}")
                     }
                 }
-                logger.warn("Utgående P_BUC_02 og SENDT, er gjennysak, oppretter oppgave")
+                logger.info("Utgående P_BUC_02 og SENDT, er gjennysak, oppretter oppgave")
             }
             val melding = OppgaveMelding(
                 sedHendelse.sedType,
