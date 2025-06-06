@@ -145,8 +145,8 @@ abstract class SedListenerBase(
         val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
             .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
 
-        val sakInformasjonFraPesys =
-            if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) null else {
+        val (sakFraPesysSomMatcherSed, listeOverSakerPesys) =
+            if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) Pair(null, emptyList()) else {
                 pensjonSakInformasjon(
                     identifisertPerson,
                     bucType,
@@ -155,65 +155,62 @@ abstract class SedListenerBase(
                     saksIdFraSed,
                     hendelseType
                 )
-            }.also { logger.debug("SakInformasjon: $it") }
-        val listeOverSakerPesys = sakInformasjonFraPesys?.second ?: emptyList()
-        val sakFraPesysSomMatcherSed = sakInformasjonFraPesys?.first
+            }.also { logger.info("SakInformasjon: $it") }?: Pair(null, emptyList())
 
         // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
         val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType, sakFraPesysSomMatcherSed != null)
-        val saktypeFraSedEllerPesys =
-            populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), bucType)
+        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), bucType)
 
-        val pesysSakIdISED = saksIdFraSed.isNotEmpty()
+        val harSakIdFraSed = saksIdFraSed.isNotEmpty()
         val match = sakFraPesysSomMatcherSed != null
-        val svarFraPenInfo = sakInformasjonFraPesys?.second?.isNotEmpty()
-        val flereSakerfraPenInfo = (svarFraPenInfo == true && sakInformasjonFraPesys.second.size > 1)
+        val harSvarFraPen = listeOverSakerPesys.isNotEmpty()
+        val flereSakerfraPenInfo = (harSvarFraPen && listeOverSakerPesys.size > 1)
 
-        val sakInformasjonFraPesysFirst = sakInformasjonFraPesys?.second?.firstOrNull()
+        val sakInformasjonFraPesysFirst = listeOverSakerPesys.firstOrNull()
         when (hendelseType) {
             MOTTATT -> {
                 //0. TODO: Skal denne beskrives mer? ev legges til en av de andre ?
-                if (!pesysSakIdISED && match) {
+                if (!harSakIdFraSed && match) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also { logScenario("0", hendelseType, advarsel, it) }
                 }
 
                 //1.
-                if (pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                if (harSakIdFraSed && !match && harSvarFraPen && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("1", hendelseType, advarsel, it)
                     }
                 }
 
                 //2.
-                if (!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                if (!harSakIdFraSed && !match && harSvarFraPen && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(saksIdFraSed.toString(), sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("2", hendelseType, advarsel, it)
                     }
                 }
 
                 //3.
-                if (pesysSakIdISED && match && svarFraPenInfo == true) {
+                if (harSakIdFraSed && match && harSvarFraPen == true) {
                     return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("3", hendelseType, advarsel, it)
                     }
                 }
 
                 //4.
-                if (pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                if (harSakIdFraSed && !match && harSvarFraPen == true && flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("4", hendelseType, advarsel, it)
                     }
                 }
 
                 //5.
-                if (!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
+                if (!harSakIdFraSed && !match && harSvarFraPen == false && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("5", hendelseType, advarsel, it)
                     }
                 }
 
                 //6.
-                if (!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                if (!harSakIdFraSed && !match && harSvarFraPen == true && flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("5", hendelseType, advarsel, it)
                     }
@@ -226,42 +223,42 @@ abstract class SedListenerBase(
 
             SENDT -> {
                 //7.
-                if (!pesysSakIdISED && !match && svarFraPenInfo == false && !flereSakerfraPenInfo) {
+                if (!harSakIdFraSed && !match && harSvarFraPen == false && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("7", hendelseType, advarsel, it)
                     }
                 }
 
                 //8.
-                if (pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                if (harSakIdFraSed && !match && harSvarFraPen == true && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, null, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("8", hendelseType, advarsel, it)
                     }
                 }
 
                 //9.
-                if (!pesysSakIdISED && !match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                if (!harSakIdFraSed && !match && harSvarFraPen == true && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("9", hendelseType, advarsel, it)
                     }
                 }
 
                 //10.
-                if (!pesysSakIdISED && !match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                if (!harSakIdFraSed && !match && harSvarFraPen == true && flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("10", hendelseType, advarsel, it)
                     }
                 }
 
                 //11.
-                if (pesysSakIdISED && match && svarFraPenInfo == true && flereSakerfraPenInfo) {
+                if (harSakIdFraSed && match && harSvarFraPen == true && flereSakerfraPenInfo) {
                     return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("11", hendelseType, advarsel, it)
                     }
                 }
 
                 //12.
-                if (pesysSakIdISED && match && svarFraPenInfo == true && !flereSakerfraPenInfo) {
+                if (harSakIdFraSed && match && harSvarFraPen == true && !flereSakerfraPenInfo) {
                     return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("12", hendelseType, advarsel, it)
                     }
