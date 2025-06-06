@@ -138,35 +138,43 @@ abstract class SedListenerBase(
             return SaksInfoSamlet(gjennySakId)
         }
 
-        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed) ?: Pair(
-            emptyList(),
-            emptyList()
+        // henter saker fra PenInfo og bestemSak
+        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed)
+            ?: (emptyList<String>() to emptyList())
+
+        val sakTypeFraSED = if (bucType == P_BUC_10 || bucType == R_BUC_02) {
+            euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
+        } else null
+
+        // svar fra PenInfo eller bestemSak som matcher SED (sakFraPesysSomMatcherSed), samt svar som ikke matcher (sakerFraPesys)
+        val (sakFraPesysSomMatcherSed, sakerFraPesys) = when {
+            hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId) -> null to emptyList()
+            else -> pensjonSakInformasjon(
+                identifisertPerson = identifisertPerson,
+                bucType = bucType,
+                saktypeFraSed = sakTypeFraSED,
+                sakIdsFraAlleSed = alleSakId,
+                sakIdsFraCurrentSed = saksIdFraSed,
+                retning = hendelseType
+            ).also { logger.info("SakInformasjon: $it") } ?: (null to emptyList())
+        }
+
+        // advarsel for oppgave
+        val advarsel = hentAdvarsel(pesysIDerFraSED = alleSakId, pesysSakInformasjonListe = sakerFraPesys, hendesesType = hendelseType, match = sakFraPesysSomMatcherSed != null)
+
+        val saktypeFraSedEllerPesys = populerSaktype(
+            saktypeFraSED = sakTypeFraSED,
+            sakInformasjon = sakFraPesysSomMatcherSed ?: sakerFraPesys.firstOrNull(),
+            bucType = bucType
         )
-        val sakTypeFraSED = euxService.hentSaktypeType(sedHendelse, alleSedIBucList)
-            .takeIf { bucType == P_BUC_10 || bucType == R_BUC_02 }
 
-        val (sakFraPesysSomMatcherSed, listeOverSakerPesys) =
-            if (hendelseType == SENDT && gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)) Pair(null, emptyList()) else {
-                pensjonSakInformasjon(
-                    identifisertPerson,
-                    bucType,
-                    sakTypeFraSED,
-                    alleSakId,
-                    saksIdFraSed,
-                    hendelseType
-                )
-            }.also { logger.info("SakInformasjon: $it") }?: Pair(null, emptyList())
+        val harSakIdFraSed = saksIdFraSed.isNotEmpty()          // har vi sakID fra SED?
+        val match = sakFraPesysSomMatcherSed != null            // matcher sakID fra SED med sakID fra PESYS?
+        val harSvarFraPen = sakerFraPesys.isNotEmpty()          // har vi svar fra PenInfo eller bestemSak?
+        val flereSakerfraPenInfo = sakerFraPesys.size > 1       // finnes det flere saker i svar fra PenInfo eller bestemSak?
 
-        // skal gi advarsel om vi har flere saker eller sed har pesys sakID som ikke matcher brukers pesys sakID
-        val advarsel = hentAdvarsel(alleSakId, listeOverSakerPesys, hendelseType, sakFraPesysSomMatcherSed != null)
-        val saktypeFraSedEllerPesys = populerSaktype(sakTypeFraSED, sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), bucType)
+        val sakInformasjonFraPesysFirst = sakerFraPesys.firstOrNull()  // første sak i listen fra PESYS, hvis den finnes
 
-        val harSakIdFraSed = saksIdFraSed.isNotEmpty()
-        val match = sakFraPesysSomMatcherSed != null
-        val harSvarFraPen = listeOverSakerPesys.isNotEmpty()
-        val flereSakerfraPenInfo = (harSvarFraPen && listeOverSakerPesys.size > 1)
-
-        val sakInformasjonFraPesysFirst = listeOverSakerPesys.firstOrNull()
         when (hendelseType) {
             MOTTATT -> {
                 //0. TODO: Skal denne beskrives mer? ev legges til en av de andre ?
@@ -263,7 +271,7 @@ abstract class SedListenerBase(
                         logScenario("12", hendelseType, advarsel, it)
                     }
                 }
-                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed ?: listeOverSakerPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel).also {
+                return SaksInfoSamlet(saksIdFraSed.firstOrNull(), sakFraPesysSomMatcherSed ?: sakerFraPesys.firstOrNull(), saktypeFraSedEllerPesys, advarsel).also {
                     logScenario("Default ut", hendelseType, advarsel, it)
                 }
             }
