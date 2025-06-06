@@ -351,7 +351,7 @@ abstract class SedListenerBase(
 
             metricForGyldigSed(sedRetning.toString(), sedHendelse.bucType, sedHendelse.sedType)
         } else {
-            logger.info("SED: ${sedHendelse.sedType}, ${sedHendelse.sedId} er ikke med i listen over gyldige hendelser")
+            logger.info("SedType: ${sedHendelse.sedType}, sedID: ${sedHendelse.sedId}, buctype: ${sedHendelse.bucType}, er ikke med i listen over gyldige hendelser")
             val sedSendt = (sedRetning == SENDT && sedHendelse.bucType in GyldigeHendelser.gyldigUtgaaendeBucType)
             val sedMottatt = (sedRetning == MOTTATT && sedHendelse.bucType in GyldigeHendelser.gyldigeInnkommendeBucTyper)
 
