@@ -22,7 +22,7 @@ object RelasjonsHandler {
                 }
 
             } catch (ex: Exception) {
-                logger.warn("Noe gikk galt under innlesing av fnr fra sed", ex)
+                logger.warn("Noe gikk galt under innlesing av fnr fra sed ${ex.toString()}")
             }
         }
 
