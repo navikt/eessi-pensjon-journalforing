@@ -70,8 +70,8 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
-                if (request.sak?.erGyldigPesysNummerEllerGjenny()?.not() == true) {
-                    throw IllegalArgumentException("Ugyldig Pesys-nummer: ${request.sak.fagsakid}")
+                request.sak?.takeIf { it.erGyldigPesysNummerEllerGjenny().not() }?.let {
+                    throw IllegalArgumentException("UGYLDIG PESYS-NUMMER: ${it.toJson()} ")
                 }
 
                 secureLog.info("Journalpostrequesten: ${request.copy(dokumenter = "***").toJson()}, header: $headers")
