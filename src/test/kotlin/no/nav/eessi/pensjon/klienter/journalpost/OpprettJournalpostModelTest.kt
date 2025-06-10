@@ -66,8 +66,8 @@ internal class OpprettJournalpostModelTest {
         assertEquals(opprettJournalpostRequest.journalpostType, JournalpostType.INNGAAENDE)
         assertEquals(opprettJournalpostRequest.kanal, "NAV_NO")
         assertEquals(opprettJournalpostRequest.sak?.sakstype, "FAGSAK")
-        assertEquals(opprettJournalpostRequest.sak?.fagsakid, "11111")
-        assertEquals(opprettJournalpostRequest.sak?.fagsaksystem, "PEN")
+        assertEquals(opprettJournalpostRequest.sak?.fagsakid, "11111111")
+        assertEquals(opprettJournalpostRequest.sak?.fagsaksystem, "PP01")
         assertEquals(opprettJournalpostRequest.tema, Tema.PENSJON)
         assertEquals(opprettJournalpostRequest.tittel, "Inngående P2000 - Krav om alderspensjon")
     }

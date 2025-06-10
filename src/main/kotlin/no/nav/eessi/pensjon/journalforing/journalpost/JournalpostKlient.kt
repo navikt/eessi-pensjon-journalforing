@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.saf.OppdaterJournalpost
+import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
@@ -57,13 +57,11 @@ class JournalpostKlient(
      *         som indikerer om posten ble ferdigstilt.
      */
     fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
-        val path = "/journalpost?forsoekFerdigstill=$forsokFerdigstill"
-
         logger.info("Forsøker å ferdigstille journalpost: $forsokFerdigstill")
 
         return opprettjournalpost.measure {
             return@measure try {
-                logger.info("Kaller Joark for å generere en journalpost: $path")
+                logger.info("Kaller Joark for å generere en journalpost: /journalpost?forsoekFerdigstill=$forsokFerdigstill")
 
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
@@ -72,11 +70,14 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
+                if (request.sak?.erGyldigPesysNummerEllerGjenny()?.not() == true) {
+                    throw IllegalArgumentException("Ugyldig Pesys-nummer: ${request.sak.fagsakid}")
+                }
+
                 secureLog.info("Journalpostrequesten: ${request.copy(dokumenter = "***").toJson()}, header: $headers")
 
-
                 val response = journalpostOidcRestTemplate.exchange(
-                        path,
+                    "/journalpost?forsoekFerdigstill=$forsokFerdigstill",
                         HttpMethod.POST,
                         HttpEntity(request.toJson(), headers),
                         String::class.java)
@@ -91,6 +92,14 @@ class JournalpostKlient(
                 logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
+        }
+    }
+    fun Sak?.erGyldigPesysNummerEllerGjenny(): Boolean {
+        return when {
+            this == null -> false
+            fagsakid.length == 5 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "EY"
+            fagsakid.length == 8 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "PP01"
+            else -> false
         }
     }
 
@@ -160,4 +169,5 @@ class JournalpostKlient(
             logger.error(it, ex)
         }
     }
+
 }

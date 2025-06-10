@@ -27,8 +27,8 @@
   "kanal": "NAV_NO",
   "sak": {
     "sakstype": "FAGSAK",
-    "fagsakid": "11111",
-    "fagsaksystem": "PEN"
+    "fagsakid": "11111111",
+    "fagsaksystem": "PP01"
   },
   "tema": "PEN",
   "tilleggsopplysninger": [
