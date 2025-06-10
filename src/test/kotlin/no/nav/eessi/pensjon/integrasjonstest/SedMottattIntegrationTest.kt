@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
+import no.nav.eessi.pensjon.journalforing.Sak
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
@@ -15,6 +16,7 @@ import org.slf4j.event.Level
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
+import kotlin.random.Random
 
 @SpringBootTest(classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
@@ -40,7 +42,11 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
     @BeforeEach
     fun setUp() {
         listOf("147729", "147666", "7477291").forEach {
-            every { hentSakService.hentSak(it) } returns mockk(relaxed = true)
+            every { hentSakService.hentSak(it) } returns Sak(
+                fagsakid = "1234567".plus(Random.Default.nextInt(10, 99)),
+                sakstype = "FAGSAK",
+                fagsaksystem = "PP01"
+            )
         }
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
 import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
+import no.nav.eessi.pensjon.journalforing.Sak
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
@@ -69,12 +70,11 @@ class JournalpostKlient(
                     headers["Nav-User-Id"] = saksbehandlerIdent
                 }
 
-                if (!request.sak?.fagsakid.erGyldigPesysNummerEllerGjenny()) {
-                    throw IllegalArgumentException("Ugyldig Pesys-nummer: ${request.sak?.fagsakid}")
+                if (request.sak?.erGyldigPesysNummerEllerGjenny()?.not() == true) {
+                    throw IllegalArgumentException("Ugyldig Pesys-nummer: ${request.sak.fagsakid}")
                 }
 
                 secureLog.info("Journalpostrequesten: ${request.copy(dokumenter = "***").toJson()}, header: $headers")
-
 
                 val response = journalpostOidcRestTemplate.exchange(
                     "/journalpost?forsoekFerdigstill=$forsokFerdigstill",
@@ -92,6 +92,14 @@ class JournalpostKlient(
                 logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message}")
             }
+        }
+    }
+    fun Sak?.erGyldigPesysNummerEllerGjenny(): Boolean {
+        return when {
+            this == null -> false
+            fagsakid.length == 5 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "EY"
+            fagsakid.length == 8 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "PP01"
+            else -> false
         }
     }
 
@@ -162,8 +170,4 @@ class JournalpostKlient(
         }
     }
 
-    fun String?.erGyldigPesysNummerEllerGjenny(): Boolean {
-        if (this.isNullOrEmpty()) return false
-        return (this.length in listOf(5, 8) && this.first() in listOf('1', '2') && this.all { it.isDigit() })
-    }
 }
