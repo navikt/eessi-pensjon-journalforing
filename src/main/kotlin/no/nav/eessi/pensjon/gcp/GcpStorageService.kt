@@ -73,10 +73,12 @@ class GcpStorageService(
         if (eksisterer(euxCaseId, gjennyBucket)) return
         val blobInfo =  BlobInfo.newBuilder(BlobId.of(gjennyBucket, euxCaseId)).setContentType("application/json").build()
         kotlin.runCatching {
-            if(gjennysak?.sakId?.length != 5 || gjennysak.sakId.any { !it.isDigit() }) {
-                throw IllegalArgumentException("SakId må være korrekt strukturert med 5 tegn; mottok: ${gjennysak?.toJson()}")
+            if(gjennysak?.sakId == null || (gjennysak.sakId.length == 5 && gjennysak.sakId.any { it.isDigit() })) {
+                gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }.also { logger.info("Lagret info på S3 med rinaID: $it") }
             }
-            gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }.also { logger.info("Lagret info på S3 med rinaID: $it") }
+            else {
+                throw IllegalArgumentException("SakId må være korrekt strukturert med 5 tegn; mottok: ${gjennysak.toJson()}")
+            }
         }.onFailure { e ->
             logger.error("Feilet med å lagre dokument med id: ${blobInfo.blobId.name}", e)
         }.onSuccess {
