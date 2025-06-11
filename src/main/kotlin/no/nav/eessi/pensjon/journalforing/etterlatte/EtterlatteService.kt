@@ -38,7 +38,7 @@ class EtterlatteService(
                 String::class.java
             )
 
-            logger.debug("Hent sak fra gjenny: response: ${response.body}".trimMargin())
+            logger.info("Hent sak fra gjenny: response: ${response.body}".trimMargin())
 
             response.body?.let {
                 Result.success(mapJsonToAny<EtterlatteResponseData>(it))
