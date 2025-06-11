@@ -97,7 +97,7 @@ class JournalpostKlient(
     fun Sak?.erGyldigPesysNummerEllerGjenny(): Boolean {
         return when {
             this == null -> false
-            fagsakid.length == 5 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "EY"
+            fagsakid.length in 4..6 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "EY"
             fagsakid.length == 8 -> fagsakid.first() in listOf('1', '2') && fagsakid.all { it.isDigit() } && fagsaksystem == "PP01"
             else -> false
         }
