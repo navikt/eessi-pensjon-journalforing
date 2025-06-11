@@ -8,6 +8,7 @@ import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -39,22 +40,33 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
             return null
         }
 
-        return hentGjennySak(
+        // sjekker om gjenny-sak validerer mot etterlatte
+        if(sakIdFraSed.erGjennySakNummer()){
+            hentGjennySak(sakIdFraSed, euxCaseId)?.let { return it }
+        }
+
+        return hentGjennyFraGCP(euxCaseId)?.let {
+            logger.info("Sjekker hentet sak fra GCP mot etterlatte ${it.toJson()}")
+            if (hentGjennySak(it.fagsakid, euxCaseId) != null) {
+                it.also { logger.info("hentSak: fant gyldig gjenny sak i GCP for euxCaseId: $euxCaseId")}
+            } else {
+                null.also { logger.warn("hentSak: fant ikke gyldig gjenny sak i GCP for euxCaseId: $euxCaseId") }
+            }
+        } ?: validerPesysSak(
+            sakInformasjon,
             sakIdFraSed,
             euxCaseId
-        ).also { logger.info("hentSak: sjekker gjenny-API: rinasakId: $euxCaseId, og sakID: $sakIdFraSed") }
-            ?: hentGjennyFraGCP(euxCaseId).also { logger.info("hentSak: sjekker GCP $euxCaseId") }
-            ?: validerPesysSak(
-                sakInformasjon,
-                sakIdFraSed,
-                euxCaseId
-            ).also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
-            ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
+        ).also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
+        ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
     }
 
     private fun hentGjennySak(sakIdFromSed: String?, euxCaseId: String): Sak? {
         if (sakIdFromSed.isNullOrBlank()) {
             logger.warn("sakIdFromSed er tom eller mangler for euxCaseId: $euxCaseId")
+            return null
+        }
+        if( !sakIdFromSed.erGjennySakNummer()) {
+            logger.warn("sakIdFromSed: $sakIdFromSed er ikke et gyldig gjenny saknummer for euxCaseId: $euxCaseId")
             return null
         }
 
@@ -111,4 +123,12 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
             .also { logger.info("PesysSakId er gyldig") } ?: false
             .also { logger.info("PesysSakId er ikke gyldig ifht valideringsregler") }
     }
+
+    private fun String?.erGjennySakNummer(): Boolean {
+        return this?.let { pesysSakId -> pesysSakId.length in  4..5 && pesysSakId.all { char -> char.isDigit() } }
+            .also { logger.info("GjennyNummer er gyldig") } ?: false
+            .also { logger.info("GjennyNummer er ikke gyldig ifht valideringsregler") }
+    }
+
 }
+
