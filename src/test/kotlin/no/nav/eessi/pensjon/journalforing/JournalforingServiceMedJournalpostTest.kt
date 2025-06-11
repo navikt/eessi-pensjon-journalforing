@@ -7,6 +7,7 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
@@ -136,6 +137,9 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
         every { journalpostKlient.opprettJournalpost(capture(journalpostSlot), capture(forsoekFerdigstillSlot), any()) } returns mockk(relaxed = true)
         every { gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId) } returns true
         every { gcpStorageService.hentFraGjenny(any()) } returns """{ "sakId" : "147730","sakType" : "EYO"}""".trimIndent()
+
+        val gjennySakJsonEtterlatte = """{ "sakId": "147730", "sakType": "OMSTILLINGSSTOENAD"}""".trimIndent()
+        every { etterlatteService.hentGjennySak(eq("147730")) } returns  Result.success(mapJsonToAny<EtterlatteResponseData>(gjennySakJsonEtterlatte))
 
         val identifisertPerson = identifisertPersonPDL(
             aktoerId = AKTOERID,
