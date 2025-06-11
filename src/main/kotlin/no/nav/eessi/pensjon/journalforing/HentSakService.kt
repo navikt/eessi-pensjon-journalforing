@@ -42,21 +42,17 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
 
         // sjekker om gjenny-sak validerer mot etterlatte
         if(sakIdFraSed.erGjennySakNummer()){
-            hentGjennySak(sakIdFraSed, euxCaseId)?.let { return it }
+            hentGjennySak(sakIdFraSed, euxCaseId)?.let {
+                return it.also { logger.info("hentSak: fant gyldig gjenny sak i SED: $sakIdFraSed, for euxCaseId: $euxCaseId")  }
+            }
         }
 
-        return hentGjennyFraGCP(euxCaseId)?.let {
-            logger.info("Sjekker hentet sak fra GCP mot etterlatte ${it.toJson()}")
-            if (hentGjennySak(it.fagsakid, euxCaseId) != null) {
-                it.also { logger.info("hentSak: fant gyldig gjenny sak i GCP for euxCaseId: $euxCaseId")}
-            } else {
-                null.also { logger.warn("hentSak: fant ikke gyldig gjenny sak i GCP for euxCaseId: $euxCaseId") }
-            }
-        } ?: validerPesysSak(
-            sakInformasjon,
-            sakIdFraSed,
-            euxCaseId
-        ).also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
+        return hentGjennyFraGCP(euxCaseId)?.takeIf {
+            hentGjennySak(it.fagsakid, euxCaseId) != null
+        }?.also {
+            logger.info("hentSak: fant gyldig gjenny sak i GCP for euxCaseId: $euxCaseId")
+        } ?: validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId)
+            ?.also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
         ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
     }
 
