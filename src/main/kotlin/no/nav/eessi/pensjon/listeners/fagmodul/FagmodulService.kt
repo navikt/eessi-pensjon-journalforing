@@ -90,8 +90,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
     }
 
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
-        val sakIdFraSed = currentSed?.nav?.eessisak?.mapNotNull { it.saksnummer }
+        val sakIdFraSed = currentSed?.nav?.eessisak?.filter { it.land == "NO" }
+            ?.mapNotNull { it.saksnummer}
             ?.map { id -> trimSakidString(id) }
+            ?.filter {  it.length == 5 }
             ?.distinct()
             .also { sakId -> logger.info("Fant gjenny sakId i SED: $sakId. Antall gjennysaker funnet: ${sakId?.size}") }
 

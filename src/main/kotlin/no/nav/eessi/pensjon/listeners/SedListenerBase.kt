@@ -131,7 +131,7 @@ abstract class SedListenerBase(
     ): SaksInfoSamlet {
         val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
         if (erGjennysak) {
-            val gjennySakId = if (hendelseType == SENDT) fagmodulService.hentGjennySakIdFraSed(currentSed) else null
+            val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             }
@@ -318,11 +318,15 @@ abstract class SedListenerBase(
         val gcpGjennysak = gcpStorageService.hentFraGjenny(sedHendelse.rinaSakId)?.let { mapJsonToAny<GjennySak>(it) }
         val gjennyFinnes = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
 
+        if(gjennysakFraSed.length != 5 || gjennysakFraSed.any { !it.isDigit() }) {
+            logger.error("SakId må være gjenny sak med 5 tegn; mottok: $gjennysakFraSed")
+            return null
+        }
+
         return if (gjennyFinnes && gcpGjennysak?.sakId == null && gcpGjennysak != null) {
             gcpStorageService.oppdaterGjennysak(sedHendelse, gcpGjennysak, gjennysakFraSed)
         } else null
     }
-
 
     fun skippingOffsett(offset: Long, offsetsToSkip: List<Long>): Boolean {
         return if (offset !in offsetsToSkip) {
