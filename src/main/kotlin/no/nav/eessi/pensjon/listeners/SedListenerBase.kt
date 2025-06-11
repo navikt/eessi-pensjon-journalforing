@@ -131,7 +131,7 @@ abstract class SedListenerBase(
     ): SaksInfoSamlet {
         val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
         if (erGjennysak) {
-            val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
+            val gjennySakId = if (hendelseType == SENDT) fagmodulService.hentGjennySakIdFraSed(currentSed) else null
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             }
@@ -260,7 +260,7 @@ abstract class SedListenerBase(
 
                 //11.
                 if (harSakIdFraSed && match && harSvarFraPen == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("11", hendelseType, advarsel, it)
                     }
                 }
