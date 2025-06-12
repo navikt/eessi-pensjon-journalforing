@@ -220,7 +220,7 @@ abstract class SedListenerBase(
                 //6.
                 if (!harSakIdFraSed && !match && harSvarFraPen == true && flereSakerfraPenInfo) {
                     return SaksInfoSamlet(null, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
-                        logScenario("5", hendelseType, advarsel, it)
+                        logScenario("6", hendelseType, advarsel, it)
                     }
                 }
 
@@ -301,15 +301,8 @@ abstract class SedListenerBase(
 
             pesysSakInformasjonListe.size == 1 && hendesesType == SENDT -> false.also { logger.info("Kun én sak fra pesys; ingen advarsel") }
             pesysIDerFraSED.isEmpty() && pesysSakInformasjonListe.isEmpty() -> false.also { logger.info("Ingen sakid i sed eller svar fra pensjonsinformasjon") }
-            hendesesType == MOTTATT && pesysIDerFraSED.none { pensjonsinformasjon -> pensjonsinformasjon in pesysSakInformasjonListe.map { it.sakId } } -> {
-                if (pesysSakInformasjonListe.isNotEmpty() && pesysIDerFraSED.isEmpty()) {
-                    false
-                } else {
-                    logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys")
-                    true
-                }
-            }
-
+            pesysIDerFraSED.isNotEmpty() && pesysSakInformasjonListe.isNotEmpty() && hendesesType == MOTTATT && !match -> true // Advarsel, scenario 1 og 4
+                .also { logger.warn("Sed inneholder pesysSakId som vi ikke finner i listen fra pesys; ADVARSEL") }
             else -> false
         }
     }
