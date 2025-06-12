@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import no.nav.eessi.pensjon.utils.mapJsonToAny
+import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -19,6 +20,23 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
 class JournalforingServiceHentSakTest : JournalforingServiceBase() {
+
+
+    @Test
+    fun `hentSak skal IKKE gi sak naar gcp har feil sakid`() {
+        val euxCaseId = "123"
+        val gjennySakFraGCP = mapJsonToAny<GjennySak>("""{ "sakId": "1234567", "sakType": "EY"}""".trimIndent())
+
+        val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
+
+        every { gcpStorageService.hentFraGjenny(eq(euxCaseId)) } returns gjennySakFraGCP.toJson()
+
+        val result = hentSakService.hentSak(euxCaseId, identifisertPersonFnr = fnr)
+
+        assertEquals(null, result)
+        verify(exactly = 1) { gcpStorageService.hentFraGjenny(euxCaseId) }
+        verify(exactly = 0) { etterlatteService.hentGjennySak(any()) }
+    }
 
     @Test
     fun `hentSak skal gi sak ved treff mot tidligere gjennySak`() {
@@ -77,7 +95,7 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     }
 
     @Test
-    fun `hentSak skal returnere null dersom buc finnes i gcpstorage`() {
+    fun `hentSak skal returnere null dersom buc finnes i gcpstorage men har verdien null`() {
         val euxCaseId = "123"
         val sakIdFraSed = "12131132"
         val fnr = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))
