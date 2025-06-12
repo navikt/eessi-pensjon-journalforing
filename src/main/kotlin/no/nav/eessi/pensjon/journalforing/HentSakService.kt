@@ -23,6 +23,10 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
 
     /**
      * Henter en sak basert på sakid og/eller gjenny informasjon
+     * Verifiserer at sakIdFraSed eller sakId fra sakInformasjon ikke er lik euxCaseId, hvis de er det, logger en feil og returnerer null.
+     * Hvis identifisertPersonFnr er null, logger en advarsel og returnerer null.
+     * Henter først sak fra gjenny-API ved hjelp av sakIdFraSed, hvis det ikke finnes, henter den fra GCP.
+     * Hvis ingen gyldig sak finnes, validerer den mot Pesys-sak basert på sakInformasjon eller sakIdFraSed.
      */
     fun hentSak(
         euxCaseId: String,
