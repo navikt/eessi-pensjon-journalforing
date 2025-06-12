@@ -107,12 +107,12 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
         """.trimIndent()
 
         every { gcpStorageService.hentFraGjenny(any()) } returns gjennygcpsvar
-        every { etterlatteService.hentGjennySak(eq(sakIdFraSed)) } returns JournalforingTestBase.mockHentGjennySakMedError()
 
         val result = hentSakService.hentSak(euxCaseId, sakIdFraSed, identifisertPersonFnr = fnr)
 
         assertNull(result)
-        verify { gcpStorageService.hentFraGjenny(euxCaseId) }
+        verify(exactly = 1) { gcpStorageService.hentFraGjenny(euxCaseId) }
+        verify(exactly = 0) { etterlatteService.hentGjennySak(any()) }
     }
 
     @Test

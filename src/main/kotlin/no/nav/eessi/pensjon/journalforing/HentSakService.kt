@@ -8,7 +8,6 @@ import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -44,51 +43,55 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
             return null
         }
 
-        // sjekker om gjenny-sak validerer mot etterlatte
-        hentGjennySak(sakIdFraSed, euxCaseId)?.let {
-            return it.also { logger.info("hentSak: fant gyldig gjenny sak i SED: $sakIdFraSed, for euxCaseId: $euxCaseId")  }
+        // er sakid fra sed en gjenny sak? verifiserer mot etterlatte api
+        if (sakIdFraSed != null && erVerifisertGjennySak(sakIdFraSed, euxCaseId)) {
+            return Sak(FAGSAK, sakIdFraSed, EY)
+                .also { logger.info("hentSak: fant gyldig gjenny sak i SED: $sakIdFraSed, for euxCaseId: $euxCaseId") }
         }
 
-        return hentGjennyFraGCP(euxCaseId)?.takeIf {
-            hentGjennySak(it.fagsakid, euxCaseId) != null
-        }?.also {
-            logger.info("hentSak: fant gyldig gjenny sak i GCP for euxCaseId: $euxCaseId")
-        } ?: validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId)
+        // er lagret sakid fra gcp en gjenny sak? verifiserer mot etterlatte api
+        gcpStorageService.hentFraGjenny(euxCaseId)?.let { gjennySakGCP ->
+            mapJsonToAny<GjennySak>(gjennySakGCP).sakId?.let { sakIdGCP ->
+                if(erVerifisertGjennySak(sakIdGCP, euxCaseId)) {
+                    logger.info("hentSak: fant gyldig gjenny sak i GCP for euxCaseId: $euxCaseId")
+                    return Sak(FAGSAK, sakIdGCP, EY)
+                }
+            }
+            return null.also { logger.error("hentSak: fant sak i GCP for euxCaseId: $euxCaseId, men klarte ikke å verifisere  sak: $gjennySakGCP mot etterlatte") }
+        }
+
+        return validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId)
             ?.also { logger.info("hentSak: ser om :$sakIdFraSed er en gyldig pesys sakId") }
         ?: logOgReturnerNull(euxCaseId, sakIdFraSed, sakInformasjon)
     }
 
-    private fun hentGjennySak(sakIdFromSed: String?, euxCaseId: String): Sak? {
+    private fun erVerifisertGjennySak(sakIdFromSed: String?, euxCaseId: String): Boolean {
         if (sakIdFromSed.isNullOrBlank()) {
             logger.warn("sakIdFromSed er tom eller mangler for euxCaseId: $euxCaseId")
-            return null
+            return false
         }
-        if( !sakIdFromSed.erGjennySakNummer()) {
-            logger.warn("sakIdFromSed: $sakIdFromSed er ikke et gyldig gjenny saknummer for euxCaseId: $euxCaseId")
-            return null
-        }
+        if (sakIdFromSed.erGjennySakNummer().not()) return false
 
         etterlatteService.hentGjennySak(sakIdFromSed).fold(
-            onSuccess = { gjennySak -> return Sak(FAGSAK, gjennySak?.id.toString(), EY) },
+            onSuccess = { gjennySak -> return true },
             onFailure = { logger.warn("Finner ingen gjennySak hos etterlatte for rinasakId: $euxCaseId, og sakID: $sakIdFromSed") }
         )
 
-        return null
+        return false
     }
 
-    /**
-     * Henter gjenny-sak fra GCP basert på euxCaseId.
-     * Hvis sakId i gjenny-saken er tom eller ugyldig, returnerer null.
-     * Hvis sakId er gyldig, returnerer en Sak-objekt med fagsakid og EY som sakstype.
-     */
-    private fun hentGjennyFraGCP(euxCaseId: String): Sak? {
-        val gjennysakMedIdFraGjenny = gcpStorageService.hentFraGjenny(euxCaseId) ?: return null
-
-        val gjennySak = mapJsonToAny<GjennySak>(gjennysakMedIdFraGjenny)
-        if (gjennySak.sakId.isNullOrEmpty()) return null
-
-        return Sak(FAGSAK, gjennySak.sakId, EY)
-    }
+//    /**
+//     * Henter gjenny-sak fra GCP basert på euxCaseId.
+//     * Hvis sakId i gjenny-saken er tom eller ugyldig, returnerer null.
+//     * Hvis sakId er gyldig, returnerer en Sak-objekt med fagsakid og EY som sakstype.
+//     */
+//    private fun hentGjennyFraGCP(euxCaseId: String): Sak? {
+//        val gjennysakMedIdFraGjenny = gcpStorageService.hentFraGjenny(euxCaseId) ?: return null
+//
+//        val gjennySak = mapJsonToAny<GjennySak>(gjennysakMedIdFraGjenny)
+//
+//        return Sak(FAGSAK, gjennySak.sakId, EY)
+//    }
 
 
     private fun validerPesysSak(sakInfo: SakInformasjon?, sakIdFromSed: String?, euxCaseId: String): Sak? {
@@ -124,10 +127,14 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
     }
 
     private fun String?.erGjennySakNummer(): Boolean {
-        return this?.let { pesysSakId -> pesysSakId.length in  4..5 && pesysSakId.all { char -> char.isDigit() } }
-            .also { logger.info("GjennyNummer er gyldig") } ?: false
-            .also { logger.info("GjennyNummer er ikke gyldig ifht valideringsregler") }
+        return this?.let { gjennySakId ->
+            if (gjennySakId.length in 4..5 && gjennySakId.all { char -> char.isDigit() }) {
+                true.also { logger.info("GjennyNummer: $gjennySakId er gyldig") }
+            } else {
+                false.also { logger.info("GjennyNummer: $gjennySakId er ikke gyldig ifht valideringsregler") }
+            }
+        } ?: false
     }
-
 }
+
 
