@@ -45,10 +45,8 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
         }
 
         // sjekker om gjenny-sak validerer mot etterlatte
-        if(sakIdFraSed.erGjennySakNummer()){
-            hentGjennySak(sakIdFraSed, euxCaseId)?.let {
-                return it.also { logger.info("hentSak: fant gyldig gjenny sak i SED: $sakIdFraSed, for euxCaseId: $euxCaseId")  }
-            }
+        hentGjennySak(sakIdFraSed, euxCaseId)?.let {
+            return it.also { logger.info("hentSak: fant gyldig gjenny sak i SED: $sakIdFraSed, for euxCaseId: $euxCaseId")  }
         }
 
         return hentGjennyFraGCP(euxCaseId)?.takeIf {
@@ -78,21 +76,22 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
         return null
     }
 
+    /**
+     * Henter gjenny-sak fra GCP basert på euxCaseId.
+     * Hvis sakId i gjenny-saken er tom eller ugyldig, returnerer null.
+     * Hvis sakId er gyldig, returnerer en Sak-objekt med fagsakid og EY som sakstype.
+     */
     private fun hentGjennyFraGCP(euxCaseId: String): Sak? {
-        val gjennysakMedIdFraGjenny = gcpStorageService.hentFraGjenny(euxCaseId)
-        if (gjennysakMedIdFraGjenny != null) {
-            val gjennySak = mapJsonToAny<GjennySak>(gjennysakMedIdFraGjenny)
-            if (gjennySak.sakId.isNullOrEmpty())
-                return null
-        }
-        return gcpStorageService.hentFraGjenny(euxCaseId)?.let { mapJsonToAny<GjennySak>(it) }?.sakId
-            ?.let { Sak(FAGSAK, it, EY) }
+        val gjennysakMedIdFraGjenny = gcpStorageService.hentFraGjenny(euxCaseId) ?: return null
+
+        val gjennySak = mapJsonToAny<GjennySak>(gjennysakMedIdFraGjenny)
+        if (gjennySak.sakId.isNullOrEmpty()) return null
+
+        return Sak(FAGSAK, gjennySak.sakId, EY)
     }
 
 
     private fun validerPesysSak(sakInfo: SakInformasjon?, sakIdFromSed: String?, euxCaseId: String): Sak? {
-        // Hvis det finnes en gjenny sak, returner null
-        if(gcpStorageService.hentFraGjenny(euxCaseId) != null) return null
         sakInfo?.sakId?.takeIf { it.isNotBlank() && it.erGyldigPesysNummer() }?.let { sakId ->
             return lagSak(sakId, sakInfo.sakType, sakInfo.sakStatus)
         }
