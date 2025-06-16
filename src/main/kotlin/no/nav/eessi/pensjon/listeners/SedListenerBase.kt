@@ -139,7 +139,7 @@ abstract class SedListenerBase(
         }
 
         // henter saker fra PenInfo og bestemSak
-        val (saksIdFraSed, alleSakId) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed)
+        val (saksIdFraSed, sakIdFraBuc) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed)
             ?: (emptyList<String>() to emptyList())
 
         val sakTypeFraSED = if (bucType == P_BUC_10 || bucType == R_BUC_02) {
@@ -153,14 +153,14 @@ abstract class SedListenerBase(
                 identifisertPerson = identifisertPerson,
                 bucType = bucType,
                 saktypeFraSed = sakTypeFraSED,
-                sakIdsFraAlleSed = alleSakId,
+                sakIdsFraAlleSed = sakIdFraBuc,
                 sakIdsFraCurrentSed = saksIdFraSed,
                 retning = hendelseType
             ).also { logger.info("SakInformasjon: $it") } ?: (null to emptyList())
         }
 
         // advarsel for oppgave
-        val advarsel = hentAdvarsel(pesysIDerFraSED = alleSakId, pesysSakInformasjonListe = sakerFraPesys, hendesesType = hendelseType, match = sakFraPesysSomMatcherSed != null)
+        val advarsel = hentAdvarsel(pesysIDerFraSED = saksIdFraSed, pesysSakInformasjonListe = sakerFraPesys, hendesesType = hendelseType, match = sakFraPesysSomMatcherSed != null)
 
         val saktypeFraSedEllerPesys = populerSaktype(
             saktypeFraSED = sakTypeFraSED,
