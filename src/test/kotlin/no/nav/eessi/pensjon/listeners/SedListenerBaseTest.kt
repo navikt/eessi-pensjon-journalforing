@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_10
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
@@ -147,6 +149,16 @@ class SedListenerBaseTest {
             every { euxService.hentSaktypeType(any(), any()) } returns null
 
             val resultat = hentResultat("P8000_ingen_pesysId.json", null, bestemSak = false, bucType = bucType)
+            assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
+            assertEquals(false, resultat?.advarsel)
+        }
+
+        //6 ++ Manuell JFR, ingen pesys i SED og ikke svar fra pesys eller bestem sak; INGEN ADVARSEL
+        @Test
+        fun `Gitt at det finnes sakid i SED og det finnes IKKE sakId fra PenInfo og INGEN MATCH og ikke svar fra bestemsak saa skal det IKKE sendes ADVARSEL`() {
+            every { euxService.hentSaktypeType(any(), any()) } returns null
+
+            val resultat = hentResultat("P8000_pesysId.json", null, bestemSak = false, bucType = P_BUC_01)
             assertEquals(null, resultat?.sakInformasjonFraPesys?.sakId)
             assertEquals(false, resultat?.advarsel)
         }
@@ -302,7 +314,7 @@ class SedListenerBaseTest {
         pesysIds: String?,
         hendelsesType: HendelseType = HendelseType.MOTTATT,
         bestemSak: Boolean = false,
-        bucType: BucType = BucType.P_BUC_10
+        bucType: BucType = P_BUC_10
     ): SaksInfoSamlet? {
         val sedJson = javaClass.getResource("/sed/$sedFilename")!!.readText()
         val sed = mapJsonToAny<P8000>(sedJson)
