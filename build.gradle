@@ -68,7 +68,7 @@ dependencies {
 		exclude module: 'ep-logging'
 		exclude module: 'ep-personoppslag'
 	}
-	implementation("com.ibm.icu:icu4j:74.2")
+	implementation("com.ibm.icu:icu4j:77.1")
 	// PDF box
 	implementation("org.apache.pdfbox:pdfbox-tools:3.0.5")
 	implementation("com.twelvemonkeys.imageio:imageio-jpeg:${imageioVersion}")
