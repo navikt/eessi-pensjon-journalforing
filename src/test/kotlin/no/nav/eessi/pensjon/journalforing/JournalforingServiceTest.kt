@@ -775,14 +775,14 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
     )
 
     @Test
-    fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes teama UFO`() {
+    fun `gitt det er en P_BUC_02 med saktype UFOREP så skal det settes tema PEN`() {
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns P_BUC_02
             every { sedType } returns SedType.P8000
         }
         val result = hentTemaService.hentTema(mockedSedhendelse, LEALAUS_KAKE.getAge(), 1, saksInfoSamlet(UFOREP), SED(type = SedType.P8000))
-        assertEquals(UFORETRYGD, result)
+        assertEquals(PENSJON, result)
     }
 
     @Test

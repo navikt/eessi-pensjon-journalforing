@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkBeans
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
@@ -25,7 +24,7 @@ import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
 import no.nav.eessi.pensjon.listeners.navansatt.NavansattKlient
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
-import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
+import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.ID_OG_FORDELING
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -144,7 +143,7 @@ internal class ConfigRestTemplateTest {
         )
 
         //sjekker at denne går gjennom og at det lages en oppgave
-        assertEquals(UFORETRYGD, requestSlot.captured.tema)
+        assertEquals(PENSJON, requestSlot.captured.tema)
         assertEquals(ID_OG_FORDELING, requestSlot.captured.journalfoerendeEnhet)
     }
 

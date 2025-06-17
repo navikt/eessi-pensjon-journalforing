@@ -15,7 +15,7 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OppgaveMelding
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakResponse
-import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -56,7 +56,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
@@ -84,7 +84,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -105,7 +105,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -134,7 +134,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
-                Assertions.assertEquals(Tema.OMSTILLING, it.tema)
+                Assertions.assertEquals(OMSTILLING, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -163,7 +163,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
-                Assertions.assertEquals(Tema.EYBARNEP, it.tema)
+                Assertions.assertEquals(EYBARNEP, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -189,7 +189,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -214,7 +214,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
@@ -248,7 +248,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -276,7 +276,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 relasjonAvod = RelasjonTilAvdod.EKTEFELLE,
                 hendelseType = MOTTATT,
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
@@ -285,7 +285,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til PENSJON med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
-                ForenkletSED("10001212", P2200, SedStatus.RECEIVED)
+                ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
             )
             val sakInfoList = listOf(SakInformasjon(sakId = "22332211", sakType = UFOREP, sakStatus = LOPENDE))
 
@@ -300,7 +300,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
@@ -333,7 +333,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = MOTTATT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
@@ -358,7 +358,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
@@ -386,12 +386,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
 
-        @Test //TODO
+        @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Utland, Og bruker har løpende uføretrygd, så routes oppgave til UFORE_UTLAND`() {
             every { gcpStorageService.gjennyFinnes("147729") } returns false
             val allDocuemtActions = listOf(
@@ -410,7 +410,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -444,7 +444,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -468,7 +468,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
             }
         }
@@ -492,12 +492,12 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = FAMILIE_OG_PENSJONSYTELSER_OSLO
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(FAMILIE_OG_PENSJONSYTELSER_OSLO, it.journalfoerendeEnhet)
             }
         }
 
-        @Test //TODO lik som over
+        @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge, Og bruker har løpende uføretrygd, Så skal oppgaver sendes til 4476 Uføretrygd med utlandstilsnitt`() {
 
             val allDocuemtActions = listOf(
@@ -516,7 +516,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.UFORETRYGD, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
         }
@@ -549,7 +549,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 hendelseType = SENDT,
                 norg2enhet = null
             ) {
-                Assertions.assertEquals(Tema.PENSJON, it.tema)
+                Assertions.assertEquals(PENSJON, it.tema)
                 Assertions.assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
         }
