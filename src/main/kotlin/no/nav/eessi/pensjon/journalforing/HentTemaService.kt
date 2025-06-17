@@ -52,12 +52,12 @@ class HentTemaService(
         val enPersonOgUforeAlderUnder62 = identifisertePersoner == 1 && erUforeAlderUnder62
         return when (sedhendelse?.bucType) {
 
+            P_BUC_01, P_BUC_02 -> PENSJON           //Vi antar at P_BUC_02 er pensjon dersom det ikke er en Gjennysak
             P_BUC_03 -> UFORETRYGD
             P_BUC_06 -> temaPbuc06(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
             P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
             P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo)
             P_BUC_04, P_BUC_05, P_BUC_09 -> if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
-            P_BUC_01, P_BUC_02 -> if (identifisertePersoner == 1 && (ufoereSak || enPersonOgUforeAlderUnder62)) UFORETRYGD else PENSJON
             else -> if (ufoereSak && erUforeAlderUnder62) UFORETRYGD else PENSJON
         }.also { logger.info("Henting av tema for ${sedhendelse?.bucType ?: "ukjent bucType"} gir tema: $it, hvor enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62") }
     }
