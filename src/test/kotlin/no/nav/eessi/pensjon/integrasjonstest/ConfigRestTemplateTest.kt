@@ -9,7 +9,6 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.config.RestTemplateConfig
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -172,7 +171,7 @@ internal class ConfigRestTemplateTest {
                 val mvc = MockRestServiceServer.bindTo(this).build()
                 val sedDokumentfiler = SedDokumentfiler(
                     SedVedlegg("", MimeType.PDF, ""),
-                    listOf(SedVedlegg("", MimeType.PDF, createLargePdf(70000).toString()))
+                    listOf(SedVedlegg("", MimeType.PDF, createLargePdf(80000).toString()))
                 )
                 val sedP2000 = javaClass.getResource("/sed/P2000-NAV.json")!!.readText()
                 with(mvc) {
