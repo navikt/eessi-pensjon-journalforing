@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.config.RestTemplateConfig
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.Document
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -32,6 +33,11 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.pdmodel.PDPage
+import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.common.PDRectangle
+import org.apache.pdfbox.pdmodel.font.PDType1Font
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,6 +55,7 @@ import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
+import java.io.ByteArrayOutputStream
 
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
 @AutoConfigureMockMvc
@@ -165,13 +172,13 @@ internal class ConfigRestTemplateTest {
                 val mvc = MockRestServiceServer.bindTo(this).build()
                 val sedDokumentfiler = SedDokumentfiler(
                     SedVedlegg("", MimeType.PDF, ""),
-                    listOf(SedVedlegg("", MimeType.PDF, javaClass.getResource("/25_mb_randomString.txt")!!.readText()))
+                    listOf(SedVedlegg("", MimeType.PDF, createLargePdf(70000).toString()))
                 )
                 val sedP2000 = javaClass.getResource("/sed/P2000-NAV.json")!!.readText()
                 with(mvc) {
                     expect(requestTo("/buc/147666")).andRespond(withBucResponse())
                     expect(requestTo("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018")).andRespond(withSuccess(sedP2000, MediaType.APPLICATION_JSON))
-                    expect(requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond( withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
+                    expect(requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond(withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
                 }
             }
         }
@@ -183,5 +190,30 @@ internal class ConfigRestTemplateTest {
                 documents = mapJsonToAny(javaClass.getResource("/fagmodul/alldocumentsids.json")!!.readText())
             ).toJson(), MediaType.APPLICATION_JSON
         )
+
+        fun createLargePdf(numberOfPages: Int): PDDocument {
+            val documentRet: PDDocument = PDDocument()
+            PDDocument().use { document ->
+                for (i in 1..numberOfPages) {
+                    val page = PDPage(PDRectangle.LETTER)
+                    documentRet.addPage(page)
+
+                    PDPageContentStream(documentRet, page).use { contentStream ->
+                        contentStream.beginText()
+                        contentStream.setFont(PDType1Font.HELVETICA, 12f)
+                        contentStream.newLineAtOffset(50f, 750f)
+                        contentStream.showText("This is page $i of $numberOfPages")
+                        contentStream.endText()
+                    }
+
+                }
+            }
+            val outputStream = ByteArrayOutputStream()
+            documentRet.save(outputStream)
+            val sizeInBytes = outputStream.size()
+            println("PDF size in memory: $sizeInBytes bytes (${sizeInBytes / 1024 /1024} MB)")
+
+            return documentRet // returner en tom PDF hvis noe går galt
+        }
     }
 }
