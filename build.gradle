@@ -87,6 +87,7 @@ dependencies {
 
 	//nødvendig for validering av jwt og EnableJwtTokenValidationConfiguration
 	implementation("org.hibernate.validator:hibernate-validator")
+	testImplementation('org.apache.pdfbox:pdfbox:2.0.34')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
