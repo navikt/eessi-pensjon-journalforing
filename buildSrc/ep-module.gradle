@@ -40,16 +40,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
-compileKotlin {
-    kotlinOptions.jvmTarget =  "21"
-    kotlinOptions.allWarningsAsErrors = true
-    kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
-}
+kotlin {
+    jvmToolchain(21)
 
-compileTestKotlin {
-    kotlinOptions.jvmTarget =  "21"
-    kotlinOptions.allWarningsAsErrors = true
-    kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
+    compilerOptions {
+        allWarningsAsErrors.set(true)
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+        freeCompilerArgs.add("-Xwarning-level=IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE:disabled")
+    }
 }
 
 test {
@@ -69,15 +67,6 @@ dependencyUpdates {
                 .any { qualifier -> it.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/}
     }
     revision = 'release'
-}
-
-
-tasks.withType(Test) {
-    jvmArgs '-Xmx2g' // Test environment heap size
-}
-
-tasks.withType(JavaExec) {
-    jvmArgs '-Xmx4g' // Production environment heap size
 }
 
 // https://docs.gradle.org/current/userguide/jacoco_plugin.html
