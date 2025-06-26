@@ -40,14 +40,16 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
-kotlin {
-    jvmToolchain(21)
+compileKotlin {
+    kotlinOptions.jvmTarget =  "21"
+    kotlinOptions.allWarningsAsErrors = true
+    kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
+}
 
-    compilerOptions {
-        allWarningsAsErrors.set(true)
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
-        freeCompilerArgs.add("-Xwarning-level=IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE:disabled")
-    }
+compileTestKotlin {
+    kotlinOptions.jvmTarget =  "21"
+    kotlinOptions.allWarningsAsErrors = true
+    kotlinOptions.freeCompilerArgs += "-Xjsr305=strict"
 }
 
 test {
