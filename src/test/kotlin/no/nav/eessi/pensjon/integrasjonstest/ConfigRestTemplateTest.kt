@@ -55,6 +55,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
 import java.io.ByteArrayOutputStream
+import kotlin.div
 
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
 @AutoConfigureMockMvc
@@ -191,28 +192,24 @@ internal class ConfigRestTemplateTest {
         )
 
         fun createLargePdf(numberOfPages: Int): PDDocument {
-            val documentRet: PDDocument = PDDocument()
-            PDDocument().use { document ->
-                for (i in 1..numberOfPages) {
-                    val page = PDPage(PDRectangle.LETTER)
-                    documentRet.addPage(page)
-
-                    PDPageContentStream(documentRet, page).use { contentStream ->
-                        contentStream.beginText()
-                        contentStream.setFont(PDType1Font.HELVETICA, 12f)
-                        contentStream.newLineAtOffset(50f, 750f)
-                        contentStream.showText("This is page $i of $numberOfPages")
-                        contentStream.endText()
-                    }
-
+            val document = PDDocument()
+            repeat(numberOfPages) { pageIndex ->
+                val page = PDPage(PDRectangle.LETTER)
+                document.addPage(page)
+                PDPageContentStream(document, page).use { contentStream ->
+                    contentStream.beginText()
+                    contentStream.setFont(PDType1Font.HELVETICA, 12f)
+                    contentStream.newLineAtOffset(50f, 750f)
+                    contentStream.showText("This is page ${pageIndex + 1} of $numberOfPages")
+                    contentStream.endText()
                 }
             }
-            val outputStream = ByteArrayOutputStream()
-            documentRet.save(outputStream)
-            val sizeInBytes = outputStream.size()
-            println("PDF size in memory: $sizeInBytes bytes (${sizeInBytes / 1024 /1024} MB)")
-
-            return documentRet // returner en tom PDF hvis noe går galt
+            ByteArrayOutputStream().use { outputStream ->
+                document.save(outputStream)
+                val sizeInBytes = outputStream.size()
+                println("PDF size in memory: $sizeInBytes bytes (${sizeInBytes / 1024 / 1024} MB)")
+            }
+            return document
         }
     }
 }
