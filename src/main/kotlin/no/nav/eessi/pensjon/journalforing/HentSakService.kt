@@ -57,7 +57,7 @@ class HentSakService(private val etterlatteService: EtterlatteService, private v
                     return Sak(FAGSAK, sakIdGCP, EY)
                 }
             }
-            return null.also { logger.error("hentSak: fant sak i GCP for euxCaseId: $euxCaseId, men klarte ikke å verifisere  sak: $gjennySakGCP mot etterlatte") }
+            return null.also { logger.warn("hentSak: fant sak i GCP for euxCaseId: $euxCaseId, men klarte ikke å verifisere  sak: $gjennySakGCP mot etterlatte") }
         }
 
         return validerPesysSak(sakInformasjon, sakIdFraSed, euxCaseId)

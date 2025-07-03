@@ -49,7 +49,7 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient) {
         logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakIdFraSed Pensjoninformasjon: ${saklistFraPesys.toJson()}")
 
         if (saklistFraPesys.none { it.sakId == pesysSakIdFraSed }) {
-            logger.error("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakIdFraSed fra listen: ${saklistFraPesys.toJson()}")
+            logger.warn("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakIdFraSed fra listen: ${saklistFraPesys.toJson()}")
             if(bucType == BucType.P_BUC_01 && saklistFraPesys.any { sak -> sak.sakType == ALDER } ) {
                 return Pair(saklistFraPesys.first(), saklistFraPesys)
             }
