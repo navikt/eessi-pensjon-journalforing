@@ -32,11 +32,12 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
+import org.apache.pdfbox.cos.COSDictionary
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDType1Font
+import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -55,7 +56,6 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
 import java.io.ByteArrayOutputStream
-import kotlin.div
 
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
 @AutoConfigureMockMvc
@@ -198,7 +198,7 @@ internal class ConfigRestTemplateTest {
                 document.addPage(page)
                 PDPageContentStream(document, page).use { contentStream ->
                     contentStream.beginText()
-                    contentStream.setFont(PDType1Font.HELVETICA, 12f)
+                    contentStream.setFont(PDTrueTypeFont(COSDictionary()), 12f)
                     contentStream.newLineAtOffset(50f, 750f)
                     contentStream.showText("This is page ${pageIndex + 1} of $numberOfPages")
                     contentStream.endText()
