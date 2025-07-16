@@ -34,6 +34,7 @@ spec:
         - host: eux-rina-api-gcp-q2.intern.dev.nav.no
         - host: eessi-pensjon-oppgave-q2.intern.dev.nav.no
         - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
+
   webproxy: true
   kafka:
     pool: nav-dev
@@ -42,6 +43,7 @@ spec:
       value: test
     - name: NAMESPACE
       value: q2
+
     - name: GCP_BUCKET_NAME_GJENNY
       value: eessi-pensjon-gjenny-dev
 
