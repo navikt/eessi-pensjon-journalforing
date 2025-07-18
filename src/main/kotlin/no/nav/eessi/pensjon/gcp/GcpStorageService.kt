@@ -64,7 +64,7 @@ class GcpStorageService(
                 logger.info("Henter melding med rinanr $storageKey, for bucket $bucketName")
                 return jsonHendelse.getContent().decodeToString()
             }
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
         }
         return null
     }
@@ -73,10 +73,10 @@ class GcpStorageService(
         if (eksisterer(euxCaseId, gjennyBucket)) return
         val blobInfo =  BlobInfo.newBuilder(BlobId.of(gjennyBucket, euxCaseId)).setContentType("application/json").build()
         kotlin.runCatching {
-            if(gjennysak?.sakId == null || (gjennysak.sakId.length == 5 && gjennysak.sakId.any { it.isDigit() })) {
-                gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }.also { logger.info("Lagret info på S3 med rinaID: $it") }
-            }
-            else {
+            if (gjennysak?.sakId == null || (gjennysak.sakId.length == 5 && gjennysak.sakId.any { it.isDigit() })) {
+                gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }
+                    .also { logger.info("Lagret info på S3 med rinaID: $it") }
+            } else {
                 throw IllegalArgumentException("SakId må være korrekt strukturert med 5 tegn; mottok: ${gjennysak.toJson()}")
             }
         }.onFailure { e ->
@@ -100,7 +100,7 @@ class GcpStorageService(
         try {
             logger.info("Sletter journalpostdetaljer for rinaSakId: $blobId")
             gcpStorage.delete(blobId).also { logger.info("Slett av journalpostdetaljer utført: $it") }
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
             logger.warn("En feil oppstod under sletting av objekt: $blobId i bucket")
         }
     }

@@ -17,11 +17,8 @@ class Norg2Service(private val klient: Norg2Klient) {
         val request = opprettNorg2ArbeidsfordelingRequest(norgRequest)
         return try {
             val enheter = klient.hentArbeidsfordelingEnheter(request)
-
             val enhet = finnArbeidsfordelingEnheter(request, enheter)
-
             enhet?.let { Enhet.getEnhet(it) }
-
         } catch (e: Exception) {
             logger.warn("Feil oppsto ved uthenting av Norg2 enhet: ", e)
             null
