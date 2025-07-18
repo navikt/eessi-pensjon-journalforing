@@ -101,7 +101,7 @@ class JournalforingService(
                 val institusjon = bestemAvsenderMottaker(hendelseType, sedHendelse)
                 val arkivsaksnummer = hentArkivsaksnummer(sedHendelse, hendelseType, saksInfoSamlet, identifisertPerson)
 
-                val journalpostRequest =journalpostService.opprettJournalpost(
+                val journalpostRequest = journalpostService.opprettJournalpost(
                     sedHendelse = sedHendelse,
                     identifisertPerson = identifisertPerson,
                     sedHendelseType = hendelseType,

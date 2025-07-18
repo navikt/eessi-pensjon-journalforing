@@ -5,24 +5,25 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
-import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
-import no.nav.eessi.pensjon.eux.model.sed.*
+import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.sed.GjenlevPensjon
+import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.eux.model.sed.UforePensjon
 import no.nav.eessi.pensjon.journalforing.*
-import no.nav.eessi.pensjon.journalforing.Bruker
-import no.nav.eessi.pensjon.journalforing.JournalpostType.*
-import no.nav.eessi.pensjon.journalforing.Sak
+import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
+import no.nav.eessi.pensjon.journalforing.JournalpostType.UTGAAENDE
 import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
-import no.nav.eessi.pensjon.journalforing.saf.*
 import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.*
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
-import no.nav.eessi.pensjon.oppgaverouting.HendelseType.*
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
+import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
@@ -92,26 +93,15 @@ class JournalpostService(
                             tildeltJoarkEnhet,
                             aktoerId,
                             sedHendelse,
-                            usupporterteFilnavn(documentsAndAttachments.second),
+                            pdfService.usupporterteFilnavn(documentsAndAttachments.second),
                             tema
                         )
                     }
                 }
             } ?: throw IllegalStateException("sedType is null")
         }
-        logger.info("Dokument hentet, størrelse: ${dokumentStorrelse(documents)}")
+        logger.info("Dokument hentet, størrelse: ${pdfService.dokumentStorrelse(documents)}")
         return documents
-    }
-
-    //TODO: flyttes til PDF/DOK
-    fun dokumentStorrelse(input: String): Double {
-        val byteSize = input.length * 2
-        return byteSize / (1024.0 * 1024.0)
-    }
-
-    //TODO: flyttes til PDF/DOK
-    private fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
-        return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
     }
 
     fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,

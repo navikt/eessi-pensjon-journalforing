@@ -125,4 +125,14 @@ class PDFService(
     private fun konverterFilendingTilPdf(filnavn: String): String {
         return filnavn.replaceAfterLast(".", "pdf")
     }
+
+    fun dokumentStorrelse(input: String): Double {
+        val byteSize = input.length * 2
+        return byteSize / (1024.0 * 1024.0)
+    }
+
+    fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
+        return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
+    }
+
 }
