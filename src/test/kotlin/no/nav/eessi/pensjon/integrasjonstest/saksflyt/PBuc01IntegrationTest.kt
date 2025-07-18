@@ -56,7 +56,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
 
         }
 
-        @Disabled
         @Test
         fun `Krav om alderpensjon for inngående P2000 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {
             val bestemsak = BestemSakResponse(
@@ -106,8 +105,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
         fun `Krav om alderpensjon der person ikke er identifiserbar men pesys sakId finnes i sed så skal vi opprette journalpost, settes til avbrutt og ikke journalføringsoppgave`() {
             val allDocuemtActions = listOf(ForenkletSED("b12e06dda2c7474b9998c7139c841646", SedType.P2000, SedStatus.SENT))
 
-//            every { etterlatteService.hentGjennySak(any()) }  returns mockHentGjennySak("12345678")
-
             testRunnerVoksen(
                 null,
                 null,
@@ -124,7 +121,6 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `Krav om alderpensjon for inngående P2000 journalføres automatisk med bruk av bestemsak med ugyldig vedlegg og det opprettes to oppgaver type BEHANDLE_SED`() {
             val bestemsak = BestemSakResponse(

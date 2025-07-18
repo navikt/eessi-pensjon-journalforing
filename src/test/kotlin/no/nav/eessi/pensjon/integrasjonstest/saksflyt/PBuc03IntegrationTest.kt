@@ -43,7 +43,6 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
     @DisplayName("Inngående P Buc 03")
     inner class InngaaendePBuc03 {
 
-        @Disabled
         @Test
         fun `Krav om uføre for inngående P2200 journalføres automatisk med bruk av bestemsak og det opprettes en oppgave type BEHANDLE_SED`() {
             val bestemsak = bestemSakResponse()

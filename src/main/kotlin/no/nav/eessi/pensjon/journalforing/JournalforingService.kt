@@ -55,8 +55,8 @@ class JournalforingService(
     private val logger = LoggerFactory.getLogger(JournalforingService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    private lateinit var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
-    private lateinit var journalforOgOpprettOppgaveForSedMedUkjentPerson: MetricsHelper.Metric
+    private var journalforOgOpprettOppgaveForSed: MetricsHelper.Metric
+    private var journalforOgOpprettOppgaveForSedMedUkjentPerson: MetricsHelper.Metric
 
     @Value("\${namespace}")
     lateinit var nameSpace: String

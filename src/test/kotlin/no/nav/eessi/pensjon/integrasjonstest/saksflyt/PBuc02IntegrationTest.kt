@@ -253,7 +253,6 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
             }
         }
 
-        @Disabled
         @Test
         fun `Hvis sjekk av adresser i PDL er gjort, Og bruker er registrert med adresse Bosatt Norge og har løpende alderspensjon, Så skal oppgaver fordeles i henhold til NORG2`( ) {
 
