@@ -26,6 +26,14 @@ configurations {
 	xsd
 }
 
+tasks.withType(Test) {
+	jvmArgs '-Xmx2g' // Test environment heap size
+}
+
+tasks.withType(JavaExec) {
+	jvmArgs '-Xmx4g' // Production environment heap size
+}
+
 dependencies {
 
 	// Spring-boot BOM-fil spesifiserer versjoner for Spring Boot-avhengigheter
@@ -107,7 +115,4 @@ dependencies {
 
 	// Architecture tests
 	testImplementation 'com.tngtech.archunit:archunit:1.4.1'
-
-
-
 }
