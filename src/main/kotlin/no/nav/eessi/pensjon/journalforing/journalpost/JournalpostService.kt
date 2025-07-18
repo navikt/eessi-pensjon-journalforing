@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
+import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
@@ -109,9 +110,9 @@ class JournalpostService(
                         hendelseType: HendelseType,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
 
-        val gjenny = when {
-            hendelseType == MOTTATT && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> false
-            hendelseType == SENDT && journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> true
+        val gjenny = when (hendelseType) {
+            MOTTATT if journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> false
+            SENDT if journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> true
             else -> false
         }
 
@@ -187,7 +188,7 @@ class JournalpostService(
         }
 
         // R-BUC skal behandles manuelt selv om vi mangler fnummer eller identifisert person
-        val rSeder = listOf(SedType.R004, SedType.R005, SedType.R006)
+        val rSeder = listOf(R004, R005, R006)
         if(sedHendelse.sedType in rSeder && hendelseType == SENDT){
             logger.warn("HendelseType er utgående og SED er av typen ${sedHendelse.sedType}; settes derfor ikke til avbrutt")
             return false
@@ -211,7 +212,7 @@ class JournalpostService(
         currentSed: SED?
     ): Behandlingstema {
         val pensjonsBucer = listOf(P_BUC_05, P_BUC_06, P_BUC_07, P_BUC_08, P_BUC_09, P_BUC_10)
-        val noenSedInPbuc06list = listOf(SedType.P5000, SedType.P6000, SedType.P7000, SedType.P10000)
+        val noenSedInPbuc06list = listOf(P5000, P6000, P7000, P10000)
 
         //TODO: Er dette nødvendig? allerde i varetatt i BehandlingstemaPbuc06
         return when {
@@ -219,7 +220,7 @@ class JournalpostService(
             bucType == P_BUC_02 -> GJENLEVENDEPENSJON
             bucType == P_BUC_03 -> UFOREPENSJON
             bucType == P_BUC_06 && currentSed?.type in noenSedInPbuc06list -> BehandlingstemaPbuc06(currentSed!!)
-            bucType == P_BUC_10 && currentSed?.type == SedType.P15000 -> BehandlingstemaPbuc06(currentSed)
+            bucType == P_BUC_10 && currentSed?.type == P15000 -> BehandlingstemaPbuc06(currentSed)
             tema == UFORETRYGD && identifisertePersoner <= 1 -> UFOREPENSJON
             tema == PENSJON && identifisertePersoner >= 2 -> GJENLEVENDEPENSJON
             bucType in pensjonsBucer -> when (saktype) {
@@ -232,9 +233,9 @@ class JournalpostService(
     }
 
     private fun BehandlingstemaPbuc06(currentSed: SED): Behandlingstema {
-        return when {
-            currentSed is UforePensjon && currentSed.hasUforePensjonType() -> UFOREPENSJON
-            currentSed is GjenlevPensjon && currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
+        return when (currentSed) {
+            is UforePensjon if currentSed.hasUforePensjonType() -> UFOREPENSJON
+            is GjenlevPensjon if currentSed.hasGjenlevPensjonType() -> GJENLEVENDEPENSJON
             else -> ALDERSPENSJON
         }
     }

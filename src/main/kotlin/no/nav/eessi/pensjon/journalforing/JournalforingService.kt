@@ -145,9 +145,8 @@ class JournalforingService(
         }
     }
 
-    private fun bestemAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker {
-        return avsenderMottaker(hendelseType, sedHendelse)
-    }
+    private fun bestemAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker =
+        avsenderMottaker(hendelseType, sedHendelse)
 
     private fun hentArkivsaksnummer(
         sedHendelse: SedHendelse,
@@ -369,7 +368,7 @@ class JournalforingService(
     fun metricsCounterForEnhet(enhet: Enhet) {
         try {
             Metrics.counter("journalforingsEnhet_fra_tema", "type", enhet.name).increment()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             logger.warn("Metrics feilet på enhet: $enhet")
         }
     }
