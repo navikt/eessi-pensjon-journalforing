@@ -29,7 +29,7 @@ private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
 abstract class JournalforingServiceBase {
 
     val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
-    val pdfService = mockk<PDFService>()
+    val pdfService = mockk<PDFService>(relaxed = true)
     val kravHandeler = mockk<KravInitialiseringsHandler>()
     val gcpStorageService = mockk<GcpStorageService>()
     val kravService = KravInitialiseringsService(kravHandeler)

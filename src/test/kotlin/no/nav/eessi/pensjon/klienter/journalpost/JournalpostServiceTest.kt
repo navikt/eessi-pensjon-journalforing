@@ -40,7 +40,7 @@ import org.springframework.web.client.HttpServerErrorException
 
 internal class JournalpostServiceTest {
 
-    private var pdfService: PDFService = mockk()
+    private var pdfService: PDFService = mockk(relaxed = true)
     private val oppgaveService: OpprettOppgaveService = mockk(relaxed = true)
     private val mockKlient: JournalpostKlient = mockk(relaxed = true)
     private val journalpostService = JournalpostService(mockKlient, pdfService, oppgaveService)
