@@ -104,7 +104,7 @@ dependencies {
 	testImplementation "org.springframework.kafka:spring-kafka-test:$springKafkaVersion"
 
 	
-	testImplementation("org.junit.jupiter:junit-jupiter:5.13.3")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
 
 	//mock - test
 	testImplementation("org.mock-server:mockserver-netty:5.15.0") {
