@@ -93,7 +93,7 @@ class PersonidentifiseringService(
         val identifisertPerson = try {
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
         } catch (fppbe: FlerePersonPaaBucException) {
-            logger.error("Flere personer funnet i $bucType, returnerer null, $fppbe")
+            logger.warn("Flere personer funnet i $bucType, returnerer null, $fppbe")
             return null
         }
         secureLog.info("Identifisert person: $identifisertPerson")
