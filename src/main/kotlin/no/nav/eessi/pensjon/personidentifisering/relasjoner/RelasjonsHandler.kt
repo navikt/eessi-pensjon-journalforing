@@ -42,7 +42,7 @@ object RelasjonsHandler {
 
         return (relasjonerMedFnr + relasjonerUtenFnr).also {
             if(it.size < relasjonList.size){
-                logger.warn("Det gjenstår ${it.size} relasjoner etter filtrering")
+                logger.info("Det gjenstår ${it.size} relasjoner etter filtrering")
             }
         }
     }
