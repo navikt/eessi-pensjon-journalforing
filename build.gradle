@@ -51,7 +51,7 @@ dependencies {
 
 	implementation("org.springframework.retry:spring-retry:2.0.12")
 
-	implementation "com.fasterxml.jackson.core:jackson-core:2.19.2"
+	implementation "com.fasterxml.jackson.core:jackson-core:2.20.0"
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
