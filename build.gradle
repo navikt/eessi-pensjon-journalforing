@@ -40,7 +40,7 @@ dependencies {
 	implementation(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
 	implementation("org.springframework.boot:spring-boot-starter-aop")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.yaml:snakeyaml:2.4") // Pga https://security.snyk.io/package/maven/org.yaml:snakeyaml
+	implementation("org.yaml:snakeyaml:2.5") // Pga https://security.snyk.io/package/maven/org.yaml:snakeyaml
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-actuator")
 
