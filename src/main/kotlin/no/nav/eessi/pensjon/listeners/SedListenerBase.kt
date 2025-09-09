@@ -343,7 +343,7 @@ abstract class SedListenerBase(
             logger.info("Gyldig sed: ${sedHendelse.sedId}, klar for behandling")
 
             val buc = euxService.hentBuc(sedHendelse.rinaSakId)
-            secureLog.info("Buc: ${buc.id}, sedid: ${sedHendelse.sedId} sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}")
+            secureLog.info("Buc: ${buc.id}, sedid: ${sedHendelse.sedId} sensitive: ${buc.sensitive}, sensitiveCommitted: ${buc.sensitiveCommitted}, mottakerID: ${sedHendelse.mottakerId}, avsenderID: ${sedHendelse.avsenderId}")
             behandleSedHendelse(sedHendelse, buc)
 
             metricForGyldigSed(sedRetning.toString(), sedHendelse.bucType, sedHendelse.sedType)
