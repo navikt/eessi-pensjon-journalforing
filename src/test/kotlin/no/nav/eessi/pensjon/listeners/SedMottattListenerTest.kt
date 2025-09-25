@@ -40,9 +40,6 @@ internal class SedMottattListenerTest {
     @BeforeEach
     fun setup() {
         every { fagmodulService.hentPesysSakId(any(), any()) } returns null
-//        every { fagmodulService.hentPensjonSakFraPesys(any(), any(), any(), any()) } returns null
-        every { sedListener.hentGjennySakIdFraSed(any()) } returns null
-        every { FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(any(), any()) } returns null
     }
 
     @Test
