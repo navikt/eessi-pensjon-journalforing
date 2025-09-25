@@ -44,13 +44,13 @@ internal class SedSendtListenerTest {
     fun setup() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { fagmodulService.hentPesysSakId(any(), any()) } returns null
-        every { fagmodulService.hentGjennySakIdFraSed(any()) } returns null
+        every { sedListener.hentGjennySakIdFraSed(any()) } returns null
     }
 
 
     @Test
     fun `gitt en gyldig sedHendelse når sedSendt hendelse konsumeres så ack melding`() {
-        every { fagmodulService.hentPesysSakIdFraSED(any(), any()) } returns null
+        every { FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(any(), any()) } returns null
         sedListener.consumeSedSendt(String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/P_BUC_01_P2000.json"))), cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
@@ -102,7 +102,7 @@ internal class SedSendtListenerTest {
     @Test
     fun `gitt en ugyldig sedHendelse av type R_BUC_02 når sedSendt hendelse konsumeres, skal melding ackes`() {
         val hendelse = String(Files.readAllBytes(Paths.get("src/test/resources/eux/hendelser/R_BUC_02_R005.json")))
-        every { fagmodulService.hentPesysSakIdFraSED(any(), any()) } returns null
+        every { FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(any(), any()) } returns null
         sedListener.consumeSedSendt(hendelse, cr, acknowledgment)
 
         verify(exactly = 1) { acknowledgment.acknowledge() }
