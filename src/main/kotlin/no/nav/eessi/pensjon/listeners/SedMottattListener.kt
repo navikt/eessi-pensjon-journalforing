@@ -88,8 +88,6 @@ class SedMottattListener(
         val alleSedMedGyldigStatus = euxService.hentSedMedGyldigStatus(sedHendelse.rinaSakId, buc)
         val kansellerteSeder = euxService.hentAlleKansellerteSedIBuc(sedHendelse.rinaSakId, buc)
 
-        val harAdressebeskyttelse =
-            personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
 
         //identifisere Person hent Person fra PDL valider Person
         val potensiellePersonRelasjoner = RelasjonsHandler.hentRelasjoner(alleSedMedGyldigStatus, bucType)
@@ -117,7 +115,6 @@ class SedMottattListener(
         }
         val currentSed =  alleSedMedGyldigStatus.firstOrNull { it.first == sedHendelse.rinaDokumentId }?.second
 
-
         val saksInfoSamlet = hentSaksInformasjonForEessi(
             alleSedIBucList,
             sedHendelse,
@@ -127,6 +124,8 @@ class SedMottattListener(
             currentSed
             // trenger ikke å sende med currentSed for MOTTATT, da det dette kommer fra utlandet
         )
+
+        val harAdressebeskyttelse = personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(alleSedMedGyldigStatus)
 
         journalforingService.journalfor(
             sedHendelse,
