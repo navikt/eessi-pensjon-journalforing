@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.SED
+import no.nav.eessi.pensjon.listeners.FiltrerPesysSakFraSedUtil
 import no.nav.eessi.pensjon.listeners.SedMottattListener
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulKlient
 import no.nav.eessi.pensjon.listeners.fagmodul.FagmodulService
@@ -107,7 +108,7 @@ internal class FagmodulServiceTest {
     fun `Gitt at det finnes eessisak der land ikke er Norge så returneres null`() {
         val sedP2000 = javaClass.getResource("/sed/P2000-ugyldigFNR-NAV.json")!!.readText()
         val mockAllSediBuc = listOf(mapJsonToAny<SED>(sedP2000))
-        val eessisakList = fmService.hentPesysSakIdFraSED(mockAllSediBuc, null)
+        val eessisakList = FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(mockAllSediBuc, null)
 
         val sakIdFraSed = mockAllSediBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }
         val result = sedMottattListener.pensjonSakInformasjon(
@@ -127,7 +128,7 @@ internal class FagmodulServiceTest {
     @Test
     fun `Gitt at det finnes eessisak der land er Norge og saksnummer er på feil format så skal null returneres`() {
         val mockAlleSedIBuc = listOf(mockSED(P2000, eessiSakId = "UGYLDIG SAK ID"))
-        val eessisakList =  fmService.hentPesysSakIdFraSED(mockAlleSedIBuc, null)
+        val eessisakList =  FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(mockAlleSedIBuc, null)
         every { bestemSakService.hentSakInformasjonViaBestemSak(any(), any(), any()) } returns null
         val sakIdFraSed = mockAlleSedIBuc.flatMap { it.nav?.eessisak.orEmpty() }.mapNotNull { it.saksnummer }
         val result = sedMottattListener.pensjonSakInformasjon(
@@ -212,7 +213,7 @@ internal class FagmodulServiceTest {
         val sedListe = listOf(mockSED(P2000, eessiSakId = null))
         val currentSed = mockSED(P2000, eessiSakId = null)
 
-        val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
+        val result = FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertEquals(emptyList<String>() ,result?.first)
         assertEquals(emptyList<SED>(), result?.second)
@@ -223,7 +224,7 @@ internal class FagmodulServiceTest {
         val sedListe = listOf(mockSED(P2000, eessiSakId = "12345678"))
         val currentSed = mockSED(P2000, eessiSakId = "12345678")
 
-        val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
+        val result = FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertEquals("12345678", result?.first?.first())
         assertEquals(listOf("12345678"), result?.second)
@@ -237,7 +238,7 @@ internal class FagmodulServiceTest {
         )
 
         val currentSed = mockSED(P2000, eessiSakId = "12345678")
-        val result = fmService.hentPesysSakIdFraSED(sedListe, currentSed)
+        val result = FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(sedListe, currentSed)
 
         assertEquals("12345678", result?.first?.first())
         assertEquals(listOf("12345678"), result?.second)
@@ -250,7 +251,7 @@ internal class FagmodulServiceTest {
             mockSED(P4000, eessiSakId = "INVALID"),
             mockSED(P5000, eessiSakId = "87654321")
         )
-        val result = fmService.hentPesysSakIdFraSED(sedListe, sedListe.first())
+        val result = FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(sedListe, sedListe.first())
 
         assertEquals("12345678", result?.first?.first())
         assertEquals(listOf("12345678"), result?.second)
