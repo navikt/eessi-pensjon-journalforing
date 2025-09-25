@@ -67,13 +67,13 @@ abstract class SedListenerBase(
 
         // Ser først om vi har treff fre sakliste fra current sed
         sakIdsFraCurrentSed?.asSequence()
-            ?.mapNotNull { sakId -> fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon) }
+            ?.mapNotNull { sakId -> FiltrerPesysSakFraSedUtil.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon) }
             ?.find { it.first != null }
             ?.let { return Pair(it.first, it.second) }
 
         // Ser så om vi har treff fra sakliste fra alle sed
         val collectedResults = sakIdsFraAlleSed.mapNotNull { sakId ->
-            fagmodulService.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
+            FiltrerPesysSakFraSedUtil.hentGyldigSakInformasjonFraPensjonSak(aktoerId, sakId, sakInformasjon)
         }
 
         return collectedResults.find { it.first != null }
@@ -131,15 +131,15 @@ abstract class SedListenerBase(
     ): SaksInfoSamlet {
         val erGjennysak = gcpStorageService.gjennyFinnes(sedHendelse.rinaSakId)
         if (erGjennysak) {
-            val gjennySakId = fagmodulService.hentGjennySakIdFraSed(currentSed)
+            val gjennySakId = hentGjennySakIdFraSed(currentSed)
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             }
             return SaksInfoSamlet(gjennySakId)
         }
 
-        // henter saker fra PenInfo og bestemSak
-        val (saksIdFraSed, sakIdFraBuc) = fagmodulService.hentPesysSakIdFraSED(alleSedIBucList, currentSed)
+        // filterer ut pesys sakID fra alle seder i buc, og fra current sed
+        val (saksIdFraSed, sakIdFraBuc) = FiltrerPesysSakFraSedUtil.hentPesysSakIdFraSED(alleSedIBucList, currentSed)
             ?: (emptyList<String>() to emptyList())
 
         val sakTypeFraSED = if (bucType == P_BUC_10 || bucType == R_BUC_02) {
@@ -277,6 +277,19 @@ abstract class SedListenerBase(
             }
         }
     }
+
+    fun hentGjennySakIdFraSed(currentSed: SED?): String? {
+        val sakIdFraSed = currentSed?.nav?.eessisak?.filter { it.land == "NO" }
+            ?.mapNotNull { it.saksnummer}
+            ?.map { id -> FiltrerPesysSakFraSedUtil.trimSakidString(id) }
+            ?.filter {  it.length == 5 }
+            ?.distinct()
+            .also { sakId -> logger.info("Fant gjenny sakId i SED: $sakId. Antall gjennysaker funnet: ${sakId?.size}") }
+
+        if (sakIdFraSed?.isEmpty() == true) logger.warn("Fant ingen gjenny sakId i SEDen")
+        return sakIdFraSed?.firstOrNull().also { logger.info("Gjenny sakId fra SED: $it") }
+    }
+
 
     fun logScenario(scenario: String, hendelseType: HendelseType, advarsel: Boolean, samlet: SaksInfoSamlet){
         logger.info("Scenario: $scenario, hendelseType: $hendelseType, advarsel: $advarsel, sakId fra sed: $samlet")
