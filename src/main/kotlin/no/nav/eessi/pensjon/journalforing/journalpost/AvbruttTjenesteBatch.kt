@@ -14,14 +14,12 @@ class AvbruttTjenesteBatch (
 ) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(AvbruttTjenesteBatch::class.java) }
 
-    @Scheduled(cron = "0 55 10 * * *")
+    @Scheduled(cron = "0 12 11 * * *")
     fun settJournalposterTilAvbrutt() {
         logger.info("Starter batch for å sette journalposter til avbrutt")
         val names = listOf(
-            "679937118",
-            "673823582",
-            "673000053",
-            "673000049"
+            "673000018",
+            "673823581"
         )
         try {
             names.forEach { name ->
