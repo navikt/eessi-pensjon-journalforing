@@ -18,8 +18,6 @@ class AvbruttTjenesteBatch (
     fun settJournalposterTilAvbrutt() {
         logger.info("Starter batch for å sette journalposter til avbrutt")
         val names = listOf(
-            "645153145",
-            "643414733",
             "679937118",
             "673823582",
             "673000053",
