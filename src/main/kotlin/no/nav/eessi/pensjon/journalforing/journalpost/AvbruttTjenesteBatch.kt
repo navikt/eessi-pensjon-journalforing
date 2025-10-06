@@ -14,11 +14,10 @@ class AvbruttTjenesteBatch (
 ) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(AvbruttTjenesteBatch::class.java) }
 
-    @Scheduled(cron = "0 40 10 * * *")
+    @Scheduled(cron = "0 55 10 * * *")
     fun settJournalposterTilAvbrutt() {
         logger.info("Starter batch for å sette journalposter til avbrutt")
         val names = listOf(
-            "619695191",
             "645153145",
             "643414733",
             "679937118",
@@ -26,9 +25,13 @@ class AvbruttTjenesteBatch (
             "673000053",
             "673000049"
         )
-        names.forEach { name ->
-            journalpostKlient.oppdaterJournalpostMedAvbrutt(name)
-            Thread.sleep(3000)
+        try {
+            names.forEach { name ->
+                journalpostKlient.oppdaterJournalpostMedAvbrutt(name)
+                Thread.sleep(3000)
+            }
+        } catch (e: Exception) {
+            logger.error("Feil ved oppdatering av journalpost til avbrutt", e)
         }
     }
 }
