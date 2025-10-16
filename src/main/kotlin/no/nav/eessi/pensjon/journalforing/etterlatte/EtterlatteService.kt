@@ -19,6 +19,7 @@ class EtterlatteService(
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
     private val logger = LoggerFactory.getLogger(EtterlatteService::class.java)
+    private val secureLog = LoggerFactory.getLogger("secureLog")
 
     private lateinit var henterSakFraEtterlatte: MetricsHelper.Metric
 
@@ -38,7 +39,7 @@ class EtterlatteService(
                 String::class.java
             )
 
-            logger.info("Hent sak fra gjenny: response: ${response.body}".trimMargin())
+            secureLog.info("Hent sak fra gjenny: response: ${response.body}".trimMargin())
 
             response.body?.let {
                 Result.success(mapJsonToAny<EtterlatteResponseData>(it))
