@@ -122,4 +122,4 @@ spec:
       memory: 4Gi
     requests:
       cpu: 600m
-      memory: 1Gi
+      memory: 2Gi
