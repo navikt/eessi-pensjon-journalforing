@@ -145,7 +145,7 @@ class JournalforingService(
         }
     }
 
-    private fun bestemAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker =
+    private fun bestemAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker? =
         avsenderMottaker(hendelseType, sedHendelse)
 
     private fun hentArkivsaksnummer(
@@ -307,14 +307,24 @@ class JournalforingService(
         """.trimIndent()
     )
 
+    /**
+     * Avsender for utgående SED og mottaker for innkommende SED
+     * Denne skal være satt og komme fra SED-hendelsen
+     */
     private fun avsenderMottaker(
         hendelseType: HendelseType,
         sedHendelse: SedHendelse
-    ): AvsenderMottaker {
-        return when (hendelseType) {
+    ): AvsenderMottaker? {
+        val avsenderMottaker = when (hendelseType) {
             SENDT -> AvsenderMottaker(sedHendelse.mottakerId, UTL_ORG, sedHendelse.mottakerNavn, konverterGBUKLand(sedHendelse.mottakerLand))
             else -> AvsenderMottaker(sedHendelse.avsenderId, UTL_ORG, sedHendelse.avsenderNavn, konverterGBUKLand(sedHendelse.avsenderLand))
         }
+
+        if(avsenderMottaker.id == null || avsenderMottaker.land == null ) {
+            logger.error("Avsender/Mottaker for $hendelseType SED, mangler info: $avsenderMottaker")
+            return null
+        }
+        return avsenderMottaker
     }
 
     private fun journalforingsEnhet(

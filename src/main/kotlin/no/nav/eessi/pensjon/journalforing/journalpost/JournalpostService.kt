@@ -55,7 +55,7 @@ class JournalpostService(
         tildeltJoarkEnhet: Enhet,
         arkivsaksnummer: Sak? = null,
         saktype: SakType? = null,
-        institusjon: AvsenderMottaker,
+        institusjon: AvsenderMottaker?,
         identifisertePersoner: Int,
         saksbehandlerInfo: Pair<String, Enhet?>? = null,
         tema: Tema,
