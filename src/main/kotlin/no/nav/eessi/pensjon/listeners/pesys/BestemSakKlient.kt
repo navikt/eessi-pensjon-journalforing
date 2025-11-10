@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -40,7 +41,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
     fun kallBestemSak(requestBody: BestemSakRequest): BestemSakResponse? {
         return hentPesysSaker.measure {
             return@measure try {
-                logger.info("Kaller bestemSak i PESYS")
+                secureLog.info("Kaller bestemSak i PESYS: ${requestBody.toJson()}")
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
 
