@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
 import java.util.*
@@ -54,10 +55,16 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
                 logger.info("Respons kallBestemSak: ${response.body}")
 
                 mapper.readValue(response.body, BestemSakResponse::class.java)
-            } catch (ex: HttpStatusCodeException) {
-                throw RuntimeException("En feil oppstod under kall til bestemSak i PESYS ex: ", ex)
             } catch (ex: Exception) {
-                throw RuntimeException("En feil oppstod under kall til bestemSak i PESYS ex: ", ex)
+                if (ex is HttpClientErrorException && ex.message?.contains("Ugyldig fødselsnummer") == true) {
+                    logger.error("Feil ved kall til bestemSak i PESYS. Statuskode: ${ex.statusCode}, responsbody: ${ex.responseBodyAsString}")
+                    secureLog.error("Feil ved kall til bestemSak i PESYS. Statuskode: ${ex.statusCode}, responsbody: ${ex.responseBodyAsString}", ex)
+                    return@measure null
+                } else {
+                    logger.error("En feil oppstod under kall til bestemSak i PESYS: ${ex.message}", ex)
+                    secureLog.error("En feil oppstod under kall til bestemSak i PESYS: ${ex.message}", ex)
+                    throw RuntimeException("En feil oppstod under kall til bestemSak i PESYS ex: ", ex)
+                }
             }
         }
     }
