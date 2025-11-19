@@ -42,9 +42,11 @@ class HentTemaService(
             if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
             return PENSJON
         }
-        if (sedhendelse?.rinaSakId != null && gcpStorageService.gjennyFinnes(sedhendelse.rinaSakId)) {
-            val blob = gcpStorageService.hentFraGjenny(sedhendelse.rinaSakId)
-            return if (blob?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+
+        sedhendelse?.rinaSakId?.takeIf { gcpStorageService.gjennyFinnes(it) }?.let { sakId ->
+            val tema = if (gcpStorageService.hentFraGjenny(sakId)?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
+            logger.info("Henting av tema for gjennysak $sakId gir tema: $tema")
+            return tema
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
