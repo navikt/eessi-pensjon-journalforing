@@ -52,7 +52,7 @@ class GcpStorageService(
         gcpStorage.get(BlobId.of(bucketName, storageKey)).blobId
 
     fun hentFraGjenny(storageKey: String): String? {
-        logger.debug("Henter gjennydetaljer for rinaSakId: $storageKey")
+        logger.info("Henter gjennydetaljer for rinaSakId: $storageKey")
         return hent(storageKey, gjennyBucket)
     }
 
@@ -75,6 +75,9 @@ class GcpStorageService(
         kotlin.runCatching {
             if(gjennysak?.sakId == null || (gjennysak.sakId.length == 5 && gjennysak.sakId.any { it.isDigit() })) {
                 gcpStorage.writer(blobInfo).use { it.write(ByteBuffer.wrap(gjennysak?.toJson()?.toByteArray())) }.also { logger.info("Lagret info på S3 med rinaID: $it") }
+                val gjennysak = gcpStorage.get(BlobId.of(gjennyBucket, euxCaseId))
+                if (eksisterer(euxCaseId, gjennyBucket)) logger.info("Lagret gjennysak $gjennysak til gcp bucket")
+                else throw RuntimeException("Obs! Fikk ikke lagret gjennysak $gjennysak til gcp bucket")
             }
             else {
                 throw IllegalArgumentException("SakId må være korrekt strukturert med 5 tegn; mottok: ${gjennysak.toJson()}")
