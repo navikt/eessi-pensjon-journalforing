@@ -47,7 +47,7 @@ class HentTemaService(
         val ufoereSak = saksInfo?.saktypeFraSed == UFOREP
         if(alder == null) {
             return if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) UFORETRYGD
-            else PENSJON
+            else PENSJON.also { logger.info("Alder er null -> tema=PENSJON") }
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
