@@ -135,7 +135,7 @@ abstract class SedListenerBase(
             if (gjennySakId != null) {
                 oppdaterGjennySak(sedHendelse, gjennySakId).also { logger.info("Gjennysak oppdatert med sakId: $it") }
             }
-            return SaksInfoSamlet(gjennySakId)
+            return SaksInfoSamlet(gjennySakId).also { logger.info("Gjennysak med sakId: $it") }
         }
 
         // filterer ut pesys sakID fra alle seder i buc, og fra current sed
