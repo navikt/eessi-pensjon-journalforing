@@ -37,16 +37,17 @@ class HentTemaService(
         saksInfo: SaksInfoSamlet?,
         currentSed: SED?
     ): Tema {
-        val ufoereSak = saksInfo?.saktypeFraSed == UFOREP
-        if(alder == null) {
-            if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) return UFORETRYGD
-            return PENSJON
-        }
 
         sedhendelse?.rinaSakId?.takeIf { gcpStorageService.gjennyFinnes(it) }?.let { sakId ->
             val tema = if (gcpStorageService.hentFraGjenny(sakId)?.contains("BARNEP") == true) EYBARNEP else OMSTILLING
             logger.info("Henting av tema for gjennysak $sakId gir tema: $tema")
             return tema
+        }
+
+        val ufoereSak = saksInfo?.saktypeFraSed == UFOREP
+        if(alder == null) {
+            return if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) UFORETRYGD
+            else PENSJON
         }
 
         //https://confluence.adeo.no/pages/viewpage.action?pageId=603358663
