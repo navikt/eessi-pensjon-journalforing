@@ -58,7 +58,6 @@ class GcpStorageService(
 
     fun hent(storageKey: String, bucketName: String): String? {
         try {
-            logger.info("storageKey: $storageKey og bucketName: $bucketName")
             val jsonHendelse = gcpStorage.get(BlobId.of(bucketName, storageKey))
             if (jsonHendelse.exists()) {
                 logger.info("Henter melding med rinanr $storageKey, for bucket $bucketName")
