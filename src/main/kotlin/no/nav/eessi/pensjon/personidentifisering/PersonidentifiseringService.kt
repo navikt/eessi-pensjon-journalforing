@@ -151,7 +151,7 @@ class PersonidentifiseringService(
     fun validerResultatPdlMotSokeKriterier(personNavn: Navn?, sokKriterier: SokKriterier) {
         personNavn?.let { navn ->
             if (!erSokKriterieOgPdlNavnLikt(sokKriterier, navn)) {
-                secureLog.error("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
+                secureLog.warn("SøkPerson fra PDL gir forskjellig navn; sokKriterier: fornavn: ${sokKriterier.fornavn}, etternavn: ${sokKriterier.etternavn} " +
                         "navn i SED: fornavn: ${navn.fornavn}, etternavn: ${navn.etternavn}"
                 )
             }
