@@ -93,7 +93,7 @@ class SedSendtListener(
             SENDT,
             sedHendelse.rinaDokumentId,
             identifisertePersoner,
-            potensiellePersonRelasjoner
+            potensiellePersonRelasjoner,
         )
 
         val alleSedIBucList = alleSedMedGyldigStatus.flatMap { (_, sed) -> listOf(sed) }

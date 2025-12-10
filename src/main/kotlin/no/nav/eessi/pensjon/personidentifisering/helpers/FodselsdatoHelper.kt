@@ -38,9 +38,7 @@ class FodselsdatoHelper {
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
             val fdato = seder
-                    .filter { it.type.kanInneholdeIdentEllerFdato() }
-                    .mapNotNull { filterFodselsdato(it) }
-                    .firstOrNull()
+                .filter { it.type.kanInneholdeIdentEllerFdato() }.firstNotNullOfOrNull { filterFodselsdato(it) }
 
             if (fdato != null) {
                 return fdato
@@ -69,18 +67,18 @@ class FodselsdatoHelper {
         fun filterFodselsdato(sed: SED): LocalDate? {
             return try {
                 val fdato = when (sed.type) {
-                    SedType.R005 -> filterPersonR005Fodselsdato(sed as R005)
+                    R005 -> filterPersonR005Fodselsdato(sed as R005)
+                    X005, X008, X010 -> filterPersonFodselsdatoX00Sed(sed)
                     P2000, P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
-                    SedType.P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
-                    SedType.P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
+                    P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
+                    P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
                     P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
                     P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    SedType.P12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    SedType.P15000 -> filterP15000(sed as P15000)
+                    P12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
+                    P15000 -> filterP15000(sed as P15000)
                     H121, H120, H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    SedType.X005, SedType.X008, SedType.X010 -> filterPersonFodselsdatoX00Sed(sed)
                     else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
@@ -102,7 +100,6 @@ class FodselsdatoHelper {
             else filterPersonFodselsdato(sed.nav?.bruker?.person)
         }
 
-
         /**
          * R005 har mulighet for flere personer.
          * har sed kun en person returneres dette fdato
@@ -110,8 +107,8 @@ class FodselsdatoHelper {
          *
          * * hvis ingen intreffer returnerer vi null
          */
-        private fun filterPersonR005Fodselsdato(sed: R005): String? =
-                sed.recoveryNav?.brukere?.first()?.person?.foedselsdato
+
+        private fun filterPersonR005Fodselsdato(sed: R005): String? = sed.recoveryNav?.brukere?.first()?.person?.foedselsdato
 
         /**
          * P10000 - [01] Søker til etterlattepensjon
@@ -129,10 +126,10 @@ class FodselsdatoHelper {
         private fun filterPersonFodselsdato(person: Person?): String? = person?.foedselsdato
 
         private fun filterPersonFodselsdatoX00Sed(sed: SED) : String? {
-            return when {
-                sed is X005 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
-                sed is X010 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
-                sed is X008 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
+            return when (sed) {
+                is X005 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
+                is X010 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
+                is X008 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
                 else -> null
             }
         }

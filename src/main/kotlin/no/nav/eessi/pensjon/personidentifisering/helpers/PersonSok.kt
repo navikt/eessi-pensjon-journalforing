@@ -2,6 +2,7 @@ package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import io.micrometer.core.instrument.Counter
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
 import no.nav.eessi.pensjon.metrics.MetricsHelper
@@ -23,8 +24,8 @@ class PersonSok(
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest() ) {
 
     private val logger = LoggerFactory.getLogger(PersonSok::class.java)
-    private lateinit var sokPersonTellerTreff: Counter
-    private lateinit var sokPersonTellerMiss: Counter
+    private var sokPersonTellerTreff: Counter
+    private var sokPersonTellerMiss: Counter
 
     init {
         sokPersonTellerTreff = Counter.builder("sokPersonTellerTreff")
@@ -43,7 +44,7 @@ class PersonSok(
 
         /** Har prioritet på fnr i journalførende sed, men åpner også opp for å bruke fnr fra andre sed i buc */
         val potensiellePersonRelasjoner = when {
-            bucType == BucType.P_BUC_02 || sedType in listOf(H070, H120, H121) -> personRelasjoner
+            bucType == P_BUC_02 || sedType in listOf(H070, H120, H121) -> personRelasjoner
             else -> personRelasjoner.filter { it.rinaDocumentId == rinaDocumentId }.ifEmpty { personRelasjoner }
         }
 
