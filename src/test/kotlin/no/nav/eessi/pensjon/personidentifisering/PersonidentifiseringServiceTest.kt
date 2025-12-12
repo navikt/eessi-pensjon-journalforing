@@ -21,7 +21,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.FOLKEREGISTERIDE
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -950,7 +949,6 @@ class PersonidentifiseringServiceTest {
             assertEquals(ident, valid)
         }
 
-        @Disabled
         @ParameterizedTest
         @CsvSource(textBlock = """    
             Ola , Testing, Ola, Testing, true

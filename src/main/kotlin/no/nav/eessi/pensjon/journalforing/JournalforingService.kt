@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.journalforing
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import io.micrometer.core.instrument.Metrics
 import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.BucType.*
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import tools.jackson.databind.exc.MismatchedInputException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period

@@ -26,7 +26,7 @@ class KravInitialiseringsHandler(private val kravInitialiseringKafkaTemplate: Ka
     private lateinit var kravTopic: String
 
     fun putKravInitMeldingPaaKafka(melding: BehandleHendelseModel) {
-        kravInitialiseringKafkaTemplate.setDefaultTopic(kravTopic)
+        kravInitialiseringKafkaTemplate.defaultTopic = kravTopic
 
         val key = MDC.get(X_REQUEST_ID)
         val payload = melding.toJson()

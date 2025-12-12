@@ -101,9 +101,9 @@ abstract class IntegrasjonsBase {
 
     private fun settOppUtitlityConsumer(topicName: String): KafkaMessageListenerContainer<String, String> {
         val consumerProperties = KafkaTestUtils.consumerProps(
-            embeddedKafka,
             UUID.randomUUID().toString(),
-            false,
+            "false",
+            embeddedKafka
         )
         consumerProperties[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         consumerProperties[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
@@ -156,7 +156,7 @@ abstract class IntegrasjonsBase {
     private fun settOppProducerTemplate(topicNavn: String): KafkaTemplate<String, String> {
         val senderProps = KafkaTestUtils.producerProps(embeddedKafka.brokersAsString)
         return KafkaTemplate(DefaultKafkaProducerFactory(senderProps, StringSerializer(), StringSerializer())).apply {
-            setDefaultTopic(topicNavn)
+            defaultTopic =topicNavn
         }
     }
 

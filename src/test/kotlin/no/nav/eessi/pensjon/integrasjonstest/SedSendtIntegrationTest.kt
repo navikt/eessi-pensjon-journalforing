@@ -6,7 +6,6 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
@@ -47,7 +46,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
 
-    @Disabled
     @Test
     fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 
