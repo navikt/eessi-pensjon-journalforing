@@ -10,12 +10,13 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.*
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer
 import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
@@ -50,14 +51,14 @@ class IntegrasjonsTestConfig {
     @Bean
     fun oppgaveKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
-            defaultTopic = oppgaveTopic
+            setDefaultTopic(oppgaveTopic)
         }
     }
 
     @Bean
     fun oppdaterOppgaveKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
-            defaultTopic = oppdaterOppgaveTopic
+            setDefaultTopic(oppdaterOppgaveTopic)
         }
     }
 
@@ -65,14 +66,14 @@ class IntegrasjonsTestConfig {
         val configs = HashMap<String, Any>()
         configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = this.brokerAddresses
         configs[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        configs[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = org.springframework.kafka.support.serializer.JsonSerializer::class.java
+        configs[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JacksonJsonSerializer::class.java
         return DefaultKafkaProducerFactory(configs)
     }
 
     @Bean
     fun statistikkKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
-            defaultTopic = automatiseringTopic
+            setDefaultTopic(automatiseringTopic)
         }
     }
 
@@ -126,7 +127,7 @@ class IntegrasjonsTestConfig {
     @Bean("sedKafkaListenerContainerFactory")
     fun aivenSedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = aivenKafkaConsumerFactory()
+        factory.setConsumerFactory(aivenKafkaConsumerFactory())
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.setAuthExceptionRetryInterval( Duration.ofSeconds(4L) )
         return factory
