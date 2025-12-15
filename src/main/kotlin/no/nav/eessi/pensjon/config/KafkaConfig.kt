@@ -1,6 +1,6 @@
 package no.nav.eessi.pensjon.config
 
-import com.fasterxml.jackson.databind.JsonSerializer
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -57,7 +57,7 @@ class KafkaConfig(
         populerCommonConfig(configMap)
         configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
         configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JacksonJsonSerializer::class.java
         configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         val automatiseringsTemplate: ProducerFactory<String, String> = DefaultKafkaProducerFactory(configMap)
 
