@@ -3,7 +3,7 @@ buildscript {
 	ext {
 		kotlinVersion = '2.2.21'
 		springBootVersion = '4.0.0'
-		springKafkaVersion = '4.0.0'
+		springKafkaVersion = '4.0.1'
 		tokenSupportVersion = '6.0.0'
 		imageioVersion = '3.12.0'
 	}
@@ -48,7 +48,7 @@ dependencies {
 	implementation("org.yaml:snakeyaml:2.5") // Pga https://security.snyk.io/package/maven/org.yaml:snakeyaml
 
 	// Spring Framework BOM-fil kan overstyre så vi får siste patch-versjon av Spring Framework
-	implementation(platform("org.springframework:spring-framework-bom:7.0.1"))
+	implementation(platform("org.springframework:spring-framework-bom:7.0.2"))
 
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.5.1")
 
