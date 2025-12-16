@@ -47,7 +47,6 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     }
 
 
-    @Disabled
     @Test
     fun `En P8000 med saksType, saksId og aktørId skal journalføres maskinelt`() {
 

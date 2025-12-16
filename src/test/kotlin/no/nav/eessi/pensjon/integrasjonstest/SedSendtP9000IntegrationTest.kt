@@ -26,7 +26,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 
-@Disabled
 @SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.*
 import org.springframework.kafka.listener.ContainerProperties
@@ -21,6 +22,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker
 import org.springframework.web.client.RestTemplate
 import java.time.Duration
 
+@EnableKafka
 @TestConfiguration
 class IntegrasjonsTestConfig {
     @Value("\${" + EmbeddedKafkaBroker.SPRING_EMBEDDED_KAFKA_BROKERS + "}")

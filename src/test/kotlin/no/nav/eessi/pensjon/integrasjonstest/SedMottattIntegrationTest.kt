@@ -20,7 +20,6 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
 import kotlin.random.Random
 
-@Disabled
 @SpringBootTest(classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
