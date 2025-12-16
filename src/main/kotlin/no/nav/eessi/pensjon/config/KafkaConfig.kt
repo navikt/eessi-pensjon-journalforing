@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.config
 
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -19,7 +20,6 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.support.serializer.JsonSerializer
 import java.time.Duration
 
 @EnableKafka
@@ -57,19 +57,19 @@ class KafkaConfig(
         populerCommonConfig(configMap)
         configMap[ProducerConfig.CLIENT_ID_CONFIG] = "eessi-pensjon-journalforing"
         configMap[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JsonSerializer::class.java
+        configMap[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = JacksonJsonSerializer::class.java
         configMap[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         val automatiseringsTemplate: ProducerFactory<String, String> = DefaultKafkaProducerFactory(configMap)
 
         val template = KafkaTemplate(automatiseringsTemplate)
-        template.defaultTopic = automatiseringTopic
+        template.setDefaultTopic(automatiseringTopic)
         return template
     }
 
     @Bean
     fun oppgaveKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory()).apply {
-            defaultTopic = oppgaveTopic
+            setDefaultTopic(oppgaveTopic)
         }
     }
 
@@ -88,7 +88,7 @@ class KafkaConfig(
     @Bean
     fun sedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String>? {
         val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = kafkaConsumerFactory()
+        factory.setConsumerFactory(kafkaConsumerFactory())
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.containerProperties.setAuthExceptionRetryInterval( Duration.ofSeconds(4L) )
         if (kafkaErrorHandler != null) {

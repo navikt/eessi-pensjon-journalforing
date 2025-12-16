@@ -2,8 +2,8 @@ buildscript {
 
 	ext {
 		kotlinVersion = '2.2.21'
-		springBootVersion = '3.5.7'
-		springKafkaVersion = '3.3.10'
+		springBootVersion = '4.0.0'
+		springKafkaVersion = '4.0.1'
 		tokenSupportVersion = '6.0.0'
 		imageioVersion = '3.12.0'
 	}
@@ -38,20 +38,24 @@ dependencies {
 
 	// Spring-boot BOM-fil spesifiserer versjoner for Spring Boot-avhengigheter
 	implementation(platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}"))
-	implementation("org.springframework.boot:spring-boot-starter-aop")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.yaml:snakeyaml:2.5") // Pga https://security.snyk.io/package/maven/org.yaml:snakeyaml
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-actuator")
+	implementation("org.springframework.boot:spring-boot-restclient")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-aop:3.5.8")
+	implementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+
+	implementation("org.yaml:snakeyaml:2.5") // Pga https://security.snyk.io/package/maven/org.yaml:snakeyaml
 
 	// Spring Framework BOM-fil kan overstyre så vi får siste patch-versjon av Spring Framework
-	implementation(platform("org.springframework:spring-framework-bom:6.2.12"))
+	implementation(platform("org.springframework:spring-framework-bom:7.0.2"))
 
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.5.1")
 
 	implementation("org.springframework.retry:spring-retry:2.0.12")
 
 	implementation "com.fasterxml.jackson.core:jackson-core:2.20.1"
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
@@ -61,16 +65,16 @@ dependencies {
 	implementation("com.google.cloud:google-cloud-storage:2.59.0")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:2.5.30")
-	implementation("no.nav.eessi.pensjon:ep-metrics:2.1.16")
-	implementation("no.nav.eessi.pensjon:ep-logging:2.3.21")
+	implementation("no.nav.eessi.pensjon:ep-eux:3.0.0")
+	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.0")
+	implementation("no.nav.eessi.pensjon:ep-logging:3.0.1")
 
-    implementation("no.nav.eessi.pensjon:ep-personoppslag:13.3.54"){
+    implementation("no.nav.eessi.pensjon:ep-personoppslag:14.0.0"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:2.1.66"){
+	implementation("no.nav.eessi.pensjon:ep-routing:3.0.0"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
@@ -103,7 +107,6 @@ dependencies {
 	}
 	testImplementation "org.springframework.kafka:spring-kafka-test:$springKafkaVersion"
 
-	
 	testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
 
 	//mock - test
