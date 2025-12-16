@@ -219,7 +219,14 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
             sedPersonRelasjon(personRelasjonGjenlev, fnrGjenlev)
         )
 
-        val actual = personidentifiseringService.hentIdentifisertPerson(R_BUC_02, R005, MOTTATT, "123456", identifisertePersonerISed, sedRelasjoner)
+        val actual = personidentifiseringService.hentIdentifisertPerson(
+            R_BUC_02,
+            R005,
+            MOTTATT,
+            "123456",
+            identifisertePersonerISed,
+            sedRelasjoner,
+        )
         println("actual: $actual")
 
         assertEquals(forventetFnr, actual?.fnr?.value)

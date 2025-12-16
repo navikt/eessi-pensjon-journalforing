@@ -27,10 +27,8 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.text.Normalizer
 import java.time.LocalDate
 import java.util.Locale
-import java.util.Locale.getDefault
 
 @Component
 class PersonidentifiseringService(
@@ -89,7 +87,6 @@ class PersonidentifiseringService(
         identifisertePersoner: List<IdentifisertPDLPerson>,
         potensiellePersonRelasjoner: List<SEDPersonRelasjon>
     ): IdentifisertPDLPerson? {
-
         val identifisertPerson = try {
             identifisertPersonUtvelger(identifisertePersoner, bucType, sedType, potensiellePersonRelasjoner)
         } catch (fppbe: FlerePersonPaaBucException) {
@@ -106,11 +103,10 @@ class PersonidentifiseringService(
             ?.let { personRelasjon -> return hentIdentifisertPersonFraPDL(personRelasjon).also {
                 secureLog.info("Henter person fra PDL $it")
             } }
-
         return null
     }
 
-    fun hentIdentifisertPersonFraPDL( personRelasjon: SEDPersonRelasjon ): IdentifisertPDLPerson? {
+    fun hentIdentifisertPersonFraPDL(personRelasjon: SEDPersonRelasjon): IdentifisertPDLPerson? {
 
         return try {
             logger.info("Henter person info fra pdl for relasjon: ${personRelasjon.relasjon}")
