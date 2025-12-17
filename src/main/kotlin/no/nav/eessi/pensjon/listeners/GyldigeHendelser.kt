@@ -8,7 +8,7 @@ class GyldigeHendelser {
         private const val GYLDIG_SEKTOR_KODE = "P"
 
         val gyldigeInnkommendeBucTyper = listOf(H_BUC_07, R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
-        val gyldigUtgaaendeBucType = listOf(R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
+        val gyldigUtgaaendeBucType = listOf(H_BUC_07, R_BUC_02, M_BUC_02, M_BUC_03a, M_BUC_03b)
 
         fun mottatt(hendelse: SedHendelse) =
                 when {

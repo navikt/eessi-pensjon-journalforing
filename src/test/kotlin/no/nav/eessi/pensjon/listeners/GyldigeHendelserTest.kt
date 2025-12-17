@@ -49,10 +49,10 @@ internal class GyldigeHendelserTest {
     }
 
     @Test
-    fun `Sendt hendelse H_BUC_07 er ikke gyldig`() {
+    fun `Sendt hendelse H_BUC_07 skal også være gyldig`() {
         val hendelse = createDummy("H", H_BUC_07)
 
-        assertFalse(GyldigeHendelser.sendt(hendelse))
+        assertTrue(GyldigeHendelser.sendt(hendelse))
     }
 
     @Test
