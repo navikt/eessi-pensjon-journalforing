@@ -62,7 +62,11 @@ import java.io.ByteArrayOutputStream
 @ActiveProfiles("test")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
+    brokerProperties = [
+        "log.dirs=build/embedded-kafka-logs",
+        "offsets.topic.replication.factor=1"
+    ]
 )
 @MockkBeans(
     MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),

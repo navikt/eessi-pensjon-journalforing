@@ -30,7 +30,11 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC]
+    topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
+    brokerProperties = [
+        "log.dirs=build/embedded-kafka-logs",
+        "offsets.topic.replication.factor=1"
+    ]
 )
 internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     @MockkBean

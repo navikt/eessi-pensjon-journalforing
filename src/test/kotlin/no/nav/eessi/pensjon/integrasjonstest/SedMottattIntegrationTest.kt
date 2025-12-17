@@ -24,7 +24,11 @@ import kotlin.random.Random
 @ActiveProfiles("integrationtest")
 @EmbeddedKafka(
     controlledShutdown = true,
-    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC]
+    topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC],
+    brokerProperties = [
+        "log.dirs=build/embedded-kafka-logs",
+        "offsets.topic.replication.factor=1"
+    ]
 )
 internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
