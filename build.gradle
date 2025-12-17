@@ -43,6 +43,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-aop:3.5.8")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 
 	implementation("org.yaml:snakeyaml:2.5") // Pga https://security.snyk.io/package/maven/org.yaml:snakeyaml
@@ -69,7 +70,7 @@ dependencies {
 	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.3")
 	implementation("no.nav.eessi.pensjon:ep-logging:3.0.4")
 
-    implementation("no.nav.eessi.pensjon:ep-personoppslag:14.0.0"){
+    implementation("no.nav.eessi.pensjon:ep-personoppslag:14.0.6"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
