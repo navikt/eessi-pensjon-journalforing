@@ -50,6 +50,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
@@ -60,6 +61,7 @@ import java.io.ByteArrayOutputStream
 @SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@DirtiesContext
 @EmbeddedKafka(
     controlledShutdown = true,
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],

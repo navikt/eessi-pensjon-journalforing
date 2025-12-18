@@ -16,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest( classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
+@DirtiesContext
 @EmbeddedKafka(
     controlledShutdown = true,
     topics = [SED_SENDT_TOPIC, OPPGAVE_TOPIC],
@@ -49,6 +51,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
     }
+
 
 
     @Test

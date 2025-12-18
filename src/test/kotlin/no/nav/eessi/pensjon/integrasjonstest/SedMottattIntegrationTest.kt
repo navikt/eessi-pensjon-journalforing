@@ -17,11 +17,13 @@ import org.mockserver.socket.PortFactory
 import org.slf4j.event.Level
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import kotlin.random.Random
 
 @SpringBootTest(classes = [IntegrasjonsTestConfig::class, EessiPensjonJournalforingTestApplication::class, IntegrasjonsBase.TestConfig::class])
 @ActiveProfiles("integrationtest")
+@DirtiesContext
 @EmbeddedKafka(
     controlledShutdown = true,
     topics = [SED_MOTTATT_TOPIC, OPPGAVE_TOPIC],
