@@ -14,6 +14,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2ArbeidsfordelingItem
+import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2ArbeidsfordelingRequest
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Service
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.NorgKlientRequest
@@ -32,6 +33,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -64,6 +66,12 @@ internal class OppgaveRoutingServiceTest {
         // NAY krets er en person yngre enn 18 år eller eldre enn 60 år
         val alder17aar: LocalDate = LocalDate.now().minusYears(18).plusDays(1)
         val alder60aar: LocalDate = LocalDate.now().minusYears(60)
+    }
+
+    @BeforeEach
+    fun setup (){
+        val norg2ArbeidsfordelingRequest = Norg2ArbeidsfordelingRequest()
+        every { norg2Klient.hentArbeidsfordelingEnheter(norg2ArbeidsfordelingRequest) } returns emptyList()
     }
 
 
