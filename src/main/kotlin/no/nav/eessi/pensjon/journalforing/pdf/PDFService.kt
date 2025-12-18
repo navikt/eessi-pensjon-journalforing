@@ -29,7 +29,7 @@ class PDFService(
 
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
 
-    private lateinit var pdfConverter: MetricsHelper.Metric
+    private var pdfConverter: MetricsHelper.Metric
 
     init {
         pdfConverter = metricsHelper.init("pdfConverter")

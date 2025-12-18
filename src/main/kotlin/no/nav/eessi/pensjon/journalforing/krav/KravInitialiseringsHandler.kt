@@ -16,7 +16,7 @@ class KravInitialiseringsHandler(private val kravInitialiseringKafkaTemplate: Ka
     private val logger = LoggerFactory.getLogger(KravInitialiseringsHandler::class.java)
     private val X_REQUEST_ID = "x_request_id"
 
-    private lateinit var publiserKravmelding: MetricsHelper.Metric
+    private var publiserKravmelding: MetricsHelper.Metric
 
     init {
         publiserKravmelding = metricsHelper.init("publiserKravmelding")

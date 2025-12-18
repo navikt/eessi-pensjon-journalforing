@@ -42,7 +42,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
     inner class Scenario1Inngaende {
         @Test
         fun `Krav om gjenlevende`() {
-            println(UUID.randomUUID().toString().toString())
+            println(UUID.randomUUID().toString())
             val allDocuemtActions = listOf(
                 ForenkletSED("10001212", P2100, SedStatus.RECEIVED)
             )

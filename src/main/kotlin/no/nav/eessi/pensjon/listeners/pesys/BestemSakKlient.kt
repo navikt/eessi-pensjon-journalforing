@@ -27,7 +27,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
     private val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
     private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 
-    private lateinit var hentPesysSaker: MetricsHelper.Metric
+    private var hentPesysSaker: MetricsHelper.Metric
 
     init {
         hentPesysSaker = metricsHelper.init("hentPesysSaker")

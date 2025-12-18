@@ -31,10 +31,10 @@ class JournalpostKlient(
     private val secureLog = LoggerFactory.getLogger("secureLog")
     private val mapper = jacksonObjectMapper()
 
-    private lateinit var opprettjournalpost: MetricsHelper.Metric
-    private lateinit var oppdaterDistribusjonsinfo: MetricsHelper.Metric
-    private lateinit var avbruttStatusInfo: MetricsHelper.Metric
-    private lateinit var ferdigstillJournal: MetricsHelper.Metric
+    private var opprettjournalpost: MetricsHelper.Metric
+    private var oppdaterDistribusjonsinfo: MetricsHelper.Metric
+    private var avbruttStatusInfo: MetricsHelper.Metric
+    private var ferdigstillJournal: MetricsHelper.Metric
 
 
     init {

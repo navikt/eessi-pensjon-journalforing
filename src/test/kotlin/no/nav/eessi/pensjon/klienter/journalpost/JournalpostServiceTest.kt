@@ -153,7 +153,7 @@ internal class JournalpostServiceTest {
         assertEquals(INNGAAENDE, actualRequest.journalpostType)
         assertEquals("EESSI", actualRequest.kanal)
         assertEquals("11111", actualRequest.sak!!.fagsakid)
-        assertEquals("PEN", actualRequest.sak!!.fagsaksystem)
+        assertEquals("PEN", actualRequest.sak.fagsaksystem)
         assertEquals("Inngående P2000 - Krav om alderspensjon", actualRequest.tittel)
 
         verify(exactly = 1) { mockKlient.opprettJournalpost(any(), any(), any()) }

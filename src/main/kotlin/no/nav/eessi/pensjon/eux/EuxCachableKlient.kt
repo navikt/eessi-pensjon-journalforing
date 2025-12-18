@@ -24,13 +24,13 @@ class EuxCacheableKlient(
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(javaClass) }
 
-    private lateinit var hentSed: MetricsHelper.Metric
-    private lateinit var sendSed: MetricsHelper.Metric
-    private lateinit var hentBuc: MetricsHelper.Metric
-    private lateinit var hentPdf: MetricsHelper.Metric
-    private lateinit var settSensitiv: MetricsHelper.Metric
-    private lateinit var hentBucDeltakere: MetricsHelper.Metric
-    private lateinit var hentInstitusjoner: MetricsHelper.Metric
+    private var hentSed: MetricsHelper.Metric
+    private var sendSed: MetricsHelper.Metric
+    private var hentBuc: MetricsHelper.Metric
+    private var hentPdf: MetricsHelper.Metric
+    private var settSensitiv: MetricsHelper.Metric
+    private var hentBucDeltakere: MetricsHelper.Metric
+    private var hentInstitusjoner: MetricsHelper.Metric
     init {
         hentSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)
         sendSed = metricsHelper.init("hentSed", alert = MetricsHelper.Toggle.OFF)

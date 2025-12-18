@@ -44,7 +44,7 @@ class SedMottattListener(
     private val logger = LoggerFactory.getLogger(SedMottattListener::class.java)
 
     private val latch = CountDownLatch(1)
-    private lateinit var consumeIncomingSed: MetricsHelper.Metric
+    private var consumeIncomingSed: MetricsHelper.Metric
 
     fun getLatch() = latch
 

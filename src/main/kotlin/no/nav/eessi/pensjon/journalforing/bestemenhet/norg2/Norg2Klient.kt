@@ -21,7 +21,7 @@ class Norg2Klient(private val norg2RestTemplate: RestTemplate,
 
     private val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
 
-    private lateinit var hentArbeidsfordeling: MetricsHelper.Metric
+    private var hentArbeidsfordeling: MetricsHelper.Metric
 
     init {
         hentArbeidsfordeling = metricsHelper.init("hentArbeidsfordeling")

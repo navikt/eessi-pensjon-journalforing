@@ -21,7 +21,7 @@ class EtterlatteService(
     private val logger = LoggerFactory.getLogger(EtterlatteService::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
 
-    private lateinit var henterSakFraEtterlatte: MetricsHelper.Metric
+    private var henterSakFraEtterlatte: MetricsHelper.Metric
 
     init {
         henterSakFraEtterlatte = metricsHelper.init("henterSakFraEtterlatte")

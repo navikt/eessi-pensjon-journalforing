@@ -15,7 +15,7 @@ class OppgaveHandler(private val oppgaveKafkaTemplate: KafkaTemplate<String, Str
     private val logger = LoggerFactory.getLogger(OppgaveHandler::class.java)
     private val X_REQUEST_ID = "x_request_id"
 
-    private lateinit var publiserOppgavemelding: MetricsHelper.Metric
+    private var publiserOppgavemelding: MetricsHelper.Metric
 
     init {
         publiserOppgavemelding = metricsHelper.init("publiserOppgavemelding")

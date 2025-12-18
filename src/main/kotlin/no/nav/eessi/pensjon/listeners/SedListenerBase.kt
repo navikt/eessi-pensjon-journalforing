@@ -50,7 +50,7 @@ abstract class SedListenerBase(
         sakIdsFraAlleSed: List<String>?,
         sakIdsFraCurrentSed: List<String>?,
         retning: HendelseType
-    ): Pair<SakInformasjon?, List<SakInformasjon>>?? {
+    ): Pair<SakInformasjon?, List<SakInformasjon>>? {
 
         val aktoerId = identifisertPerson?.aktoerId ?: return null.also {
             logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon")
@@ -198,7 +198,7 @@ abstract class SedListenerBase(
 
                 //3.
                 if (harSakIdFraSed && match && harSvarFraPen == true) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("3", hendelseType, advarsel, it)
                     }
                 }
@@ -260,14 +260,14 @@ abstract class SedListenerBase(
 
                 //11.
                 if (harSakIdFraSed && match && harSvarFraPen == true && flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("11", hendelseType, advarsel, it)
                     }
                 }
 
                 //12.
                 if (harSakIdFraSed && match && harSvarFraPen == true && !flereSakerfraPenInfo) {
-                    return SaksInfoSamlet(sakFraPesysSomMatcherSed?.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
+                    return SaksInfoSamlet(sakFraPesysSomMatcherSed.sakId, sakInformasjonFraPesysFirst, saktypeFraSedEllerPesys, advarsel).also {
                         logScenario("12", hendelseType, advarsel, it)
                     }
                 }

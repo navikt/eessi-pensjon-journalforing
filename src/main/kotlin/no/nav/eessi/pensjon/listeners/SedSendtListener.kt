@@ -40,7 +40,7 @@ class SedSendtListener(
     private val logger = LoggerFactory.getLogger(SedSendtListener::class.java)
     private val secureLog = LoggerFactory.getLogger("secureLog")
     private val latch = CountDownLatch(1)
-    private lateinit var consumeOutgoingSed: MetricsHelper.Metric
+    private var consumeOutgoingSed: MetricsHelper.Metric
 
     fun getLatch() = latch
 
