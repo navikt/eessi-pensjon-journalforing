@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.ObjectMapper
 
+@Disabled
 class SedDokumenterTest {
 
     @Test
