@@ -20,6 +20,7 @@ import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.DefaultResponseErrorHandler
 import org.springframework.web.client.RestTemplate
@@ -27,6 +28,7 @@ import tools.jackson.core.StreamReadConstraints
 import tools.jackson.core.json.JsonFactory
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 
@@ -142,9 +144,13 @@ class RestTemplateConfig(
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
+                messageConverters.removeIf { it is StringHttpMessageConverter }
                 messageConverters.removeIf { it is JacksonJsonHttpMessageConverter }
-                messageConverters.add(0, converter)
+
+                messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
+                messageConverters.add(1, converter)
             }
+
     }
 
     private fun buildRestTemplate(url: String): RestTemplate {
