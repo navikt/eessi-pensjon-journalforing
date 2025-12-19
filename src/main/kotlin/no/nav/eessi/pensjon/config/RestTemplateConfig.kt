@@ -33,12 +33,6 @@ class RestTemplateConfig(
 ) {
     private val logger = LoggerFactory.getLogger(RestTemplateConfig::class.java)
 
-    init {
-        StreamReadConstraints.overrideDefaultStreamReadConstraints(
-            StreamReadConstraints.builder().maxStringLength(100000000).build()
-        )
-    }
-
     @Value("\${JOURNALPOST_V1_URL}")
     lateinit var joarkUrl: String
 
