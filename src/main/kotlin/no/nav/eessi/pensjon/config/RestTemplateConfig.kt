@@ -1,6 +1,9 @@
 package no.nav.eessi.pensjon.config
 
+import com.fasterxml.jackson.core.JsonFactoryBuilder
+import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.nimbusds.jwt.JWTClaimsSet
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
@@ -107,7 +110,16 @@ class RestTemplateConfig(
     }
 
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
-        val objectMapper = JacksonConfig().objectMapper()
+        val constraints = StreamReadConstraints.builder()
+            .maxStringLength(50_000_000)
+            .build()
+
+        val jsonFactory = JsonFactoryBuilder()
+            .streamReadConstraints(constraints)
+            .build()
+
+        val objectMapper =  JsonMapper.builder(jsonFactory).build()
+
         val restTemplate = RestTemplateBuilder()
             .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
