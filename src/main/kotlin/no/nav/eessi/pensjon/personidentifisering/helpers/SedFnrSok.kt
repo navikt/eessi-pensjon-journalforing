@@ -1,7 +1,7 @@
 package no.nav.eessi.pensjon.personidentifisering.helpers
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.toJson
@@ -28,7 +28,7 @@ class SedFnrSok {
          */
         fun finnAlleFnrDnrISed(sed: SED): Set<String> {
             try {
-                val sedRootNode = jacksonObjectMapper().readTree(sed.toJson())
+                val sedRootNode = ObjectMapper().readTree(sed.toJson())
 
                 return traverseNode(sedRootNode)
                         .map { it.value }

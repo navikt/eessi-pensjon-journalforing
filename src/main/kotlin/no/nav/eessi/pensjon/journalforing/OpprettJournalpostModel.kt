@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.journalforing.saf.SafDokument
 import no.nav.eessi.pensjon.journalforing.saf.SafSak
@@ -17,6 +16,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.utils.mapAnyToJson
+import tools.jackson.databind.ObjectMapper
 import java.io.IOException
 import java.time.LocalDateTime
 import java.util.*
@@ -137,7 +137,7 @@ class OpprettJournalPostResponse(
 
 ){
     override fun toString(): String {
-        val mapper = jacksonObjectMapper()
+        val mapper = ObjectMapper()
         return mapper.writeValueAsString(this)
     }
 }

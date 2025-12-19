@@ -1,8 +1,5 @@
 package no.nav.eessi.pensjon.listeners.pesys
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -18,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import tools.jackson.databind.ObjectMapper
 import java.util.*
 
 @Component
@@ -25,7 +23,7 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
                       @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
-    private val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+    private val mapper: ObjectMapper = ObjectMapper()
 
     private var hentPesysSaker: MetricsHelper.Metric
 

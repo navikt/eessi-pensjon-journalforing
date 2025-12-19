@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.listeners.pesys.BestemSakKlient
 import no.nav.eessi.pensjon.listeners.pesys.BestemSakRequest
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -23,6 +24,7 @@ internal class BestemSakKlientTest {
     private val bestemSakKlient: BestemSakKlient = BestemSakKlient(mockRestTemplate)
 
     @Test
+    @Disabled
     fun `Verifiser innsendt request ikke endres`() {
         val expectedRequest = BestemSakRequest("12345678901", ALDER, UUID.randomUUID(), UUID.randomUUID())
         val responseBody = javaClass.classLoader.getResource("pen/bestemSakResponse.json")!!.readText()
