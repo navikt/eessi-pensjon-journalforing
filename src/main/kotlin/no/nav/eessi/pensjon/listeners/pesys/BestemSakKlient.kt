@@ -1,5 +1,6 @@
 package no.nav.eessi.pensjon.listeners.pesys
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -15,7 +16,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import tools.jackson.databind.ObjectMapper
 import java.util.*
 
 @Component
