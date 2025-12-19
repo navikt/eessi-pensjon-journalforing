@@ -1,7 +1,6 @@
 package no.nav.eessi.pensjon.config
 
 import com.fasterxml.jackson.core.StreamReadConstraints
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jwt.JWTClaimsSet
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
@@ -21,9 +20,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
-import org.springframework.http.converter.HttpMessageConverter
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.DefaultResponseErrorHandler
 import java.util.*
 
@@ -111,8 +107,7 @@ class RestTemplateConfig(
     }
 
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
-        val objectMapper = JacksonConfig().objectMapper()
-        val restTemplate = RestTemplateBuilder()
+        return RestTemplateBuilder()
             .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
@@ -124,15 +119,6 @@ class RestTemplateConfig(
             .build().apply {
                 requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
             }
-
-        restTemplate.messageConverters
-            .filter { it.javaClass.name.contains("Jackson") }
-            .forEach { converter ->
-                val method = converter.javaClass.getMethod("setObjectMapper", ObjectMapper::class.java)
-                method.invoke(converter, objectMapper)
-            }
-
-        return restTemplate
     }
 
     private fun buildRestTemplate(url: String): RestTemplate {
