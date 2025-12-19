@@ -1,6 +1,8 @@
 package no.nav.eessi.pensjon.listeners.pesys
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
@@ -23,7 +25,9 @@ class BestemSakKlient(private val bestemSakOidcRestTemplate: RestTemplate,
                       @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(BestemSakKlient::class.java) }
-    private val mapper: ObjectMapper = ObjectMapper()
+    private val mapper: ObjectMapper = JsonMapper.builder()
+        .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+        .build()
 
     private var hentPesysSaker: MetricsHelper.Metric
 
