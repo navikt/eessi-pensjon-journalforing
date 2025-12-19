@@ -1,6 +1,5 @@
 package no.nav.eessi.pensjon.config
 
-import com.fasterxml.jackson.core.StreamReadConstraints
 import com.nimbusds.jwt.JWTClaimsSet
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
@@ -14,13 +13,20 @@ import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.restclient.RestTemplateBuilder
-import org.springframework.web.client.RestTemplate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
-import org.springframework.http.client.*
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.DefaultResponseErrorHandler
+import org.springframework.web.client.RestTemplate
+import tools.jackson.core.StreamReadConstraints
+import tools.jackson.core.json.JsonFactory
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 import java.util.*
 
 
@@ -113,6 +119,19 @@ class RestTemplateConfig(
     }
 
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
+        val constraints = StreamReadConstraints.builder()
+            .maxStringLength(60_000_000)
+            .build()
+
+        val jsonFactory = JsonFactory.builder()
+            .streamReadConstraints(constraints)
+            .build()
+
+        val mapper = JsonMapper.builder(jsonFactory)
+            .addModule(KotlinModule.Builder().build())
+            .build()
+
+        val converter = JacksonJsonHttpMessageConverter(mapper)
         return RestTemplateBuilder()
             .rootUri(url)
             .errorHandler(DefaultResponseErrorHandler())
@@ -123,7 +142,8 @@ class RestTemplateConfig(
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                messageConverters.removeIf { it is JacksonJsonHttpMessageConverter }
+                messageConverters.add(0, converter)
             }
     }
 
