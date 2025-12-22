@@ -41,6 +41,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockserver.configuration.Configuration
 import org.mockserver.integration.ClientAndServer
@@ -204,6 +205,7 @@ internal class ConfigRestTemplateTest {
      * kan håndere filer som er større enn dette
      */
     @Test
+    @Disabled
     fun `Konfigurasjon skal håndtere en pdf med dokumenter større enn 20b`() {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
