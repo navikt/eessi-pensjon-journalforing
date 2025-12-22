@@ -121,7 +121,9 @@ class RestTemplateConfig(
                 RequestCountInterceptor(meterRegistry),
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
-            .build()
+            .build().apply {
+                requestFactory = SimpleClientHttpRequestFactory()
+            }
     }
 
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
