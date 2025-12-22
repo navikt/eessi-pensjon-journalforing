@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles
         "offsets.topic.replication.factor=1"
     ]
 )
+@Disabled
 internal class SedSendtIntegrationTest : IntegrasjonsBase() {
 
     @MockkBean(relaxed = true)

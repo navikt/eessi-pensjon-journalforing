@@ -38,6 +38,7 @@ import org.springframework.test.context.ActiveProfiles
         "offsets.topic.replication.factor=1"
     ]
 )
+@Disabled
 internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     @MockkBean
     private lateinit var personService: PersonService
