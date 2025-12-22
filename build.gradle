@@ -54,11 +54,9 @@ dependencies {
 	implementation("org.apache.httpcomponents.client5:httpclient5:5.5.1")
 
 	implementation("org.springframework.retry:spring-retry:2.0.12")
-	implementation("tools.jackson.core:jackson-core:3.0.3")
-	implementation("tools.jackson.core:jackson-databind:3.0.3")
-	implementation("tools.jackson.module:jackson-module-kotlin:3.0.3")
-//	implementation("com.fasterxml.jackson.core:jackson-core:3.0.0")
-//	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:3.0.0")
+
+	implementation "com.fasterxml.jackson.core:jackson-core:2.20.1"
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
