@@ -10,6 +10,13 @@ AZURE_APP_JWK: "dummy"
 ENV: q2
 NAMESPACE: test
 kafka:
+  brokers: ${spring.embedded.kafka.brokers}
+  keystore:
+    path: test
+  truststore:
+    path: test
+  credstore:
+    password: test
   sedSendt:
     topic: ${KAFKA_SEDSENDT_TOPIC}
     groupid: eessi-pensjon-group
@@ -29,7 +36,7 @@ kafka:
     topic: ${KAFKA_AUTOMATISERING_TOPIC}
     groupid: eessi-pensjon-group
 
-  security.protocol: SSL
+  security.protocol: PLAINTEXT
 
 
 GCP_STORAGE_API_URL: "http://some.strange.place"
@@ -40,9 +47,10 @@ securityTokenService:
 
 NAIS_APP_NAME: eessi-pensjon-journalforing
 
+SAF_GRAPHQL_URL: http://localhost
 PDL_URL: http://localhost:${mockServerport}
 NORG2_URL: http://localhost:${mockServerport}
-BestemSak_URL: http://localhost:${mockServerport}
+BESTEMSAK_URL: http://localhost:${mockServerport}
 NAVANSATT_URL: http://localhost:${mockServerport}
 ETTERLATTE_URL: http://localhost:${mockServerport}
 JOURNALPOST_V1_URL: http://localhost:${mockServerport}
@@ -64,7 +72,7 @@ spring:
     consumer:
       enable-auto-commit: false
       auto-offset-reset: earliest
-    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    bootstrap-servers: ${kafka.brokers}
     properties:
       security.protocol: PLAINTEXT
   main:

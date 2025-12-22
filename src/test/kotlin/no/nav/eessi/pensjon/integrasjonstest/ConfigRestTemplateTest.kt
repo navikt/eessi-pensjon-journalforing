@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.config.RestTemplateConfig
 import no.nav.eessi.pensjon.eux.klient.EuxKlientLib
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.DocumentsItem
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedDokumentfiler
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
@@ -32,15 +33,19 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
-import org.apache.pdfbox.cos.COSDictionary
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont
+import org.apache.pdfbox.pdmodel.font.PDType0Font
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockserver.configuration.Configuration
+import org.mockserver.integration.ClientAndServer
+import org.mockserver.socket.PortFactory
+import org.slf4j.event.Level
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.boot.test.context.SpringBootTest
@@ -48,6 +53,8 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
@@ -58,9 +65,9 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.web.client.RestTemplate
 import java.io.ByteArrayOutputStream
 
-@SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, IntegrasjonsTestConfig::class])
+@SpringBootTest( classes = [EessiPensjonJournalforingTestApplication::class, RestTemplateConfig::class, ConfigRestTemplateTest.TestConfig::class, RestTemplateConfig::class])
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka(
     controlledShutdown = true,
@@ -77,9 +84,17 @@ import java.io.ByteArrayOutputStream
 )
 
 internal class ConfigRestTemplateTest {
+    @MockkBean
+    private lateinit var clientConfigurationProperties: ClientConfigurationProperties
 
     @Autowired
     private lateinit var sedSendtListener: SedSendtListener
+
+//    @Autowired
+//    private lateinit var euxRestTemplate: RestTemplate
+
+    @Autowired
+    private lateinit var euxKlientLab: EuxKlientLib
 
     @MockkBean
     private lateinit var personService: PersonService
@@ -107,9 +122,12 @@ internal class ConfigRestTemplateTest {
     @MockkBean(relaxed = true)
     private lateinit var safClient: SafClient
 
-
     @MockkBean(relaxed = true)
     private lateinit var fagmodulKlient: FagmodulKlient
+
+    val rinaSakId = "147666"
+    val dokumentId = "b12e06dda2c7474b9998c7139c666666"
+    lateinit var mockServer: ClientAndServer
 
     @BeforeEach
     fun setup() {
@@ -139,6 +157,48 @@ internal class ConfigRestTemplateTest {
         every { hentSakService.hentSak("147666") } returns mockk(relaxed = true)
     }
 
+    init {
+        if(System.getProperty("mockServerport") == null){
+            val port = System.getProperty("mockServerport")?.toInt() ?: PortFactory.findFreePort()
+            mockServer = ClientAndServer(Configuration().apply { logLevel(Level.ERROR) }, port)
+            System.setProperty("mockServerport", port.toString())
+        }
+    }
+
+    @TestConfiguration
+    class TestConfig {
+
+        @Bean
+        @Primary
+        fun euxKlientLib(): EuxKlientLib = EuxKlientLib(mockedRestTemplate())
+
+        @Bean
+        fun etterlatteRestTemplate(): RestTemplate = mockedRestTemplate()
+
+        @Bean
+        fun fagmodulOidcRestTemplate(): RestTemplate = mockedRestTemplate()
+
+        @Bean
+        fun journalpostOidcRestTemplate(): RestTemplate = mockedRestTemplate()
+
+        @Bean
+        @Primary
+        fun hentSakService(): HentSakService = mockk(relaxed = true)
+
+        fun mockedRestTemplate(): RestTemplate {
+            val port = System.getProperty("mockServerport")
+            return RestTemplateBuilder()
+                .rootUri("http://localhost:${port}")
+                .build()
+        }
+
+        @Bean
+        @Primary
+        fun euxOAuthRestTemplate(): RestTemplate {
+            return RestTemplateBuilder().build().apply {
+            }
+        }
+    }
     /**
      * Jackson har en begrensning på 20MB for dokumenter. Dette er en test for å verifisere at RestTemplateConfig
      * kan håndere filer som er større enn dette
@@ -160,34 +220,33 @@ internal class ConfigRestTemplateTest {
         assertEquals(ID_OG_FORDELING, requestSlot.captured.journalfoerendeEnhet)
     }
 
-    @TestConfiguration
-    class TestConfig {
+    @Test
+    fun `skal kunne hente dokumenter over 20mb `() {
+        val sedDokumentfiler = SedDokumentfiler(
+            SedVedlegg("", MimeType.PDF, ""),
+            listOf(SedVedlegg("", MimeType.PDF, createLargePdf(150000).toString()))
+        )
+        CustomMockServer().
+        mockBucResponse("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer" ,sedDokumentfiler.toJson())
 
-        @Bean
-        @Primary
-        fun euxKlientLab(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
+        val result = euxKlientLab.hentAlleDokumentfiler(rinaSakId, dokumentId)
+    }
 
-        @Bean
-        @Primary
-        fun hentSakService(): HentSakService = mockk(relaxed = true)
+    fun CustomMockServer.mockBucResponse(endpoint: String, dokument: String) = apply {
+        mockHttpRequestWithResponseFromJson(
+            endpoint,
+            HttpMethod.GET,
+            dokument
+        )
+    }
 
-        @Bean
-        @Primary
-        fun euxOAuthRestTemplate(): RestTemplate {
-            return RestTemplateBuilder().build().apply {
-                val mvc = MockRestServiceServer.bindTo(this).build()
-                val sedDokumentfiler = SedDokumentfiler(
-                    SedVedlegg("", MimeType.PDF, ""),
-                    listOf(SedVedlegg("", MimeType.PDF, createLargePdf(80000).toString()))
-                )
-                val sedP2000 = javaClass.getResource("/sed/P2000-NAV.json")!!.readText()
-                with(mvc) {
-                    expect(requestTo("/buc/147666")).andRespond(withBucResponse())
-                    expect(requestTo("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018")).andRespond(withSuccess(sedP2000, MediaType.APPLICATION_JSON))
-                    expect(requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond(withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
-                }
-            }
-        }
+    protected fun opprettBucDocuments(file: String): List<DocumentsItem> {
+        val json = javaClass.getResource(file)!!.readText()
+        return mapJsonToAny(json)
+    }
+
+
+
 
         private fun withBucResponse() = withSuccess(
             Buc(
@@ -197,25 +256,32 @@ internal class ConfigRestTemplateTest {
             ).toJson(), MediaType.APPLICATION_JSON
         )
 
-        fun createLargePdf(numberOfPages: Int): PDDocument {
-            val document = PDDocument()
-            repeat(numberOfPages) { pageIndex ->
-                val page = PDPage(PDRectangle.LETTER)
-                document.addPage(page)
-                PDPageContentStream(document, page).use { contentStream ->
-                    contentStream.beginText()
-                    contentStream.setFont(PDTrueTypeFont(COSDictionary()), 12f)
-                    contentStream.newLineAtOffset(50f, 750f)
-                    contentStream.showText("This is page ${pageIndex + 1} of $numberOfPages")
-                    contentStream.endText()
-                }
-            }
-            ByteArrayOutputStream().use { outputStream ->
-                document.save(outputStream)
-                val sizeInBytes = outputStream.size()
-                println("PDF size in memory: $sizeInBytes bytes (${sizeInBytes / 1024 / 1024} MB)")
-            }
-            return document
+
+
+    fun createLargePdf(numberOfPages: Int): PDDocument {
+        val document = PDDocument()
+        // Load from Spring classpath resource (works in fat jar + Docker)
+        val fontResource = ClassPathResource("fonts/Roboto-Regular.ttf")
+        val font = fontResource.inputStream.use { input ->
+            PDType0Font.load(document, input, true) // true = embed
         }
+
+        repeat(numberOfPages) { pageIndex ->
+            val page = PDPage(PDRectangle.LETTER)
+            document.addPage(page)
+            PDPageContentStream(document, page).use { contentStream ->
+                contentStream.beginText()
+                contentStream.setFont(font, 12f)
+                contentStream.newLineAtOffset(50f, 750f)
+                contentStream.showText("The sky was dark and gloomy.${pageIndex + 1} of $numberOfPages")
+                contentStream.endText()
+            }
+        }
+        ByteArrayOutputStream().use { outputStream ->
+            document.save(outputStream)
+            val sizeInBytes = outputStream.size()
+            println("PDF size in memory: $sizeInBytes bytes (${sizeInBytes / 1024 / 1024} MB)")
+        }
+        return document
     }
 }
