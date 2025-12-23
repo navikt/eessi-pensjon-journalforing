@@ -25,7 +25,6 @@ import kotlin.random.Random
 @ActiveProfiles("integrationtest")
 @DirtiesContext
 @EmbeddedKafka
-@Disabled
 internal class SedMottattIntegrationTest : IntegrasjonsBase() {
 
     init {

@@ -76,7 +76,6 @@ import java.io.ByteArrayOutputStream
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
 )
-@Disabled("Kun for lokal testing av RestTemplate konfigurasjon for store filer")
 internal class ConfigRestTemplateTest {
 
     @Autowired
