@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.metrics.MetricsHelper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
@@ -19,6 +20,7 @@ import org.springframework.web.client.HttpStatusCodeException
 @Service
 class EuxCacheableKlient(
     private val euxKlientLib: EuxKlientLib,
+    @Value("\${EUX_RINA_API_V1_URL}") private val baseurl: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
@@ -81,7 +83,7 @@ class EuxCacheableKlient(
     )
     internal fun hentAlleDokumentfiler(rinaSakId: String, dokumentId: String): SedDokumentfiler? {
         return hentPdf.measure {
-            euxKlientLib.hentAlleDokumentfiler(rinaSakId, dokumentId)
+            euxKlientLib.hentAlleDokumentfiler(rinaSakId, dokumentId, emptyList(), baseurl)
         }
     }
 

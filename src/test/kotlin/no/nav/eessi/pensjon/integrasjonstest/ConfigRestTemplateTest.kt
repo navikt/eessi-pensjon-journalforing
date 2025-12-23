@@ -40,6 +40,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.RestTemplateBuilder
@@ -75,7 +76,6 @@ import java.io.ByteArrayOutputStream
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
 )
-
 internal class ConfigRestTemplateTest {
 
     @Autowired
@@ -184,7 +184,7 @@ internal class ConfigRestTemplateTest {
                 with(mvc) {
                     expect(requestTo("/buc/147666")).andRespond(withBucResponse())
                     expect(requestTo("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018")).andRespond(withSuccess(sedP2000, MediaType.APPLICATION_JSON))
-                    expect(requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond(withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
+                    expect(requestTo("http://localhost/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond(withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
                 }
             }
         }
