@@ -3,7 +3,7 @@
 
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%magenta(%d{dd-MM-yyyy HH:mm:ss.SSS}) %highlight(%-5level) %logger{25} - %msg%n</pattern>
+            <pattern>%magenta(%d{dd-MM-yyyy HH:mm:ss.SSS}) %highlight(%-5level) %logger{25} - %.2000msg%n</pattern>
         </encoder>
     </appender>
 
