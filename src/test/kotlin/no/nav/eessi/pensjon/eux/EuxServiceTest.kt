@@ -32,7 +32,7 @@ private const val RINASAK_ID = "123456"
 internal class EuxServiceTest {
 
     private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
-    private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib)
+    private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib, "mockUrl")
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     private val helper = EuxService(euxCacheableKlient)
 

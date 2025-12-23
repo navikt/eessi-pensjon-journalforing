@@ -109,7 +109,7 @@ internal open class JournalforingTestBase {
     }
 
     protected val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk())
+    protected val euxKlient: EuxCacheableKlient = EuxCacheableKlient(mockk(), "mockUrl")
     protected val navansattKlient: NavansattKlient = mockk(relaxed = true)
     {
         every { navAnsattMedEnhetsInfo(any(), any()) } returns null

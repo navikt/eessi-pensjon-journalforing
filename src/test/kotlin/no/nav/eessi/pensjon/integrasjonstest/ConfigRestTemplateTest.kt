@@ -143,7 +143,6 @@ internal class ConfigRestTemplateTest {
      * Jackson har en begrensning på 20MB for dokumenter. Dette er en test for å verifisere at RestTemplateConfig
      * kan håndere filer som er større enn dette
      */
-    @Disabled
     @Test
     fun `Konfigurasjon skal håndtere en pdf med dokumenter større enn 20b`() {
         val requestSlot = slot<OpprettJournalpostRequest>()
@@ -185,7 +184,7 @@ internal class ConfigRestTemplateTest {
                 with(mvc) {
                     expect(requestTo("/buc/147666")).andRespond(withBucResponse())
                     expect(requestTo("/buc/147666/sed/44cb68f89a2f4e748934fb4722721018")).andRespond(withSuccess(sedP2000, MediaType.APPLICATION_JSON))
-                    expect(requestTo("/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond(withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
+                    expect(requestTo("http://localhost/buc/147666/sed/b12e06dda2c7474b9998c7139c666666/filer")).andRespond(withSuccess(sedDokumentfiler.toJson(), MediaType.APPLICATION_JSON))
                 }
             }
         }

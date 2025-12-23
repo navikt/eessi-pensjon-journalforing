@@ -92,7 +92,7 @@ class EuxServiceCacheTest {
         @Bean
         fun euxKlientLib() = EuxKlientLib(euxRestTemplate())
         @Bean
-        fun euxCacheableKlient() = EuxCacheableKlient(euxKlientLib())
+        fun euxCacheableKlient() = EuxCacheableKlient(euxKlientLib(), "mockUrl")
         @Bean
         fun EuxService() = EuxService(euxCacheableKlient())
         @Bean

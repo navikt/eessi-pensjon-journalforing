@@ -60,7 +60,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
     private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
-    private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib)
+    private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib, "mockUrl")
     private val euxService = EuxService(euxCacheableKlient)
     private val bestemSakKlient = mockk<BestemSakKlient>(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)

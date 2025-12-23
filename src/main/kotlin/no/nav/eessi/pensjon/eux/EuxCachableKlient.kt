@@ -20,6 +20,7 @@ import org.springframework.web.client.HttpStatusCodeException
 @Service
 class EuxCacheableKlient(
     private val euxKlientLib: EuxKlientLib,
+    @Value("\${EUX_RINA_API_V1_URL}") private val baseurl: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
 
@@ -82,7 +83,7 @@ class EuxCacheableKlient(
     )
     internal fun hentAlleDokumentfiler(rinaSakId: String, dokumentId: String): SedDokumentfiler? {
         return hentPdf.measure {
-            euxKlientLib.hentAlleDokumentfiler(rinaSakId, dokumentId, emptyList(), "https://eux-rina-api-gcp-q2.intern.dev.nav.no/cpi")
+            euxKlientLib.hentAlleDokumentfiler(rinaSakId, dokumentId, emptyList(), baseurl)
         }
     }
 
