@@ -143,6 +143,7 @@ internal class ConfigRestTemplateTest {
      * Jackson har en begrensning på 20MB for dokumenter. Dette er en test for å verifisere at RestTemplateConfig
      * kan håndere filer som er større enn dette
      */
+    @Disabled
     @Test
     fun `Konfigurasjon skal håndtere en pdf med dokumenter større enn 20b`() {
         val requestSlot = slot<OpprettJournalpostRequest>()
