@@ -40,6 +40,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.RestTemplateBuilder
@@ -75,7 +76,7 @@ import java.io.ByteArrayOutputStream
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
 )
-
+@Disabled("Kun for lokal testing av RestTemplate konfigurasjon for store filer")
 internal class ConfigRestTemplateTest {
 
     @Autowired

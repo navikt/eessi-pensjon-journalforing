@@ -122,7 +122,7 @@ class RestTemplateConfig(
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                requestFactory = SimpleClientHttpRequestFactory()
+                requestFactory = HttpComponentsClientHttpRequestFactory()
             }
     }
 
