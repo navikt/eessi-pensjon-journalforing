@@ -25,13 +25,6 @@
                 <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
                 <includeContext>false</includeContext>
             </encoder>
-            <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-                <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                    <marker>TEAM_LOGS</marker>
-                </evaluator>
-                <OnMatch>ACCEPT</OnMatch>
-                <OnMismatch>DENY</OnMismatch>
-            </filter>
         </appender>
 
         <logger name="secureLog" level="DEBUG" additivity="false">
@@ -79,13 +72,7 @@
                 <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
                 <includeContext>false</includeContext>
             </encoder>
-            <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-                <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                    <marker>TEAM_LOGS</marker>
-                </evaluator>
-                <OnMatch>ACCEPT</OnMatch>
-                <OnMismatch>DENY</OnMismatch>
-            </filter>
+
         </appender>
 
         <logger name="secureLog" level="DEBUG" additivity="false">
