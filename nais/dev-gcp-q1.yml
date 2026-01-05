@@ -20,6 +20,9 @@ spec:
       enabled: true
   accessPolicy:
     outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
       external:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q1.dev-fss-pub.nais.io

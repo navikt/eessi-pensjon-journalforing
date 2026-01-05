@@ -21,6 +21,8 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: etterlatte-api
           namespace: etterlatte
           cluster: prod-gcp
