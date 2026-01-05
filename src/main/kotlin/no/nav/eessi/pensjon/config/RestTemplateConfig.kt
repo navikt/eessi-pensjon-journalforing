@@ -65,7 +65,7 @@ class RestTemplateConfig(
 
 
     @Bean
-    fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplateMinimal(euxUrl, "eux-credentials")
+    fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
 
     @Bean
     fun euxKlientLib(): EuxKlientLib = EuxKlientLib(euxOAuthRestTemplate())
@@ -108,24 +108,9 @@ class RestTemplateConfig(
                 bearerTokenInterceptor
             )
             .build().apply {
-                requestFactory = HttpComponentsClientHttpRequestFactory()
+                requestFactory = JdkClientHttpRequestFactory()
             }
     }
-    private fun opprettRestTemplateMinimal(url: String, oAuthKey: String) : RestTemplate {
-        return RestTemplateBuilder()
-            .rootUri(url)
-            .errorHandler(DefaultResponseErrorHandler())
-            .additionalInterceptors(
-                RequestIdHeaderInterceptor(),
-                IOExceptionRetryInterceptor(),
-                RequestCountInterceptor(meterRegistry),
-                bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
-            )
-            .build().apply {
-                requestFactory = HttpComponentsClientHttpRequestFactory()
-            }
-    }
-
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
         return RestTemplateBuilder()
             .rootUri(url)
@@ -137,7 +122,7 @@ class RestTemplateConfig(
                 bearerTokenInterceptor(clientProperties(oAuthKey), oAuth2AccessTokenService!!)
             )
             .build().apply {
-                requestFactory = BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory())
+                requestFactory = JdkClientHttpRequestFactory()
             }
     }
 
