@@ -64,16 +64,16 @@ dependencies {
 	implementation("com.google.cloud:google-cloud-storage:2.61.0")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:3.0.11")
-	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.4")
-	implementation("no.nav.eessi.pensjon:ep-logging:3.0.5")
+	implementation("no.nav.eessi.pensjon:ep-eux:3.0.12")
+	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.5")
+	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.7")
 
-    implementation("no.nav.eessi.pensjon:ep-personoppslag:14.0.10"){
+    implementation("no.nav.eessi.pensjon:ep-personoppslag:14.0.13"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
 	}
-	implementation("no.nav.eessi.pensjon:ep-routing:3.0.9"){
+	implementation("no.nav.eessi.pensjon:ep-routing:3.0.13"){
 		exclude module: 'ep-eux'
 		exclude module: 'ep-metrics'
 		exclude module: 'ep-logging'
