@@ -13,8 +13,6 @@ spec:
         - id: loki
   envFrom:
     - secret: journalforing-prod
-  secureLogs:
-    enabled: true
   azure:
     application:
       enabled: true
