@@ -5,7 +5,7 @@ buildscript {
 		springBootVersion = '4.0.1'
 		springKafkaVersion = '4.0.1'
 		tokenSupportVersion = '6.0.0'
-		imageioVersion = '3.12.0'
+		imageioVersion = '3.13.0'
 	}
 }
 
@@ -66,7 +66,7 @@ dependencies {
 	// Eessi pensjon biblioteker
 	implementation("no.nav.eessi.pensjon:ep-eux:3.0.12")
 	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.5")
-	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.5")
+	implementation("no.nav.eessi.pensjon:ep-logging:3.0.7")
 
     implementation("no.nav.eessi.pensjon:ep-personoppslag:14.0.13"){
 		exclude module: 'ep-eux'
