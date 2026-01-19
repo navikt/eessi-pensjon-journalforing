@@ -21,12 +21,15 @@ spec:
       rules:
         - application: logging
           namespace: nais-system
+        - application: etterlatte-api
+          namespace: etterlatte
+          cluster: dev-gcp
       external:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q1.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
-        - host: navansatt.dev-fss-pub.nais.io
+        - host: navansatt.dev.intern.dev.nav.no
         - host: dokarkiv-q1.dev-fss-pub.nais.io
         - host: eux-rina-api-q1.dev-fss-pub.nais.io
         - host: eessi-pensjon-oppgave-q1.intern.dev.nav.no
@@ -55,7 +58,7 @@ spec:
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io/norg
     - name: NAVANSATT_URL
-      value: https://navansatt.dev-fss-pub.nais.io
+      value: http://navansatt.pensjon-saksbehandling
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1-q1
     - name: KAFKA_SEDMOTTATT_TOPIC
