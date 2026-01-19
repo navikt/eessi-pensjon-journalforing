@@ -28,7 +28,7 @@ spec:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: navansatt.dev-fss-pub.nais.io
+        - host: navansattdev.intern.dev.nav.no
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
         - host: eux-rina-api-gcp-q2.intern.dev.nav.no
@@ -62,7 +62,7 @@ spec:
     - name: BESTEMSAK_URL
       value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
-      value: https://navansatt.dev-fss-pub.nais.io
+      value: http://navansatt.pensjon-saksbehandling/
     - name: ETTERLATTE_URL
       value: http://etterlatte-api.etterlatte
 
@@ -84,7 +84,7 @@ spec:
     - name: AZURE_APP_NORG2_CLIENT_ID
       value: dev-fss.org.norg2
     - name: AZURE_APP_NAVANSATT_CLIENT_ID
-      value: dev-fss.teampensjon.navansatt
+      value: dev-gcp.pensjon-saksbehandling.navansatt
     - name: AZURE_APP_PDL_CLIENT_ID
       value: dev-fss.pdl.pdl-api
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
