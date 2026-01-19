@@ -39,6 +39,7 @@ class NavansattKlient(private val navansattRestTemplate: RestTemplate,
                 return json
             } catch (ex: Exception) {
                 logger.error("En feil oppstod under henting av saksbehandler fra navansatt ex: $ex")
+                throw ex
             }
         }
         return null
