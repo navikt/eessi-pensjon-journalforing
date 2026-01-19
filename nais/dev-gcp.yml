@@ -24,11 +24,14 @@ spec:
         - application: etterlatte-api
           namespace: etterlatte
           cluster: dev-gcp
+        - application: navansatt
+          namespace: pensjon-saksbehandling
+          cluster: dev-gcp
       external:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
-        - host: navansattdev.intern.dev.nav.no
+        - host: navansatt.dev.intern.dev.nav.no
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
         - host: eux-rina-api-gcp-q2.intern.dev.nav.no

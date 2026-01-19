@@ -24,6 +24,9 @@ spec:
         - application: etterlatte-api
           namespace: etterlatte
           cluster: prod-gcp
+        - application: navansatt
+          namespace: pensjon-saksbehandling
+          cluster: prod-gcp
       external:
         - host: saf.prod-fss-pub.nais.io
         - host: eux-rina-api.intern.nav.no
