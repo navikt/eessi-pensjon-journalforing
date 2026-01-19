@@ -31,7 +31,7 @@ spec:
         - host: pdl-api.prod-fss-pub.nais.io
         - host: prod-fss.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
-        - host: navansatt.prod-fss-pub.nais.io
+        - host: pensjon-navansatt.intern.nav.no
         - host: pensjon-pen.prod-fss-pub.nais.io
         - host: eessi-pensjon-oppgave.intern.nav.no
         - host: eessi-pensjon-fagmodul.intern.nav.no
@@ -63,7 +63,7 @@ spec:
     - name: BESTEMSAK_URL
       value: https://pensjon-pen.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
-      value: https://navansatt.prod-fss-pub.nais.io
+      value: http://navansatt.pensjon-saksbehandling
 
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1
@@ -87,7 +87,7 @@ spec:
     - name: AZURE_APP_DOKARKIV_CLIENT_ID
       value: dokarkiv
     - name: AZURE_APP_NAVANSATT_CLIENT_ID
-      value: prod-fss.pensjondeployer.navansatt
+      value: prod-gcp.pensjon-saksbehandling.navansatt
     - name: AZURE_APP_SAF_CLIENT_ID
       value: prod-fss.teamdokumenthandtering.saf
     - name: ETTERLATTE_URL

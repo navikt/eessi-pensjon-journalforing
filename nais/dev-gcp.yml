@@ -62,7 +62,7 @@ spec:
     - name: BESTEMSAK_URL
       value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
-      value: http://navansatt.pensjon-saksbehandling/
+      value: http://navansatt.pensjon-saksbehandling
     - name: ETTERLATTE_URL
       value: http://etterlatte-api.etterlatte
 
