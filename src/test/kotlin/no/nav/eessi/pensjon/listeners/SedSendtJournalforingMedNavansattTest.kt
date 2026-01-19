@@ -175,6 +175,16 @@ internal class SedSendtJournalforingMedNavansattTest {
         every { etterlatteService.hentGjennySak(eq("1234")) } returns JournalforingTestBase.mockHentGjennySak("123")
         every { gcpStorageService.hentFraGjenny(any()) } returns null
 
+        every {
+            navansattRestTemplate.exchange(
+                any<String>(),
+                any<HttpMethod>(),
+                any(),
+                String::class.java
+            )
+        } returns ResponseEntity.ok(enhetsInfo())
+
+
         val opprettJournalPostResponse = OpprettJournalPostResponse(
             journalpostId = "12345",
             journalstatus = "",
@@ -259,7 +269,28 @@ internal class SedSendtJournalforingMedNavansattTest {
         assertEquals(Enhet.ARBEID_OG_YTELSER_TONSBERG, ansattMedEnhetsInfo?.second)
         assertEquals("(Z990965, ARBEID_OG_YTELSER_TONSBERG)", ansattMedEnhetsInfo.toString())
     }
-
+    private fun enhetsInfo(): String {
+        val navansattInfo = """
+                {
+                    "ident":"H562012",
+                    "navn":"Andersen, Anette Christin",
+                    "fornavn":"Anette Christin",
+                    "etternavn":"Andersen",
+                    "epost":"Anette.Christin.Andersen@nav.no",
+                    "groups":[
+                        "Group_be80eb75-e270-40ca-a5f9-29ae8b63eecd",
+                        "1209XX-GA-Brukere",
+                        "4407-GO-Enhet",
+                        "0000-GA-EESSI-CLERK-UFORE",
+                        "0000-GA-Person-EndreSprakMalform",
+                        "0000-GA-Person-EndreKommunikasjon",
+                        "0000-ga-eessi-basis",
+                        "0000-GA-Arena","0000-GA-STDAPPS"
+                    ]
+                }
+            """.trimIndent()
+        return navansattInfo
+    }
 
     fun identifisertPersonPDL(
         aktoerId: String = "3216549873215",
