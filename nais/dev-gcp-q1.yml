@@ -24,6 +24,9 @@ spec:
         - application: etterlatte-api
           namespace: etterlatte
           cluster: dev-gcp
+        - application: navansatt
+          namespace: pensjon-saksbehandling
+          cluster: dev-gcp
       external:
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q1.dev-fss-pub.nais.io
