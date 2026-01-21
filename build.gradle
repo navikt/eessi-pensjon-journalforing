@@ -6,6 +6,7 @@ buildscript {
 		springKafkaVersion = '4.0.1'
 		tokenSupportVersion = '6.0.0'
 		imageioVersion = '3.13.0'
+		jacksonModuleKotlinVersion = '2.21.0'
 	}
 }
 
@@ -53,8 +54,8 @@ dependencies {
 
 	implementation("org.springframework.retry:spring-retry:2.0.12")
 
-	implementation "com.fasterxml.jackson.core:jackson-core:2.21.0"
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
+	implementation("com.fasterxml.jackson.core:jackson-core:${jacksonModuleKotlinVersion}")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonModuleKotlinVersion}")
 
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
