@@ -11,6 +11,9 @@ spec:
       destinations:
         - id: elastic
         - id: loki
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   envFrom:
     - secret: journalforing-prod
   azure:
