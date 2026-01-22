@@ -58,6 +58,7 @@ test {
         showFullStackTraces true
         slowThreshold 5000          //Tests that are too slow will have their duration logged.
     }
+    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 }
 
 /* https://github.com/ben-manes/gradle-versions-plugin */
