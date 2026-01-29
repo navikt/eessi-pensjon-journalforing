@@ -2,7 +2,7 @@ buildscript {
 
 	ext {
 		kotlinVersion = '2.3.0'
-		springBootVersion = '4.0.1'
+		springBootVersion = '4.0.2'
 		springKafkaVersion = '4.0.1'
 		tokenSupportVersion = '6.0.0'
 		imageioVersion = '3.13.0'
