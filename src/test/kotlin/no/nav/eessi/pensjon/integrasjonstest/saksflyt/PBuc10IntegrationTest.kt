@@ -35,7 +35,6 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -52,7 +51,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
      */
 
     val allDocuemtActions = forenkletSEDs()
-
+    
     /* ============================
      * UTGÅENDE
      * ============================ */
@@ -219,21 +218,21 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         @Test
         fun `Test med Sed fra Rina BARNEP og bestemsak - automatisk`() {
+            val fnrBarn = FodselsnummerGenerator.generateFnrForTest(10)
             val bestemsak = bestemSakResponse(SakType.BARNEP, TIL_BEHANDLING)
 
-            val valgtbarnfnr = FodselsnummerGenerator.generateFnrForTest(5)
             testRunnerBarn(
                 "13017123321",
-                valgtbarnfnr,
+                fnrBarn,
                 bestemsak,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
-                sedJson = mockSED(),
+                sedJson = mockSED(fnrBarn),
                 hendelseType = SENDT
             ) {
                     assertEquals(PENSJON, it.tema)
                     assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
-                    assertEquals(valgtbarnfnr, it.bruker?.id!!)
+                    assertEquals(fnrBarn, it.bruker?.id!!)
                 }
         }
 
@@ -873,9 +872,9 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
     }
 
-    private fun mockSED() : String {
+    private fun mockSED(fnrBarn: String) : String {
         return """
-            {"pensjon":{"gjenlevende":{"person":{"pin":[{"identifikator":"05020876176","land":"NO"}],"foedselsdato":"2008-02-05","etternavn":"TRANFLASKE","fornavn":"TYKKMAGET","kjoenn":"M","relasjontilavdod":{"relasjon":"06"}}}},"sedGVer":"4","nav":{"bruker":{"adresse":{"land":"NO","gate":"BEISKKÁNGEAIDNU 7","postnummer":"8803","by":"SANDNESSJØEN"},"person":{"fornavn":"BLÅ","pin":[{"land":"NO","institusjonsid":"NO:NAVAT07","institusjonsnavn":"NAV ACCEPTANCE TEST 07","identifikator":"13017123321"}],"kjoenn":"M","etternavn":"SKILPADDE","foedselsdato":"1971-01-13","statsborgerskap":[{"land":"NO"}]}},"eessisak":[{"institusjonsnavn":"NAV ACCEPTANCE TEST 07","saksnummer":"22919587","institusjonsid":"NO:NAVAT07","land":"NO"}],"krav":{"dato":"2020-10-01","type":"02"}},"sedVer":"2","sed":"P15000"}
+            {"pensjon":{"gjenlevende":{"person":{"pin":[{"identifikator":"$fnrBarn","land":"NO"}],"foedselsdato":"${Fodselsnummer.fra(fnrBarn)?.getBirthDate()}","etternavn":"TRANFLASKE","fornavn":"TYKKMAGET","kjoenn":"M","relasjontilavdod":{"relasjon":"06"}}}},"sedGVer":"4","nav":{"bruker":{"adresse":{"land":"NO","gate":"BEISKKÁNGEAIDNU 7","postnummer":"8803","by":"SANDNESSJØEN"},"person":{"fornavn":"BLÅ","pin":[{"land":"NO","institusjonsid":"NO:NAVAT07","institusjonsnavn":"NAV ACCEPTANCE TEST 07","identifikator":"13017123321"}],"kjoenn":"M","etternavn":"SKILPADDE","foedselsdato":"1971-01-13","statsborgerskap":[{"land":"NO"}]}},"eessisak":[{"institusjonsnavn":"NAV ACCEPTANCE TEST 07","saksnummer":"22919587","institusjonsid":"NO:NAVAT07","land":"NO"}],"krav":{"dato":"2020-10-01","type":"02"}},"sedVer":"2","sed":"P15000"}
         """.trimIndent()
     }
 
