@@ -30,10 +30,12 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.PdlPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
 import no.nav.eessi.pensjon.utils.toJsonSkipEmpty
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -50,7 +52,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
      */
 
     val allDocuemtActions = forenkletSEDs()
-    
+
     /* ============================
      * UTGÅENDE
      * ============================ */
@@ -219,10 +221,10 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Test med Sed fra Rina BARNEP og bestemsak - automatisk`() {
             val bestemsak = bestemSakResponse(SakType.BARNEP, TIL_BEHANDLING)
 
-            val valgtbarnfnr = "05020876176"
+            val valgtbarnfnr = FodselsnummerGenerator.generateFnrForTest(5)
             testRunnerBarn(
                 "13017123321",
-                "05020876176",
+                valgtbarnfnr,
                 bestemsak,
                 krav = GJENLEV,
                 alleDocs = allDocuemtActions,
