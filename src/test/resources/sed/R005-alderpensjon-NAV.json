@@ -1,7 +1,7 @@
 {
   "nav": {
-    "brukere": [
-      {
+    "begunstiget": {
+      "forsikret": {
         "person": {
           "fornavn": "LUR",
           "pin": [
@@ -20,7 +20,7 @@
           }
         }
       }
-    ]
+    }
   },
   "sed": "R005",
   "sedGVer": "4",

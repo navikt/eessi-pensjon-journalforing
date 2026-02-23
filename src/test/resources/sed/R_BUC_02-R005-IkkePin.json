@@ -1,7 +1,7 @@
 {
   "nav": {
-    "brukere": [
-      {
+    "begunstiget" : {
+      "forsikret": {
         "person": {
           "fornavn": "Developer",
           "foedselsdato": "1980-10-22",
@@ -9,12 +9,12 @@
           "kjoenn": "M"
         },
         "tilbakekreving": {
-          "status":
-
-          { "type": "forsikret_person" }
+          "status": {
+            "type": "forsikret_person"
+          }
         }
       }
-    ],
+    },
     "eessisak": [
 
       { "saksnummer": "1234", "land": "BE" }

@@ -1,7 +1,7 @@
 {
   "nav": {
-    "brukere": [
-      {
+    "begunstiget": {
+      "forsikret": {
         "person": {
           "doedsdato": "2020-05-08",
           "etternavn": "BAMSE",
@@ -27,43 +27,24 @@
             "type": "avdød_mottaker_av_ytelser"
           }
         }
-      },
-      {
-        "person": {
-          "foedselsdato": "2000-05-18",
-          "fornavn": "ENKELENKE",
-          "pin": [
-            {
-              "land": "NO",
-              "identifikator": "28125518943"
-            }
-          ],
-          "kjoenn": "K",
-          "etternavn": "BAMSE"
-        },
-        "tilbakekreving": {
-          "status": {
-            "type": "enke_eller_enkemann"
-          }
-        },
-        "adresse": [
-          {
-            "type": "bosted",
-            "land": "NO",
-            "by": "Bergen"
-          }
-        ]
       }
-    ],
-    "eessisak": [
+    },
+    "adresse": [
       {
-        "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
-        "saksnummer": "12312312312312312312312313",
+        "type": "bosted",
         "land": "NO",
-        "institusjonsid": "NO:NAVAT07"
+        "by": "Bergen"
       }
     ]
   },
+  "eessisak": [
+    {
+      "institusjonsnavn": "NAV ACCEPTANCE TEST 07",
+      "saksnummer": "12312312312312312312312313",
+      "land": "NO",
+      "institusjonsid": "NO:NAVAT07"
+    }
+  ],
   "sedVer": "2",
   "tilbakekreving": {
     "feilutbetaling": {

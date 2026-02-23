@@ -1,20 +1,7 @@
 {
   "nav": {
-    "brukere": [
-      {
-        "tilbakekreving": {
-          "status": {
-            "type": "annet"
-          }
-        },
-        "adresse": [
-          {
-            "type": "adrtype",
-            "gate": "gate",
-            "by": "by",
-            "land": "SE"
-          }
-        ],
+    "begunstiget" : {
+      "forsikret": {
         "person": {
           "pin": [
             {
@@ -37,9 +24,14 @@
           "foedselsdato": "1959-04-27",
           "etternavn": "",
           "fornavn": ""
+        },
+        "tilbakekreving": {
+          "status": {
+            "type": "forsikret_person"
+          }
         }
       }
-    ],
+    },
     "eessisak": [
       {
         "institusjonsnavn": "The Swedish Social Insurance Agency",

@@ -36,10 +36,10 @@ internal class SEDTest {
 
     @Test
     fun `Test felter på en R005 deserialiseres korrekt`() {
-        val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText())
+        val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-alderpensjon-NAV.json")!!.readText())
 
-        val brukere = sed.recoveryNav!!.brukere!!
-        val person = brukere.firstOrNull()?.person!!
+        val brukere = sed.recoveryNav!!.begunstiget?.forsikret!!
+        val person = brukere.person!!
 
         val pin = person.pin!![0]
         assertEquals("04117922400", pin.identifikator)
@@ -47,7 +47,7 @@ internal class SEDTest {
 
         assertEquals("1979-11-04", person.foedselsdato)
 
-        assertEquals("debitor", brukere.firstOrNull()?.tilbakekreving?.status?.type)
+        assertEquals("debitor", brukere.tilbakekreving?.status?.type)
 
         val tilbakekreving = sed.tilbakekreving!!
         assertEquals("alderspensjon", tilbakekreving.feilutbetaling!!.ytelse!!.type)
