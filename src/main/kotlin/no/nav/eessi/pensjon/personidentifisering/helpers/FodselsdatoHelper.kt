@@ -34,11 +34,15 @@ class FodselsdatoHelper {
          * @return siste fødselsdato i SED-listen som [LocalDate]
          */
         fun fdatoFraSedListe(seder: List<SED>): LocalDate? {
+            logger.info("Starter fdatoFraSedListe med ${seder.size} SEDer")
             if (seder.isEmpty())
                 throw RuntimeException("Kan ikke hente fødselsdato fra tom SED-liste.")
 
-            val fdato = seder
-                .filter { it.type.kanInneholdeIdentEllerFdato() }.firstNotNullOfOrNull { filterFodselsdato(it) }
+            val filtered = seder.filter { it.type.kanInneholdeIdentEllerFdato() }
+            logger.info("Filtrerte SEDer som kan inneholde ident eller fødselsdato: ${filtered.size}")
+
+            val fdato = filtered.firstNotNullOfOrNull { filterFodselsdato(it) }
+            logger.info("Resultat fødselsdato: ${fdato?.toString()?.take(4)}")
 
             if (fdato != null) {
                 return fdato
@@ -53,7 +57,9 @@ class FodselsdatoHelper {
 
         //Det er noen XSed som mangler FNR
         private fun sederUtenFdato(seder: List<SED>) : Boolean {
-            return seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == GJENLEV }
+            val result = seder.any { it.type == SedType.P15000 && it.nav?.krav?.type == GJENLEV }
+            logger.info("sederUtenFdato resultat: $result")
+            return result
         }
 
         /**
@@ -65,6 +71,7 @@ class FodselsdatoHelper {
          * @return Fødselsdato som [LocalDate]
          */
         fun filterFodselsdato(sed: SED): LocalDate? {
+            logger.info("Starter filterFodselsdato for SED-type: ${sed.type}")
             return try {
                 val fdato = when (sed.type) {
                     R005 -> filterPersonR005Fodselsdato(sed as R005)
@@ -82,6 +89,7 @@ class FodselsdatoHelper {
                     else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                 }
 
+                logger.info("filterFodselsdato fant fødselsdato-streng: $fdato")
                 fdato?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) }.also {
                     if (it != null) logger.info("Fant fødselsdato i ${sed.type}, fdato: $it")
                 }
@@ -91,13 +99,17 @@ class FodselsdatoHelper {
             }
         }
         private fun leggTilGjenlevendeFdatoHvisFinnes(person: Person?, gjenlevende: Bruker?): String? {
-            return if (gjenlevende != null) filterGjenlevendeFodselsdato(gjenlevende)
+            val result = if (gjenlevende != null) filterGjenlevendeFodselsdato(gjenlevende)
             else filterPersonFodselsdato(person)
+            logger.info("leggTilGjenlevendeFdatoHvisFinnes resultat: $result")
+            return result
         }
 
         private fun filterP15000(sed: P15000): String? {
-            return if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
+            val result = if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
             else filterPersonFodselsdato(sed.nav?.bruker?.person)
+            logger.info("filterP15000 resultat: $result")
+            return result
         }
 
         /**
@@ -108,7 +120,11 @@ class FodselsdatoHelper {
          * * hvis ingen intreffer returnerer vi null
          */
 
-        private fun filterPersonR005Fodselsdato(sed: R005): String? = sed.recoveryNav?.brukere?.first()?.person?.foedselsdato
+        private fun filterPersonR005Fodselsdato(sed: R005): String? {
+            val result = sed.recoveryNav?.brukere?.first()?.person?.foedselsdato
+            logger.info("filterPersonR005Fodselsdato resultat: $result")
+            return result
+        }
 
         /**
          * P10000 - [01] Søker til etterlattepensjon
@@ -118,20 +134,32 @@ class FodselsdatoHelper {
         private fun leggTilAnnenPersonFdatoHvisFinnes(annenPerson: Person?): String? {
             logger.info("Annen persons rolle er: ${annenPerson?.rolle}")
             if (annenPerson?.rolle != Rolle.ETTERLATTE.kode) return null
-            return annenPerson.foedselsdato
+            val result = annenPerson.foedselsdato
+            logger.info("leggTilAnnenPersonFdatoHvisFinnes resultat: $result")
+            return result
         }
 
-        private fun filterGjenlevendeFodselsdato(gjenlevende: Bruker?): String? = gjenlevende?.person?.foedselsdato
+        private fun filterGjenlevendeFodselsdato(gjenlevende: Bruker?): String? {
+            val result = gjenlevende?.person?.foedselsdato
+            logger.info("filterGjenlevendeFodselsdato resultat: $result")
+            return result
+        }
 
-        private fun filterPersonFodselsdato(person: Person?): String? = person?.foedselsdato
+        private fun filterPersonFodselsdato(person: Person?): String? {
+            val result = person?.foedselsdato
+            logger.info("filterPersonFodselsdato resultat: $result")
+            return result
+        }
 
         private fun filterPersonFodselsdatoX00Sed(sed: SED) : String? {
-            return when (sed) {
+            val result = when (sed) {
                 is X005 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
                 is X010 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
                 is X008 -> filterPersonFodselsdato(sed.xnav?.sak?.kontekst?.bruker?.person)
                 else -> null
             }
+            logger.info("filterPersonFodselsdatoX00Sed resultat: $result")
+            return result
         }
     }
 }
