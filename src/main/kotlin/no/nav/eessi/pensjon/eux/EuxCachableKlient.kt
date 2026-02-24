@@ -23,7 +23,7 @@ class EuxCacheableKlient(
     @Value("\${EUX_RINA_API_V1_URL}") private val baseurl: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
-
+    private val secureLog = LoggerFactory.getLogger("secureLog")
     private val logger: Logger by lazy { LoggerFactory.getLogger(javaClass) }
 
     private var hentSed: MetricsHelper.Metric
@@ -60,6 +60,7 @@ class EuxCacheableKlient(
     internal fun hentSed(rinaSakId: String, dokumentId: String): SED {
         return hentSed.measure {
             val json = euxKlientLib.hentSedJson(rinaSakId, dokumentId)
+            secureLog.info("Hentet SED json for rinaSakId: $rinaSakId, dokumentId: $dokumentId, json: $json")
             SED.fromJsonToConcrete(json)
         }
     }
