@@ -106,6 +106,14 @@ internal class FodselsdatoHelperTest {
     }
 
     @Test
+    fun `ved henting av fdato på R005 når det er flere personer og en er avød hentes den avdøde`() {
+        val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005_P.json").readText())
+
+        val sedListe = listOf(sed)
+        assertEquals(LocalDate.of(1979, 12, 4), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+    }
+
+    @Test
     fun `ved henting ved fdato på R005 ved den person som debitor og sak er alderpensjon`() {
         val sed = mapJsonToAny<R005>(javaClass.getResource("/sed/R005-alderpensjon-NAV.json").readText())
         assertEquals(LocalDate.of(1979, 11, 4), FodselsdatoHelper.fdatoFraSedListe(listOf(sed)))

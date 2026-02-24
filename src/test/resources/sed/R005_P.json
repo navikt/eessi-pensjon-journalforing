@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "forsikret": {
+      "bruker": {
+        "person": {
+          "kjoenn": "M",
+          "fornavn": "BALL",
+          "foedested": {
+            "land": "SE",
+            "by": "VEI "
+          },
+          "pin": [
+            {
+              "land": "SE",
+              "identifikator": "1926535-8855",
+              "institusjonsnavn": "The Swedish Social Insurance Agency",
+              "institusjonsid": "SE:12600"
+            }
+          ],
+          "foedselsdato": "1979-12-04",
+          "etternavn": "Etternavn"
+        },
+        "sistekjenteadresser": [
+          {
+            "postkode": "433 75",
+            "gate": "Gate",
+            "type43": "bosted",
+            "land": "SE",
+            "by": "JONSERED"
+          }
+        ],
+        "statsborgerskap": {
+          "land": "SE"
+        }
+      }
+    },
+    "eessisak": [
+      {
+        "institusjonsnavn": "The Swedish Social Insurance Agency",
+        "saksnummer": "987654321",
+        "institusjonsid": "SE:12600",
+        "land": "SE"
+      }
+    ]
+  },
+  "tilbakekreving": {
+    "anmodning": {
+      "type": "foreløpig"
+    },
+    "feilutbetaling": {
+      "ytelse": {
+        "type": "uførepensjon"
+      }
+    }
+  },
+  "sedGVer": "4",
+  "sedVer": "4",
+  "sed": "R005"
+}

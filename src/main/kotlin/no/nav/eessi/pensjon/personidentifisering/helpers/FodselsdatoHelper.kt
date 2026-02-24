@@ -121,7 +121,7 @@ class FodselsdatoHelper {
          */
 
         private fun filterPersonR005Fodselsdato(sed: R005): String? {
-            val result = sed.recoveryNav?.begunstiget?.forsikret?.person?.foedselsdato
+            val result = sed.recoveryNav?.forsikret?.bruker?.person?.foedselsdato
             logger.info("filterPersonR005Fodselsdato resultat: $result")
             return result
         }
