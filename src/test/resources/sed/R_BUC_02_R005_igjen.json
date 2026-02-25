@@ -1,0 +1,122 @@
+{
+  "nav": {
+    "brukere": [
+      {
+        "tilbakekreving": {
+          "status": {
+            "type": "enke_eller_enkemann"
+          }
+        },
+        "person": {
+          "pin": [
+            {
+              "identifikator": "9876543211",
+              "land": "SE",
+              "institusjonsid": "SE:2001",
+              "sektor": "pensjoner",
+              "institusjonsnavn": "The Swedish Pensions Agency"
+            }
+          ],
+          "statsborgerskap": [
+            {
+              "land": "SE"
+            }
+          ],
+          "foedselsdato": "1961-03-14",
+          "etternavn": "Hest",
+          "fornavn": "Hester",
+          "kjoenn": "K"
+        },
+        "adresse": [
+          {
+            "by": "FREDRIKSBERG",
+            "land": "SE",
+            "postkode": "710",
+            "type43": "bosted",
+            "gate": "FILIPS 8"
+          }
+        ]
+      },
+      {
+        "person": {
+          "pin": [
+            {
+              "identifikator": "652321654897",
+              "land": "SE",
+              "institusjonsnavn": "The Swedish Pensions Agency",
+              "institusjonsid": "SE:2001",
+              "sektor": "pensjoner"
+            },
+            {
+              "institusjonsnavn": "The Norwegian Labour and Welfare Administration",
+              "sektor": "pensjoner",
+              "identifikator": "654654654654",
+              "land": "NO",
+              "institusjonsid": "NO:889640782"
+            }
+          ],
+          "kjoenn": "M",
+          "foedselsdato": "1962-08-13",
+          "etternavn": "FLODEHEST",
+          "fornavn": "FLODE",
+          "doedsdato": "2025-04-13"
+        },
+        "adresse": [
+          {
+            "land": "SE",
+            "type43": "bosted",
+            "gate": "FILIPVÄGEN 8",
+            "by": "FREDSBERG ",
+            "postkode": "770"
+          }
+        ],
+        "tilbakekreving": {
+          "status": {
+            "type": "forsikret_person"
+          }
+        }
+      }
+    ],
+    "eessisak": [
+      {
+        "institusjonsnavn": "The Swedish Pensions Agency",
+        "saksnummer": "2025-11-139191",
+        "land": "SE",
+        "institusjonsid": "SE:2001"
+      }
+    ]
+  },
+  "tilbakekreving": {
+    "anmodningommotregning": {
+      "bank": {
+        "konto": {
+          "sepa": {
+            "iban": "SE8412000000012810123322",
+            "swift": "DABASESX"
+          },
+          "betalingsreferanse": "Maria Ekehov, 19610314-7200",
+          "innehaver": {
+            "navn": "Pensionsmyndigheten, Inbetalning Utland"
+          }
+        }
+      }
+    },
+    "feilutbetaling": {
+      "periode": {
+        "sluttdato": "2026-01-31",
+        "startdato": "2026-01-01"
+      },
+      "ytelse": {
+        "type": "andre_former_for_etterlattepensjon"
+      },
+      "valuta": "SEK",
+      "beloep": "3410"
+    },
+    "anmodning": {
+      "type": "endelig"
+    }
+  },
+  "sedVer": "3",
+  "sedGVer": "4",
+  "sed": "R005"
+}

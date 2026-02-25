@@ -98,6 +98,13 @@ internal class FodselsdatoHelperTest {
     }
 
     @Test
+    fun `Ved henting ved fdato på R005 test2` () {
+        val x008 = X008(xnav=XNav(Navsak()))
+        val sedListe = listOf(x008, getSedFile("/sed/R_BUC_02_R005_igjen.json"))
+        assertEquals(LocalDate.of(1961, 3, 14), FodselsdatoHelper.fdatoFraSedListe(sedListe))
+    }
+
+    @Test
     fun `ved henting ved fdato på R005 dersom det er begunstiget som har fdato` () {
         val x008 = X008(xnav=XNav(Navsak()))
         val sedListe = listOf(x008, getSedFile("/sed/R_BUC_02_R005_.json"))
