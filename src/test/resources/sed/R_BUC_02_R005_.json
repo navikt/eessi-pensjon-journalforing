@@ -1,0 +1,109 @@
+{
+  "nav": {
+    "begunstiget": {
+      "bruker": {
+        "statsborgerskap": {
+          "land": "SE"
+        },
+        "person": {
+          "kjoenn": "M",
+          "pin": [
+            {
+              "identifikator": "19447-3551",
+              "institusjonsid": "SE:2001",
+              "sektor": "alle",
+              "land": "SE",
+              "institusjonsnavn": "The Swedish Pensions Agency"
+            }
+          ],
+          "fornavn": "R002",
+          "foedselsdato": "1961-12-17",
+          "etternavn": "RBUC02",
+          "foedested": {
+            "by": "HÄSSLEHOLM",
+            "land": "SE"
+          }
+        },
+        "personstatus": {
+          " RStatusPersonBeneficiaryNoDeceaseType": "01"
+        },
+        "sistekjenteadresser": [
+          {
+            "postkode": "27293",
+            "land": "SE",
+            "type43": "bosted",
+            "gate": "BYGATAN 26",
+            "by": "Tommarp"
+          }
+        ],
+        "familiestatus": {
+          "RFamilyStatusType": "enke_enkemann"
+        }
+      },
+      "forsikret": {
+        "bruker": {
+          "person": {
+            "pin": [
+              {
+                "identifikator": "1565464-5797",
+                "institusjonsid": "SE:2001",
+                "land": "SE",
+                "sektor": "alle",
+                "institusjonsnavn": "The Swedish Pensions Agency"
+              },
+              {
+                "institusjonsnavn": "The Norwegian Labour and Welfare Administration",
+                "land": "NO",
+                "sektor": "alle",
+                "institusjonsid": "NO:889640782",
+                "identifikator": "022265 35220"
+              }
+            ],
+            "etternavn": "Ruud",
+            "foedested": {
+              "land": "NO",
+              "by": "Oslo"
+            },
+            "kjoenn": "M",
+            "fornavn": "Simen",
+            "foedselsdato": "1965-12-04"
+          },
+          "sistekjenteadresser": [
+            {
+              "land": "SE",
+              "postkode": "27293",
+              "type43": "bosted",
+              "gate": "BYGATAN 26",
+              "by": "Tommarp"
+            }
+          ],
+          "statsborgerskap": {
+            "land": "NO"
+          },
+          "doedsdato": "2025-06-18"
+        }
+      }
+    },
+    "eessisak": [
+      {
+        "institusjonsnavn": "The Swedish Pensions Agency",
+        "saksnummer": "2026-02-210748",
+        "land": "SE",
+        "institusjonsid": "SE:2001"
+      }
+    ]
+  },
+  "sedVer": "4",
+  "tilbakekreving": {
+    "feilutbetaling": {
+      "ytelse": {
+        "type": "etterlattepensjon_enke"
+      }
+    },
+    "anmodning": {
+      "type": "foreløpig"
+    }
+  },
+  "sedGVer": "4",
+  "sed": "R005"
+}
