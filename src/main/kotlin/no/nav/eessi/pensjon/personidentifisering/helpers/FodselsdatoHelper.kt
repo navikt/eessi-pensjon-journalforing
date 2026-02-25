@@ -123,10 +123,11 @@ class FodselsdatoHelper {
         private fun filterPersonR005Fodselsdato(sed: R005): String? {
             val forsikret = sed.recoveryNav?.forsikret?.bruker?.person?.foedselsdato
             val begunstiget = sed.recoveryNav?.begunstiget?.bruker?.person?.foedselsdato
+            //Ved to eller flere brukere velger vi den gjenlevende, eller den uten dødsdato
+            sed.recoveryNav?.brukere?.size?.let { if (it > 2) return null.also { logger.error("Her har vi flere enn to brukere i personlista")} }
+            val brukerUtendoedsdato = sed.recoveryNav?.brukere?.firstOrNull { it.doedsdato.isNullOrEmpty() }?.person?.foedselsdato
 
-            return if (!forsikret.isNullOrEmpty()) {
-                forsikret.also { logger.info("filterPersonR005Fodselsdato resultat for Forsikret: $forsikret") }
-            } else begunstiget.also { logger.info("filterPersonR005Fodselsdato resultat for Begunstiget: $begunstiget") }
+            return forsikret ?: begunstiget ?: brukerUtendoedsdato
         }
 
         /**
