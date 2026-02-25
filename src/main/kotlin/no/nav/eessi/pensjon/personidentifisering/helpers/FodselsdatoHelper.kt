@@ -121,9 +121,12 @@ class FodselsdatoHelper {
          */
 
         private fun filterPersonR005Fodselsdato(sed: R005): String? {
-            val result = sed.recoveryNav?.forsikret?.bruker?.person?.foedselsdato
-            logger.info("filterPersonR005Fodselsdato resultat: $result")
-            return result
+            val forsikret = sed.recoveryNav?.forsikret?.bruker?.person?.foedselsdato
+            val begunstiget = sed.recoveryNav?.begunstiget?.bruker?.person?.foedselsdato
+
+            return if (!forsikret.isNullOrEmpty()) {
+                forsikret.also { logger.info("filterPersonR005Fodselsdato resultat for Forsikret: $forsikret") }
+            } else begunstiget.also { logger.info("filterPersonR005Fodselsdato resultat for Begunstiget: $begunstiget") }
         }
 
         /**
