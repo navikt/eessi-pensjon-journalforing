@@ -26,7 +26,7 @@ open class RelasjonTestBase {
                            annenPersonTilbakekreving: String? = null): R005 {
 
         val annenPerson = annenPersonFnr?.let {
-            Brukere(
+            RBruker(
                 person = createPersonR005(it),
                 tilbakekreving = annenPersonTilbakekreving?.let { type ->
                     TilbakekrevingBrukere(status = Status(type))
@@ -37,7 +37,7 @@ open class RelasjonTestBase {
         return R005(
             type = SedType.R005,
             recoveryNav = RNav(brukere = listOfNotNull(
-                Brukere(
+                RBruker(
                     person = createPersonR005(forsikretFnr),
                     tilbakekreving = forsikretTilbakekreving?.let {
                         TilbakekrevingBrukere(status = Status(it))
