@@ -13,8 +13,8 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
 
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulKlient::class.java) }
 
-    fun hentPensjonSaklist(aktoerId: String): List<SakInformasjon> {
-        val path = "/pensjon/sakliste/$aktoerId"
+    fun hentPensjonSaklist(fnr: String): List<SakInformasjon> {
+        val path = "/pensjon/sakliste/$fnr"
 
         val responseJson = try {
             val responsebody = fagmodulOidcRestTemplate.exchange(

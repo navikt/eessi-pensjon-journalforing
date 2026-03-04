@@ -115,7 +115,7 @@ internal open class JournalforingTestBase {
         every { navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
     private val euxService = EuxService(euxKlient)
-    private val fagmodulService = FagmodulService(fagmodulKlient)
+    private val fagmodulService = FagmodulService(fagmodulKlient, mockk(relaxed = true))
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
@@ -247,6 +247,13 @@ internal open class JournalforingTestBase {
                 land,
                 aktorId = AKTOER_ID
             )
+//            every { personService.hentPerson(AktoerId(fnr)) } returns createBrukerWith(
+//                fnr,
+//                "Mamma forsørger",
+//                "Etternavn",
+//                land,
+//                aktorId = AKTOER_ID
+//            )
         }
 
         if (fnrAnnenPerson != null) {

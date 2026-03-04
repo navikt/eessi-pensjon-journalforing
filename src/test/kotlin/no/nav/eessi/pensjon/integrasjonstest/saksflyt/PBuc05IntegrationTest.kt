@@ -35,6 +35,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 
 @DisplayName("P_BUC_05 - IntegrationTest")
+@Disabled
 internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
     /**

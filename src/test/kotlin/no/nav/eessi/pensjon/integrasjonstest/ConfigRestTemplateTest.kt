@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.MockkBeans
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
@@ -40,7 +41,6 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle
 import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.RestTemplateBuilder
@@ -114,7 +114,7 @@ internal class ConfigRestTemplateTest {
     @BeforeEach
     fun setup() {
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns emptyList()
-        fagmodulService = FagmodulService(fagmodulKlient)
+        fagmodulService = FagmodulService(fagmodulKlient, personService)
 
         every { personService.harAdressebeskyttelse(any()) } returns false
         every { personService.sokPerson(any()) } returns setOf(
@@ -148,6 +148,7 @@ internal class ConfigRestTemplateTest {
         val requestSlot = slot<OpprettJournalpostRequest>()
 
         every { journalpostKlient.opprettJournalpost(capture(requestSlot), any(), null) } returns mockk(relaxed = true)
+        every { personService.hentIdent(any(), any()) } returns null
 
         sedSendtListener.consumeSedSendt(
             javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_MedUgyldigVedlegg.json")!!.readText(),
