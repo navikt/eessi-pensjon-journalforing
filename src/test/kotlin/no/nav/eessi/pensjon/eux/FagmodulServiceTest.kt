@@ -22,31 +22,22 @@ import no.nav.eessi.pensjon.listeners.pesys.BestemSakService
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
-import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
-import no.nav.eessi.pensjon.personidentifisering.helpers.FodselsdatoHelperTest
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
-import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
-import no.nav.eessi.pensjon.shared.person.Fodselsnummer
-import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import kotlin.collections.orEmpty
 
-@Disabled("Testen er ustabil, og trenger en refaktorering for å bli mer stabil")
 internal class FagmodulServiceTest {
 
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
     private val fmService = FagmodulService(fagmodulKlient)
     private val bestemSakService: BestemSakService = mockk(relaxed = true)
-    private val identifiseringService: PersonidentifiseringService = mockk()
     private val sedMottattListener = SedMottattListener(
         journalforingService = mockk(),
-        personidentifiseringService = identifiseringService,
+        personidentifiseringService = mockk(),
         euxService = mockk(),
         fagmodulService = fmService,
         bestemSakService = bestemSakService,
@@ -56,7 +47,6 @@ internal class FagmodulServiceTest {
 
     @AfterEach
     fun after() {
-//        every { identifiseringService. }
         confirmVerified(fagmodulKlient)
         clearAllMocks()
     }
@@ -71,7 +61,7 @@ internal class FagmodulServiceTest {
 
         val sedP5000 =  mapJsonToAny<SED>(javaClass.getResource("/sed/P5000-medNorskGjenlevende-NAV.json")!!.readText())
         val eessisakList = sedP5000.nav?.eessisak?.mapNotNull { it.saksnummer }
-        val result = fmService.hentPesysSakId(Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))!!, P_BUC_01)
+        val result = fmService.hentPesysSakId("123123", P_BUC_01)
 
         assertNotNull(result)
         assertEquals(expected.sakId, result?.get(0)?.sakId)
@@ -90,7 +80,7 @@ internal class FagmodulServiceTest {
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns pensjonsinformasjonsList
 
-        val resultat = fmService.hentPesysSakId(Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))!!, bucType)
+        val resultat = fmService.hentPesysSakId("13245678912", bucType)
 
         assertEquals("ALDER", resultat?.firstOrNull()?.sakType.toString())
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
@@ -107,7 +97,7 @@ internal class FagmodulServiceTest {
 
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns pensjonsinformasjonsList
 
-        val resultat = fmService.hentPesysSakId(Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(20))!!, P_BUC_03)
+        val resultat = fmService.hentPesysSakId("13245678912", P_BUC_03)
 
         assertEquals("UFOREP", resultat?.get(0)?.sakType.toString())
         verify(exactly = 1) { fagmodulKlient.hentPensjonSaklist(any()) }
