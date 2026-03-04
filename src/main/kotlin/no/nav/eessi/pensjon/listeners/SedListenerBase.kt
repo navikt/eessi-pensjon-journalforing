@@ -55,7 +55,10 @@ abstract class SedListenerBase(
         val aktoerId = identifisertPerson?.aktoerId ?: return null.also {
             logger.info("IdentifisertPerson mangler aktørId. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon")
         }
-        val sakFraPenInfo = fagmodulService.hentPesysSakId(aktoerId, bucType).takeIf { it?.isNotEmpty() == true }
+        val fnr = identifisertPerson.fnr ?: return null.also {
+            logger.info("IdentifisertPerson mangler fnr. Ikke i stand til å hente ut saktype fra bestemsak eller pensjonsinformasjon")
+        }
+        val sakFraPenInfo = fagmodulService.hentPesysSakId(fnr, bucType).takeIf { it?.isNotEmpty() == true }
         val sakInformasjon = hentSakInformasjon(sakFraPenInfo, bucType, saktypeFraSed, aktoerId, identifisertPerson, retning)
 
         if (sakInformasjon.isNullOrEmpty()) {
