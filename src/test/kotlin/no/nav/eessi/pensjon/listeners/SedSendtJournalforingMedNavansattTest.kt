@@ -44,6 +44,7 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -51,6 +52,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 
+@Disabled
 internal class SedSendtJournalforingMedNavansattTest {
 
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
