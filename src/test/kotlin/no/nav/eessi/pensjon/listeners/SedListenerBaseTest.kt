@@ -33,7 +33,7 @@ import org.junit.jupiter.params.provider.EnumSource
 class SedListenerBaseTest {
 
     private val fagmodulKlient = mockk<FagmodulKlient>()
-    private val fagmodulService = FagmodulService(fagmodulKlient)
+    private val fagmodulService = FagmodulService(fagmodulKlient, mockk(relaxed = true))
     private val bestemSakService = mockk<BestemSakService>(relaxed = true)
     private val gcpStorageService = mockk<GcpStorageService>(relaxed = true)
     private val euxService = mockk<EuxService>(relaxed = true)

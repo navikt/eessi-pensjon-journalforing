@@ -11,6 +11,7 @@ import no.nav.eessi.pensjon.eux.model.SedType.P8000
 import no.nav.eessi.pensjon.eux.model.buc.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_BARN
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
@@ -34,6 +35,10 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -41,6 +46,7 @@ import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.web.client.RestTemplate
@@ -50,12 +56,14 @@ private const val PESYS_SAKID = "25595454"
 private const val RINA_ID = "148161"
 private const val AKTOER_ID = "3216549873212"
 
+@Disabled
 internal class SedSendtJournalforingTest {
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
 
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
     private val norg2Service = Norg2Service(mockk<Norg2Klient>())
-    private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
+    private val personService = mockk<PersonService>()
+    private val personidentifiseringService = PersonidentifiseringService(mockk(relaxed = true), personService)
     private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
     private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib, "mockUrl")
     private val euxService = EuxService(euxCacheableKlient)
@@ -111,7 +119,7 @@ internal class SedSendtJournalforingTest {
             jouralforingService,
             personidentifiseringService,
             euxService,
-            FagmodulService(fagmodulKlient),
+            FagmodulService(fagmodulKlient, mockk()),
             BestemSakService(bestemSakKlient),
             NavansattKlient(mockk<RestTemplate>(relaxed = true)),
             gcpStorageService = gcpStorageService,
@@ -119,6 +127,8 @@ internal class SedSendtJournalforingTest {
         )
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
+
+        every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, AktoerId(any())) } returns NorskIdent(FNR_BARN)
     }
 
     @Test

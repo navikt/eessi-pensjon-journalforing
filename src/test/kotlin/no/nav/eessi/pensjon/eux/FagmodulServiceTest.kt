@@ -33,7 +33,7 @@ import kotlin.collections.orEmpty
 internal class FagmodulServiceTest {
 
     private val fagmodulKlient: FagmodulKlient = mockk(relaxed = true)
-    private val fmService = FagmodulService(fagmodulKlient)
+    private val fmService = FagmodulService(fagmodulKlient, mockk(relaxed = true))
     private val bestemSakService: BestemSakService = mockk(relaxed = true)
     private val sedMottattListener = SedMottattListener(
         journalforingService = mockk(),
