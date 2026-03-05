@@ -15,6 +15,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
+import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_BARN
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.bestemenhet.OppgaveRoutingService
 import no.nav.eessi.pensjon.journalforing.bestemenhet.norg2.Norg2Klient
@@ -35,6 +36,9 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
+import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
@@ -44,7 +48,6 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -52,7 +55,6 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.web.client.RestTemplate
 import java.time.LocalDate
 
-@Disabled
 internal class SedSendtJournalforingMedNavansattTest {
 
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
@@ -60,14 +62,16 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val norg2Klient = mockk<Norg2Klient>()
     private val norg2Service = Norg2Service(norg2Klient)
     private val oppgaveRoutingService = OppgaveRoutingService(norg2Service)
-    private val personidentifiseringService = mockk<PersonidentifiseringService>(relaxed = true)
     private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
     private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib, "mockUrl")
     private val euxService = EuxService(euxCacheableKlient)
     private val bestemSakKlient = mockk<BestemSakKlient>(relaxed = true)
     private val bestemSakService = BestemSakService(bestemSakKlient)
     private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
-    private val fagmodulService = FagmodulService(fagmodulKlient,mockk())
+
+    private val personService = mockk<PersonService>()
+    private val personidentifiseringService = PersonidentifiseringService(mockk(relaxed = true), personService)
+    private val fagmodulService = FagmodulService(fagmodulKlient, personService)
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
 
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
@@ -89,6 +93,8 @@ internal class SedSendtJournalforingMedNavansattTest {
 
     @BeforeEach
     fun setup() {
+
+        every { personService.harAdressebeskyttelse(any()) } returns true
 
         pdfService = mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
@@ -167,10 +173,10 @@ internal class SedSendtJournalforingMedNavansattTest {
 
         every { euxService.hentBuc(any()) } returns buc
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
-        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
-        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
+//        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
+//        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
+//        every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
+//        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(eq(aktoerId)) } returns listOf(sakInformasjon)
         every { gcpStorageService.gjennyFinnes(any())} returns false
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
@@ -250,6 +256,8 @@ internal class SedSendtJournalforingMedNavansattTest {
             any(),
             String::class.java)
         } returns ResponseEntity.ok(responseHentEnheter)
+
+        every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_BARN)
 
         val hendelse = SedHendelse(
             sedType = SedType.M051,

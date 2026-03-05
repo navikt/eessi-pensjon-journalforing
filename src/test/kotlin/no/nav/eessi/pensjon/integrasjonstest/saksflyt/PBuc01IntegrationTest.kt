@@ -417,6 +417,8 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.harAdressebeskyttelse(any()) } returns false
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Forsikret", "Personen", "NOR", aktorId = aktoerf)
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnr)
+
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns PENSJON_UTLAND
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
 
@@ -649,8 +651,11 @@ internal class PBuc01IntegrationTest : JournalforingTestBase() {
             val mockp = createBrukerWith(
                 fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID
             )
-            if (Fodselsnummer.fra(fnrVoksen)?.erNpid != true)
+            if (Fodselsnummer.fra(fnrVoksen)?.erNpid != true) {
                 every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns mockp
+                every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnrVoksen)
+            }
+
             else
                 every { personService.hentPerson(Npid(fnrVoksen)) } returns mockp
             mockp

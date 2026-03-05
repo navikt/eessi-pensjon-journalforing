@@ -194,7 +194,6 @@ class PersonidentifiseringService(
     fun finnesPersonMedAdressebeskyttelseIBuc(alleSediBuc: List<Pair<String, SED>>): Boolean {
         logger.info("Leter etter personer med adressebeskyttelse i : ${alleSediBuc.map { it.second.type }.toJson()}")
         val fnr = alleSediBuc.flatMap { SedFnrSok.finnAlleFnrDnrISed(it.second) }
-
         return personService.harAdressebeskyttelse(fnr)
             .also { logger.debug("Finnes adressebeskyttet person: $it") }
     }

@@ -481,6 +481,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             val allDocuemtActions = forenkletSEDs(sedStatus = SedStatus.RECEIVED)
             val bestemsak = bestemSakResponse(SakType.UFOREP,TIL_BEHANDLING)
+            every { personService.harAdressebeskyttelse(any()) } returns false
 
             testRunner(FNR_OVER_62, null, land = "SWE", alleDocs = allDocuemtActions, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
@@ -507,6 +508,8 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om etterlatteytelser`() {
             val allDocuemtActions = forenkletSEDs(sedStatus = SedStatus.RECEIVED)
+
+            every { personService.harAdressebeskyttelse(any()) } returns false
 
             testRunnerBarn(FNR_VOKSEN_2, null, alleDocs = allDocuemtActions, land = "SWE", krav = GJENLEV, hendelseType = MOTTATT) {
                 assertEquals(PENSJON, it.tema)
@@ -546,6 +549,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns createBrukerWith(FNR_OVER_62, "Fornavn", "Pensjonisten", "NOR")
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_OVER_62)
 
             val meldingSlot = slot<String>()
             every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()
@@ -586,6 +590,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentSedJson(any(), any()) } returns sedP5000mottatt.toJson() andThen sed15000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(FNR_OVER_62)) } returns createBrukerWith(FNR_OVER_62, "Fornavn", "Pensjonisten", "SWE")
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_OVER_62)
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
             val meldingSlot = slot<String>()
@@ -628,6 +633,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentSedJson(any(), any()) } returns sedP5000mottatt.toJson() andThen sed15000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns createBrukerWith(FNR_VOKSEN_UNDER_62, "Fornavn", "Pensjonisten", "NOR")
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_VOKSEN_UNDER_62)
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
             val meldingSlot = slot<String>()
@@ -670,6 +676,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
             every { euxKlient.hentSedJson(any(), any()) } returns sedP5000mottatt.toJson() andThen sed15000sent.toJson()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns createBrukerWith(FNR_VOKSEN_UNDER_62, "Fornavn", "Pensjonisten", "SWE")
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_VOKSEN_UNDER_62)
             every { norg2Service.hentArbeidsfordelingEnhet(any()) } returns null
 
             val meldingSlot = slot<String>()
@@ -767,6 +774,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
             every { personService.sokPerson(any()) } returns sokPerson
             every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns mockGjenlevende
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_OVER_62)
             every { euxKlient.hentBuc(any()) } returns bucFrom(P_BUC_10, alleDocumenter)
             every { euxKlient.hentSedJson(any(), any()) } returns sedP15000.toJsonSkipEmpty()
             every { euxKlient.hentAlleDokumentfiler(any(), any()) } returns getDokumentfilerUtenVedlegg()
@@ -908,6 +916,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
         if (fnrBarn != null) {
             every { personService.hentPerson(NorskIdent(fnrBarn)) } returns createBrukerWith(fnrBarn, "Barn", "Diskret", land, aktorId = AKTOER_ID_2)
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnrBarn)
         }
         if (sokPerson != null) {
             every { personService.sokPerson(any()) } returns setOf(
@@ -1123,6 +1132,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         }
         if (fnrVoksenSoker != null) {
             every { personService.hentPerson(NorskIdent(fnrVoksenSoker)) } returns createBrukerWith(fnrVoksenSoker, "Voksen", "Gjenlevende", land, aktorId = AKTOER_ID_2)
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnrVoksenSoker)
         }
         every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
         if (bestemSak != null) {
@@ -1176,6 +1186,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
 
         if (fnr1 != null) {
             every { personService.hentPerson(NorskIdent(fnr1)) } returns createBrukerWith(fnr1, "Fornavn", "Etternavn", land, aktorId = AKTOER_ID)
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnr1)
             every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
             if (bestemSak != null) {
                 every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak.sakInformasjonListe

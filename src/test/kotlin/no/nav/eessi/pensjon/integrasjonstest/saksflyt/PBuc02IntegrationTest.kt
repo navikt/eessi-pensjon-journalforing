@@ -22,6 +22,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.*
@@ -594,6 +595,7 @@ internal class PBuc02IntegrationTest : JournalforingTestBase() {
                 land,
                 aktorId = AKTOER_ID_2
             )
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnrVoksenSoker)
         }
 
         if (bestemSak != null) {

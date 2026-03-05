@@ -9,6 +9,7 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
@@ -51,6 +52,7 @@ internal class PBuc04IntegrationTest: JournalforingTestBase() {
                 land,
                 aktorId = AKTOER_ID
             )
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnr)
         }
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
 

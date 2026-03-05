@@ -35,6 +35,7 @@ import no.nav.eessi.pensjon.oppgaverouting.Enhet.UFORE_UTLANDSTILSNITT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
+import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
@@ -56,14 +57,16 @@ private const val PESYS_SAKID = "25595454"
 private const val RINA_ID = "148161"
 private const val AKTOER_ID = "3216549873212"
 
-@Disabled
 internal class SedSendtJournalforingTest {
     private val acknowledgment = mockk<Acknowledgment>(relaxUnitFun = true)
 
     private val cr = mockk<ConsumerRecord<String, String>>(relaxed = true)
     private val norg2Service = Norg2Service(mockk<Norg2Klient>())
-    private val personService = mockk<PersonService>()
-    private val personidentifiseringService = PersonidentifiseringService(mockk(relaxed = true), personService)
+    private val personService =  mockk<PersonService>().also {
+        every { it.harAdressebeskyttelse(any()) } returns false
+    }
+    private val personSok = PersonSok(personService)
+    private val personidentifiseringService = PersonidentifiseringService(personSok, personService)
     private val euxKlientLib = mockk<EuxKlientLib>(relaxed = true)
     private val euxCacheableKlient = EuxCacheableKlient(euxKlientLib, "mockUrl")
     private val euxService = EuxService(euxCacheableKlient)
@@ -114,12 +117,11 @@ internal class SedSendtJournalforingTest {
             oppgaveService = opprettOppgaveService,
             env = null,
         )
-
         sedListener = SedSendtListener(
             jouralforingService,
             personidentifiseringService,
             euxService,
-            FagmodulService(fagmodulKlient, mockk()),
+            FagmodulService(fagmodulKlient, personService),
             BestemSakService(bestemSakKlient),
             NavansattKlient(mockk<RestTemplate>(relaxed = true)),
             gcpStorageService = gcpStorageService,
@@ -127,8 +129,8 @@ internal class SedSendtJournalforingTest {
         )
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { etterlatteService.hentGjennySak(any()) } returns JournalforingTestBase.mockHentGjennySak("123456789")
-
-        every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, AktoerId(any())) } returns NorskIdent(FNR_BARN)
+        every { personService.hentIdent(IdentGruppe.AKTORID, any()) } returns NorskIdent(FNR_BARN)
+        every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_BARN)
     }
 
     @Test
@@ -163,9 +165,13 @@ internal class SedSendtJournalforingTest {
 
         every { euxService.hentBuc(eq(RINA_ID)) } returns buc
         every { euxKlientLib.hentSedJson(eq(RINA_ID), any()) } returns sedJson
-        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6,11)
+        every { personService.hentPerson(any()) } returns JournalforingTestBase().createBrukerWith(
+            FNR_VOKSEN_UNDER_62,
+            "Mamma forsørger",
+            "Etternavn",
+            "NO",
+            aktorId = JournalforingTestBase.Companion.AKTOER_ID
+        )
         every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
@@ -221,13 +227,15 @@ internal class SedSendtJournalforingTest {
             ),
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
-
+        every { personService.hentPerson(any()) } returns JournalforingTestBase().createBrukerWith(
+            FNR_VOKSEN_UNDER_62,
+            "Mamma forsørger",
+            "Etternavn",
+            "NOR",
+            aktorId = JournalforingTestBase.Companion.AKTOER_ID
+        )
         every { euxService.hentBuc(eq(RINA_ID)) } returns buc
         every { euxKlientLib.hentSedJson(eq(RINA_ID), any()) } returns sedJson
-        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentIdentifisertePersoner(any()) } returns listOf(identifisertPerson)
-        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { gcpStorageService.gjennyFinnes(RINA_ID) } returns false
         every { fagmodulKlient.hentPensjonSaklist(eq(AKTOER_ID)) } returns listOf(sakInformasjon)
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
@@ -258,6 +266,7 @@ internal class SedSendtJournalforingTest {
     }
 
     @Test
+    @Disabled
     fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid M051`() {
         val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
         val sedHendelse = javaClass.getResource("/eux/hendelser/M_BUC_03a_M051.json")!!.readText()
@@ -295,9 +304,6 @@ internal class SedSendtJournalforingTest {
         every { euxService.hentBuc(any()) } returns buc
         every { euxKlientLib.hentBucJson(any()) } returns sedJson //TODO korrekt?
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
-        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null
@@ -353,13 +359,16 @@ internal class SedSendtJournalforingTest {
             ),
             fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
         )
-
+        every { personService.hentPerson(any()) } returns JournalforingTestBase().createBrukerWith(
+            FNR_VOKSEN_UNDER_62,
+            "Mamma forsørger",
+            "Etternavn",
+            "NO",
+            aktorId = JournalforingTestBase.Companion.AKTOER_ID
+        )
         every { euxService.hentBuc(any()) } returns buc
         every { euxKlientLib.hentBucJson(any()) } returns sedJson
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
-        every { personidentifiseringService.finnesPersonMedAdressebeskyttelseIBuc(any()) } returns false
-        every { personidentifiseringService.hentIdentifisertPerson(any(), any(), any(), any(), any(), any(),) } returns identifisertPerson
-        every { personidentifiseringService.hentFodselsDato(any(), any()) } returns LocalDate.of(1971, 6, 11)
         every { fagmodulKlient.hentPensjonSaklist(any()) } returns sakInformasjon
         justRun { journalpostKlient.oppdaterDistribusjonsinfo(any()) }
         every { gcpStorageService.hentFraGjenny(any()) } returns null

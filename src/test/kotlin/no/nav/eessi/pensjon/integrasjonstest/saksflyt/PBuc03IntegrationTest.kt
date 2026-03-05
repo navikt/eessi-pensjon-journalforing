@@ -27,6 +27,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -307,7 +308,15 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         initCommonMocks(sed, alleDocs, documentFiler)
 
         if (fnrVoksen != null) {
-        every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(fnrVoksen, "Voksen ", "Forsikret", land, aktorId = AKTOER_ID) }
+            every { personService.hentPerson(NorskIdent(fnrVoksen)) } returns createBrukerWith(
+                fnrVoksen,
+                "Voksen ",
+                "Forsikret",
+                land,
+                aktorId = AKTOER_ID
+            )
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(fnrVoksen)
+        }
         sakId?.let {
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySak(it)
         } ?: run {
@@ -315,7 +324,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         }
         if (bestemSak != null) {
             every { bestemSakKlient.kallBestemSak(any()) } returns bestemSak
-        }else{
+        } else {
             //every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns bestemSak?.sakInformasjonListe!!
         }
 

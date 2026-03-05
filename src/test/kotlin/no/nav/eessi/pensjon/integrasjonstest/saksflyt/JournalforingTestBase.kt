@@ -115,7 +115,8 @@ internal open class JournalforingTestBase {
         every { navAnsattMedEnhetsInfo(any(), any()) } returns null
     }
     private val euxService = EuxService(euxKlient)
-    private val fagmodulService = FagmodulService(fagmodulKlient, mockk(relaxed = true))
+    protected val personService: PersonService = mockk(relaxed = true)
+    private val fagmodulService = FagmodulService(fagmodulKlient, personService)
 
     protected val norg2Service: Norg2Service = mockk(relaxed = true)
     protected val journalpostKlient: JournalpostKlient = mockk(relaxed = true, relaxUnitFun = true)
@@ -169,7 +170,6 @@ internal open class JournalforingTestBase {
         env = null,
     )
 
-    protected val personService: PersonService = mockk(relaxed = true)
     private val personSok = PersonSok(personService)
     val personidentifiseringService = PersonidentifiseringService(personSok, personService)
 
@@ -247,13 +247,6 @@ internal open class JournalforingTestBase {
                 land,
                 aktorId = AKTOER_ID
             )
-//            every { personService.hentPerson(AktoerId(fnr)) } returns createBrukerWith(
-//                fnr,
-//                "Mamma forsørger",
-//                "Etternavn",
-//                land,
-//                aktorId = AKTOER_ID
-//            )
         }
 
         if (fnrAnnenPerson != null) {
@@ -267,10 +260,14 @@ internal open class JournalforingTestBase {
             )
         }
 
-        if (rolle == Rolle.ETTERLATTE)
+        if (rolle == Rolle.ETTERLATTE){
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(AKTOER_ID_2)
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID_2) } returns saker
-        else
+        }
+        else{
+            every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(AKTOER_ID)
             every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
+        }
 
         val (journalpost, _) = initJournalPostRequestSlot()
 
@@ -371,7 +368,7 @@ internal open class JournalforingTestBase {
                 aktorId = AKTOER_ID
             )
         }
-
+        every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(AKTOER_ID)
         every { fagmodulKlient.hentPensjonSaklist(AKTOER_ID) } returns saker
         every { navansattKlient.navAnsattMedEnhetsInfo(any(), any()) } returns null
         every { journalpostKlient.oppdaterDistribusjonsinfo(any()) } returns Unit
