@@ -42,10 +42,18 @@ class FagmodulKlientTest {
         val jsonBody = getJsonBody(ALDER.name)
 
         every { fagmodulKlientExchange() } returns ResponseEntity(jsonBody, HttpStatus.OK)
-
+        val resultJson = """
+            [ {
+              "sakId" : "321",
+              "sakType" : "ALDER",
+              "sakStatus" : "LOPENDE",
+              "saksbehandlendeEnhetId" : "",
+              "nyopprettet" : false
+            } ]
+        """.trimIndent()
         val result = fagmodulKlient.hentPensjonSaklist("321654987")
 
-        assertEquals(jsonBody, result.toJson())
+        assertEquals(resultJson, result.toJson())
 
     }
 
@@ -60,7 +68,7 @@ class FagmodulKlientTest {
                 [ {
                   "sakId" : "321",
                   "sakType" : "$sakType",
-                  "sakStatus" : "LOPENDE",
+                  "sakStatus" : "INNV",
                   "saksbehandlendeEnhetId" : "",
                   "nyopprettet" : false
                 } ]

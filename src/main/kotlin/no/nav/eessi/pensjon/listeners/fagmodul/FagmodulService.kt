@@ -29,10 +29,10 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient, val personServ
                 secureLog.info("Svar fra pensjonsinformasjon: ${it.toJson()}")
             }
         if (bucType == BucType.P_BUC_03) {
-            return sak.sortedBy { if (it.sakType == UFOREP) 0 else 1 }
+            return sak.sortedBy { if (it.sakType.name == UFOREP.name) 0 else 1 }
         } else {
             logger.info("Velger ALDER før UFOERE dersom begge finnes")
-            return sak.sortedBy { if (it.sakType == ALDER) 0 else 1 }
+            return sak.sortedBy { if (it.sakType.name == ALDER.name) 0 else 1 }
         }
     }
 }
