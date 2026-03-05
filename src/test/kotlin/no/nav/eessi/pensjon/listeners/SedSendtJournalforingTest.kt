@@ -266,7 +266,6 @@ internal class SedSendtJournalforingTest {
     }
 
     @Test
-    @Disabled
     fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid M051`() {
         val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
         val sedHendelse = javaClass.getResource("/eux/hendelser/M_BUC_03a_M051.json")!!.readText()
@@ -287,20 +286,12 @@ internal class SedSendtJournalforingTest {
             )
         )
 
-        val identifisertPerson = identifisertPersonPDL(
-            landkode = "NO",
-            geografiskTilknytning = null,
-            personRelasjon = SEDPersonRelasjon(
-                fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
-                relasjon = GJENLEVENDE,
-                saktype = null,
-                sedType = P8000,
-                fdato = LocalDate.of(1971, 6, 11),
-                rinaDocumentId = "165sdugh587dfkgjhbkj"
-            ),
-            fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
-        )
-
+        every { personService.hentPerson(NorskIdent("16507017499")) } returns
+                JournalforingTestBase().createBrukerWith(
+                    "16507017499",
+                    land = "SWE",
+                    aktorId = JournalforingTestBase.AKTOER_ID
+                )
         every { euxService.hentBuc(any()) } returns buc
         every { euxKlientLib.hentBucJson(any()) } returns sedJson //TODO korrekt?
         every { euxKlientLib.hentSedJson(any(), any()) } returns sedJson
