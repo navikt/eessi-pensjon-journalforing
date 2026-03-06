@@ -337,19 +337,6 @@ internal class SedSendtJournalforingTest {
             )
         )
 
-        val identifisertPerson = identifisertPersonPDL(
-            landkode = "NO",
-            geografiskTilknytning = null,
-            personRelasjon = SEDPersonRelasjon(
-                fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62),
-                relasjon = GJENLEVENDE,
-                saktype = null,
-                sedType = P8000,
-                fdato = LocalDate.of(1971, 6, 11),
-                rinaDocumentId = "165sdugh587dfkgjhbkj"
-            ),
-            fnr = Fodselsnummer.fra(FNR_VOKSEN_UNDER_62)
-        )
         every { personService.hentPerson(any()) } returns JournalforingTestBase().createBrukerWith(
             FNR_VOKSEN_UNDER_62,
             "Mamma forsørger",
