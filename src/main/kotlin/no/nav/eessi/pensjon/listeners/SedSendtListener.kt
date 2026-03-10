@@ -47,7 +47,7 @@ class SedSendtListener(
     init {
         consumeOutgoingSed = metricsHelper.init("consumeOutgoingSed")
     }
-    private val offsetsToSkip = listOf<Long>(133722, 143447, 176379, 183457, 183585, 204028, 294886, 297871, 298929, 299044, 335342, 335344, 335345, 335346, 335348, 623616)
+    private val offsetsToSkip = listOf<Long>(133722, 143447, 176379, 183457, 183585, 204028, 294886, 297871, 298929, 299044, 335342, 335344, 335345, 335346, 335348)
 
     @KafkaListener(
         containerFactory = "sedKafkaListenerContainerFactory",
