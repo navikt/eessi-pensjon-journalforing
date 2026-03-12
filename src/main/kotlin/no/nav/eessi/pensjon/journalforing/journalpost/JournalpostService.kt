@@ -110,17 +110,17 @@ class JournalpostService(
                         hendelseType: HendelseType,
                         saksbehandlerIdent: String?): OpprettJournalPostResponse? {
 
-        val gjenny = when (hendelseType) {
+        val gjennySedSendt = when (hendelseType) {
             MOTTATT if journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> false
             SENDT if journalpostRequest.tema in listOf(EYBARNEP, OMSTILLING) -> true
             else -> false
         }
 
-        val forsokFerdigstill: Boolean = gjenny || kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
+        val forsokFerdigstill: Boolean = gjennySedSendt || kanSakFerdigstilles(journalpostRequest, sedHendelse.bucType!!, hendelseType)
         val journalforingResponse  = journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
 
-        // Vi har en uvanlig situasjon der vi forventer ferdigstilling, men dokarkiv klarer ikke å ferdigstill
-        if(forsokFerdigstill && journalforingResponse?.journalpostferdigstilt == false){
+        // Vi har en uvanlig situasjon der vi forventer ferdigstilling, men dokarkiv klarer ikke å ferdigstille journalposten.
+        if(forsokFerdigstill && journalforingResponse?.journalpostferdigstilt == false) {
             logger.error("Forventet ferdigstilling feilet")
         }
 
