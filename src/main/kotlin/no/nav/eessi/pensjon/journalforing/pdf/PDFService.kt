@@ -36,7 +36,7 @@ class PDFService(
         pdfConverter = metricsHelper.init("pdfConverter")
     }
 
-    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<List<JournalPostDokument>, List<SedVedlegg>> {
+    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<String, List<SedVedlegg>> {
         val documents = euxService.hentAlleDokumentfiler(rinaSakId, dokumentId)
             ?: throw RuntimeException("Failed to get documents from EUX (rinaSakId: $rinaSakId, dokumentId: $dokumentId)")
 
@@ -108,8 +108,8 @@ class PDFService(
                     )
                 }
 
-//                val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
-                Pair(journalPostDokumenter, unsupportedDocuments)
+                val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
+                Pair(supportedDocumentsJson, unsupportedDocuments)
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
                 throw ex
