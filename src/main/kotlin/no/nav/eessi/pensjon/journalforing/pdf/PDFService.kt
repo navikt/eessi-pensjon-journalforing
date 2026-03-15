@@ -72,10 +72,10 @@ class PDFService(
                         "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
                                 "overskrider grensen på ${maxTotalBase64SizeBytes / (1024 * 1024)} MB"
                     )
-                    throw RuntimeException(
-                        "Total dokumentstørrelse overskrider grensen og kan føre til minneproblemer. " +
-                                "rinaSakId=$rinaSakId, dokumentId=$dokumentId"
-                    )
+//                    throw RuntimeException(
+//                        "Total dokumentstørrelse overskrider grensen og kan føre til minneproblemer. " +
+//                                "rinaSakId=$rinaSakId, dokumentId=$dokumentId"
+//                    )
                 }
 
                 val journalPostDokumenter = filtrertSupportedDokument
