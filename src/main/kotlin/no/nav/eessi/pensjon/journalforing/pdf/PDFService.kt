@@ -61,16 +61,7 @@ class PDFService(
                 if (supportedDocuments.isEmpty()) {
                     throw RuntimeException("No supported documents, ${documents.toJson()}")
                 }
-                val rt = Runtime.getRuntime()
-                val mb = 1024 * 1024
 
-                logger.info(
-                    "Heap status before serialization: max={}MB total={}MB free={}MB used={}MB",
-                    rt.maxMemory() / mb,
-                    rt.totalMemory() / mb,
-                    rt.freeMemory() / mb,
-                    (rt.totalMemory() - rt.freeMemory()) / mb
-                )
                 // Filtrer bort null‑innhold og beregn total base64‑størrelse før vi bygger JSON‑strengen
                 val filtrertSupportedDokument = supportedDocuments.filter { it.innhold != null }
                 val totalBase64Length = filtrertSupportedDokument.sumOf { it.innhold!!.length.toLong() }
@@ -81,10 +72,6 @@ class PDFService(
                         "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
                                 "overskrider grensen på ${maxTotalBase64SizeBytes / (1024 * 1024)} MB"
                     )
-//                    throw RuntimeException(
-//                        "Total dokumentstørrelse overskrider grensen og kan føre til minneproblemer. " +
-//                                "rinaSakId=$rinaSakId, dokumentId=$dokumentId"
-//                    )
                 }
 
                 val journalPostDokumenter = filtrertSupportedDokument
