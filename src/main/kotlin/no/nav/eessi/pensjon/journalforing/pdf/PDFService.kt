@@ -26,6 +26,7 @@ class PDFService(
     private val euxService: EuxService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
+    private val maxTotalBase64SizeBytes: Long = 80L * 1024 * 1024
 
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
 
@@ -57,27 +58,48 @@ class PDFService(
                 unsupportedDocuments.forEach {
                     logger.info("Usupportert dokument: ${it.filnavn} - av type${it.mimeType}")
                 }
-                val supportedDocumentsJson = if (supportedDocuments.isNotEmpty()) {
-                    val filtrertSupportedDokument = supportedDocuments.filterNot { it.innhold == null }
-                    mapper.writeValueAsString(filtrertSupportedDokument.map {
-                        logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, dokumentId: $dokumentId med: sedtype: ${sedType.name} , tittel: ${it.filnavn}")
-                        JournalPostDokument(
-                                brevkode = sedType.name,
-                                dokumentKategori = "SED",
-                                dokumentvarianter = listOf(
-                                        Dokumentvarianter(
-                                                filtype = it.mimeType?.name
-                                                        ?: throw RuntimeException("MimeType is null after being converted to PDF, $it"),
-                                                fysiskDokument = it.innhold!!,
-                                                variantformat = Variantformat.ARKIV
-                                        )
-                                ),
-                                tittel = it.filnavn)
-                    })
-                } else {
+                if (supportedDocuments.isEmpty()) {
                     throw RuntimeException("No supported documents, ${documents.toJson()}")
                 }
 
+                // Filtrer bort null‑innhold og beregn total base64‑størrelse før vi bygger JSON‑strengen
+                val filtrertSupportedDokument = supportedDocuments.filter { it.innhold != null }
+                val totalBase64Length = filtrertSupportedDokument.sumOf { it.innhold!!.length.toLong() }
+
+                if (totalBase64Length * 2 > maxTotalBase64SizeBytes) {
+                    val sizeMb = (totalBase64Length * 2).toDouble() / (1024 * 1024)
+                    logger.error(
+                        "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
+                                "overskrider grensen på ${maxTotalBase64SizeBytes / (1024 * 1024)} MB"
+                    )
+                    throw RuntimeException(
+                        "Total dokumentstørrelse overskrider grensen og kan føre til minneproblemer. " +
+                                "rinaSakId=$rinaSakId, dokumentId=$dokumentId"
+                    )
+                }
+
+                val journalPostDokumenter = filtrertSupportedDokument
+                    .asSequence()
+                    .filter { it.innhold != null }.map {
+                    logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, " + "dokumentId: $dokumentId med: sedtype: ${sedType.name} , tittel: ${it.filnavn}")
+                    JournalPostDokument(
+                        brevkode = sedType.name,
+                        dokumentKategori = "SED",
+                        dokumentvarianter = listOf(
+                            Dokumentvarianter(
+                                filtype = it.mimeType?.name
+                                    ?: throw RuntimeException(
+                                        "MimeType is null after being converted to PDF, $it"
+                                    ),
+                                fysiskDokument = it.innhold!!,
+                                variantformat = Variantformat.ARKIV
+                            )
+                        ),
+                        tittel = it.filnavn
+                    )
+                }
+
+                val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
                 Pair(supportedDocumentsJson, unsupportedDocuments)
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
