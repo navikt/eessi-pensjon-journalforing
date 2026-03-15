@@ -25,5 +25,5 @@ DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:ActiveProcessorCount=2"
 # However ... it is easier to see actual memory need using G1GC as it releases memory faster, and keeps memory use more in check (our experience)
 
 #DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:+UseG1GC"
-DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:+UseG1GC -XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=70.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
+#  DEFAULT_JVM_OPTS="${DEFAULT_JVM_OPTS} -XX:+UseG1GC -XX:InitialRAMPercentage=25.0 -XX:MaxRAMPercentage=70.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
 export DEFAULT_JVM_OPTS
