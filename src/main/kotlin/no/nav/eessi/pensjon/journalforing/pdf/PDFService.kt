@@ -36,7 +36,7 @@ class PDFService(
         pdfConverter = metricsHelper.init("pdfConverter")
     }
 
-    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<String, List<SedVedlegg>> {
+    fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<List<JournalPostDokument>, List<SedVedlegg>> {
         val documents = euxService.hentAlleDokumentfiler(rinaSakId, dokumentId)
             ?: throw RuntimeException("Failed to get documents from EUX (rinaSakId: $rinaSakId, dokumentId: $dokumentId)")
 
@@ -61,7 +61,16 @@ class PDFService(
                 if (supportedDocuments.isEmpty()) {
                     throw RuntimeException("No supported documents, ${documents.toJson()}")
                 }
+                val rt = Runtime.getRuntime()
+                val mb = 1024 * 1024
 
+                logger.info(
+                    "Heap status before serialization: max={}MB total={}MB free={}MB used={}MB",
+                    rt.maxMemory() / mb,
+                    rt.totalMemory() / mb,
+                    rt.freeMemory() / mb,
+                    (rt.totalMemory() - rt.freeMemory()) / mb
+                )
                 // Filtrer bort null‑innhold og beregn total base64‑størrelse før vi bygger JSON‑strengen
                 val filtrertSupportedDokument = supportedDocuments.filter { it.innhold != null }
                 val totalBase64Length = filtrertSupportedDokument.sumOf { it.innhold!!.length.toLong() }
@@ -79,8 +88,8 @@ class PDFService(
                 }
 
                 val journalPostDokumenter = filtrertSupportedDokument
-                    .asSequence()
-                    .filter { it.innhold != null }.map {
+                    .filter { it.innhold != null }
+                    .map {
                     logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, " + "dokumentId: $dokumentId med: sedtype: ${sedType.name} , tittel: ${it.filnavn}")
                     JournalPostDokument(
                         brevkode = sedType.name,
@@ -99,8 +108,8 @@ class PDFService(
                     )
                 }
 
-                val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
-                Pair(supportedDocumentsJson, unsupportedDocuments)
+//                val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
+                Pair(journalPostDokumenter, unsupportedDocuments)
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
                 throw ex
