@@ -64,15 +64,7 @@ class PDFService(
 
                 // Filtrer bort null‑innhold og beregn total base64‑størrelse før vi bygger JSON‑strengen
                 val filtrertSupportedDokument = supportedDocuments.filter { it.innhold != null }
-                val totalBase64Length = filtrertSupportedDokument.sumOf { it.innhold!!.length.toLong() }
-
-                if (totalBase64Length * 2 > maxTotalBase64SizeBytes) {
-                    val sizeMb = (totalBase64Length * 2).toDouble() / (1024 * 1024)
-                    logger.error(
-                        "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
-                                "overskrider grensen på ${maxTotalBase64SizeBytes / (1024 * 1024)} MB"
-                    )
-                }
+                validerVedleggInfo(filtrertSupportedDokument)
 
                 val journalPostDokumenter = filtrertSupportedDokument
                     .filter { it.innhold != null }
@@ -101,6 +93,18 @@ class PDFService(
                 logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
                 throw ex
             }
+        }
+    }
+
+    private fun validerVedleggInfo(filtrertSupportedDokument: List<SedVedlegg>) {
+        val totalBase64Length = filtrertSupportedDokument.sumOf { it.innhold!!.length.toLong() }
+
+        if (totalBase64Length * 2 > maxTotalBase64SizeBytes) {
+            val sizeMb = (totalBase64Length * 2).toDouble() / (1024 * 1024)
+            logger.error(
+                "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
+                        "overskrider grensen på ${maxTotalBase64SizeBytes / (1024 * 1024)} MB"
+            )
         }
     }
 
