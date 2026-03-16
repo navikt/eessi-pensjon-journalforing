@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -57,12 +59,16 @@ class FagmodulKlientTest {
 
     }
 
-    private fun fagmodulKlientExchange() = fagmodulOidcRestTemplate.exchange(
-        "/pensjon/sakliste/321654987",
-        HttpMethod.GET,
-        null,
-        String::class.java
-    )
+    private fun fagmodulKlientExchange() =
+        fagmodulOidcRestTemplate.exchange(
+            "/pensjon/saklisteFraPesys",
+            HttpMethod.GET,
+            HttpEntity<String>(HttpHeaders().apply {
+                set("fnr", "321654987")
+            }),
+            String::class.java
+        )
+
 
     private fun getJsonBody(sakType: String) = """
                 [ {
