@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
+import no.nav.eessi.pensjon.personoppslag.pdl.model.Ident
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe.NPID
 import no.nav.eessi.pensjon.utils.toJson
@@ -23,6 +24,8 @@ class FagmodulService(private val fagmodulKlient: FagmodulKlient, val personServ
         val fnr = personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, AktoerId(aktoerId)) ?: return null.also {
             logger.info("IdentifisertPerson mangler fnr")
         }
+        secureLog.info("Ident: ${Ident.bestemIdent(fnr.id)}, fnr: $fnr, aktoerId: $aktoerId")
+
         val sak = fagmodulKlient.hentPensjonSaklist(fnr.id).also {secureLog.info("Svar fra pensjonsinformasjon, før filtrering: ${it.toJson()}")}
             .filter { it.sakId != null && it.sakType in eessipenSakTyper }
             .also {
