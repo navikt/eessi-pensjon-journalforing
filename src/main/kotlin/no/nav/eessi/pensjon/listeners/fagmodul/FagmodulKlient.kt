@@ -2,11 +2,12 @@ package no.nav.eessi.pensjon.listeners.fagmodul
 
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakType
-import no.nav.eessi.pensjon.eux.model.sed.EessisakItem
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -17,13 +18,18 @@ class FagmodulKlient(private val fagmodulOidcRestTemplate: RestTemplate) {
     private val logger: Logger by lazy { LoggerFactory.getLogger(FagmodulKlient::class.java) }
 
     fun hentPensjonSaklist(fnr: String): List<SakInformasjon> {
-        val path = "/pensjon/sakliste/$fnr"
+        val path = "/pensjon/saklisteFraPesys"
+
+        val headers = HttpHeaders().apply {
+            set("fnr", fnr)
+        }
+        val entity = HttpEntity<String>(headers)
 
         val responseJson = try {
             val responsebody = fagmodulOidcRestTemplate.exchange(
                 path,
                 HttpMethod.GET,
-                null,
+                entity,
                 String::class.java).body
             responsebody.orEmpty().also { logger.debug("Response body fra fagmodul: $it") }
         } catch(ex: Exception) {
