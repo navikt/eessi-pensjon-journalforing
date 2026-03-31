@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.journalforing.opprettoppgave
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
@@ -8,6 +9,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.utils.toJson
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class OppgaveMelding(
     val sedType: SedType?,
     val journalpostId: String? = null,
