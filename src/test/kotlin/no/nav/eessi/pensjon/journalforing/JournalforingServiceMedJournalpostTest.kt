@@ -255,7 +255,6 @@ internal class JournalforingServiceMedJournalpostTest : JournalforingServiceBase
               "aktoerId" : "12078945602",
               "rinaSakId" : "147729",
               "hendelseType" : "MOTTATT",
-              "filnavn" : null,
               "oppgaveType" : "BEHANDLE_SED",
               "tema" : "PEN",
               "sendeAdvarsel" : false

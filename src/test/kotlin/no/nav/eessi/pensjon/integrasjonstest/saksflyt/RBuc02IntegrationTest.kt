@@ -106,7 +106,6 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
               "aktoerId" : "123654987321",
               "rinaSakId" : "123456",
               "hendelseType" : "MOTTATT",
-              "filnavn" : null,
               "oppgaveType" : "BEHANDLE_SED",
               "tema" : "PEN",
               "sendeAdvarsel" : false
@@ -185,7 +184,6 @@ internal class RBuc02IntegrationTest : JournalforingTestBase() {
               "aktoerId" : "123654987321",
               "rinaSakId" : "123456",
               "hendelseType" : "MOTTATT",
-              "filnavn" : null,
               "oppgaveType" : "JOURNALFORING",
               "tema" : "PEN",
               "sendeAdvarsel" : false
