@@ -26,6 +26,7 @@ import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
+import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -46,6 +47,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
         private val SLAPP_SKILPADDE = Fodselsnummer.fra("09035225916")!!
         private val STERK_BUSK = Fodselsnummer.fra("12011577847")!!
+        private val GML_MANN = Fodselsnummer.fra(FodselsnummerGenerator.generateFnrForTest(76))
     }
 
     @BeforeEach
@@ -151,6 +153,52 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
               "filnavn" : null,
               "oppgaveType" : "JOURNALFORING",
               "tema" : "PEN"
+              }""".trimIndent()
+        )
+        verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }
+    }
+
+    @Test
+    fun `Ved mottatt P2000 med bruker som er over 75 år så skal det opprettes en Behandle SED oppgave`() {
+        val hendelse = javaClass.getResource("/eux/hendelser/P_BUC_01_P2000_SE.json")!!.readText()
+        val sed = mapJsonToAny<P2000>(javaClass.getResource("/sed/P2000-NAV.json")!!.readText())
+        val sedHendelse = SedHendelse.fromJson(hendelse).copy(navBruker = GML_MANN, bucType = P_BUC_01)
+
+        val identifisertPerson = identifisertPersonPDL(
+            AKTOERID,
+            sedPersonRelasjon(GML_MANN, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+        )
+
+        justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
+        val opprettJournalPostResponse = OpprettJournalPostResponse(journalpostId = "12345", journalstatus = "EKSPEDERT", melding = "", journalpostferdigstilt = true)
+        every { journalpostKlient.opprettJournalpost(capture(opprettJournalpostRequestCapturingSlot), any(), any()) } returns opprettJournalPostResponse
+
+        journalforingService.journalfor(
+            sedHendelse,
+            MOTTATT,
+            identifisertPerson,
+            GML_MANN?.getBirthDate(),
+            SaksInfoSamlet(sakInformasjonFraPesys = SakInformasjon(
+                sakId = "21234511",
+                sakType = ALDER,
+                sakStatus = LOPENDE
+            ), saksIdFraSed = "21234511", saktypeFraSed = ALDER),
+            identifisertePersoner = 1,
+            navAnsattInfo = null,
+            currentSed = sed
+        )
+
+        val oppgaveMelding = mapJsonToAny<OppgaveMelding>("""{
+              "sedType" : "P2000",
+              "journalpostId" : "12345",
+              "tildeltEnhetsnr" : "0001",
+              "aktoerId" : "12078945602",
+              "rinaSakId" : "147729",
+              "hendelseType" : "MOTTATT",
+              "filnavn" : null,
+              "oppgaveType" : "BEHANDLE_SED",
+              "tema" : "PEN",
+              "beskrivelse" : "Det er mottatt søknad om alderspensjon. Automatisk opprettelse av krav feilet. Bruker er over 75 år. Krav må opprettes manuelt."
               }""".trimIndent()
         )
         verify { oppgaveHandler.opprettOppgaveMeldingPaaKafkaTopic(eq(oppgaveMelding)) }

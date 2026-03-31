@@ -18,7 +18,8 @@ data class OppgaveMelding(
     var filnavn: String?,
     val oppgaveType: OppgaveType,
     val tema: Tema? = Tema.PENSJON,
-    val sendeAdvarsel: Boolean? = false
+    val sendeAdvarsel: Boolean? = false,
+    val beskrivelse: String? = null,
 )  {
     override fun toString(): String {
         return toJson()

@@ -7,6 +7,8 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.Period
 
 @Component
 class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
