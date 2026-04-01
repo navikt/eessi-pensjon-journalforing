@@ -37,7 +37,6 @@ import no.nav.eessi.pensjon.personidentifisering.IdentifisertPDLPerson
 import no.nav.eessi.pensjon.personidentifisering.PersonidentifiseringService
 import no.nav.eessi.pensjon.personidentifisering.helpers.PersonSok
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
-import no.nav.eessi.pensjon.personoppslag.pdl.model.AktoerId
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon.GJENLEVENDE
@@ -47,7 +46,6 @@ import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.web.client.RestTemplate
@@ -74,7 +72,7 @@ internal class SedSendtJournalforingTest {
     private val fagmodulKlient = mockk<FagmodulKlient>(relaxed = true)
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
 
-    private val opprettOppgaveService = OpprettOppgaveService(oppgaveHandler)
+    private val opprettOppgaveService = OpprettOppgaveService(oppgaveHandler, "test")
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
     private val gcpStorageService = mockk<GcpStorageService>()
     private val etterlatteService = mockk<EtterlatteService>()
