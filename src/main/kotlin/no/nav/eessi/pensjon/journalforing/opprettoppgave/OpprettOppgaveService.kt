@@ -5,10 +5,12 @@ import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType.MOTTATT
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
-class OpprettOppgaveService(private val oppgaveHandler: OppgaveHandler) {
+class OpprettOppgaveService(private val oppgaveHandler: OppgaveHandler,
+                            @Value("\${NAMESPACE}") private val env: String?) {
 
     private val logger = LoggerFactory.getLogger(OpprettOppgaveService::class.java)
 
@@ -21,7 +23,7 @@ class OpprettOppgaveService(private val oppgaveHandler: OppgaveHandler) {
         tema: Tema,
         beskrivelse: String? = null
     ) {
-        if (sedHendelseModel.avsenderLand != "NO") {
+        if (sedHendelseModel.avsenderLand != "NO" || env == "q2") {
             val oppgave = OppgaveMelding(
                 sedHendelseModel.sedType,
                 journalpostId,
