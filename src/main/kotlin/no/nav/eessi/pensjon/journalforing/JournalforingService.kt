@@ -205,11 +205,13 @@ class JournalforingService(
                 tema = tema,
                 beskrivelse = beskrivelse
             )
-            kravInitialiseringsService.initKrav(
-                sedHendelse,
-                saksInfoSamlet?.sakInformasjonFraPesys,
-                currentSed
-            )
+            if( beskrivelse == null) {
+                kravInitialiseringsService.initKrav(
+                    sedHendelse,
+                    saksInfoSamlet?.sakInformasjonFraPesys,
+                    currentSed
+                )
+            }
         } else {
             loggDersomIkkeBehSedOppgaveOpprettes(
                 sedHendelse.bucType,
