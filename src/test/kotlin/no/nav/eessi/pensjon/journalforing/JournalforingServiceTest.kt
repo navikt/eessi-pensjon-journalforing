@@ -166,7 +166,8 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
         val identifisertPerson = identifisertPersonPDL(
             AKTOERID,
-            sedPersonRelasjon(GML_MANN, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID)
+            sedPersonRelasjon(GML_MANN, Relasjon.FORSIKRET, rinaDocumentId = RINADOK_ID),
+            fnr = GML_MANN
         )
 
         justRun { kravHandeler.putKravInitMeldingPaaKafka(any()) }
