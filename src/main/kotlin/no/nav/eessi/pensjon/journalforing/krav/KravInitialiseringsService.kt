@@ -27,13 +27,25 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
                     logger.error("P2000 med rinaSakId: ${sedHendelse.rinaSakId} mangler SED informasjon, avslutter sending av krav")
                 }
                 else if ((sed as P2000).validerForKravinit()) {
-                    val hendelse = BehandleHendelseModel(
-                        sakId = sakInformasjon?.sakId,
-                        bucId = sedHendelse.rinaSakId,
-                        hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
-                        beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
-                    )
-                    kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                    sedHendelse.navBruker?.getAge()?.let {
+                        if (it > 75) {
+                            val hendelse = BehandleHendelseModel(
+                                sakId = sakInformasjon?.sakId,
+                                bucId = sedHendelse.rinaSakId,
+                                hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
+                                beskrivelse = "Det er mottatt søknad om alderspensjon. Automatisk opprettelse av krav feilet. Bruker er over 75 år. Krav må opprettes manuelt."
+                            )
+                            kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                        } else {
+                            val hendelse = BehandleHendelseModel(
+                                sakId = sakInformasjon?.sakId,
+                                bucId = sedHendelse.rinaSakId,
+                                hendelsesKode = HendelseKode.SOKNAD_OM_ALDERSPENSJON,
+                                beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
+                            )
+                            kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+                        }
+                    }
                 }  else {
                     logger.warn("P2000 mangler sivilstand, sivilstand.dato eller statsborgerskap")
                 }
@@ -58,7 +70,6 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
             return nav?.bruker?.person?.let { person ->
                 val isStatsborgerskapValid = person.statsborgerskap != null
                 val isSivilstandValid = person.sivilstand?.none { it.fradato == null } == true
-
                 logger.warn("Sjekker statsborgerskap: ${person.statsborgerskap}, sivilstand: ${person.sivilstand}")
 
                 isStatsborgerskapValid && isSivilstandValid
