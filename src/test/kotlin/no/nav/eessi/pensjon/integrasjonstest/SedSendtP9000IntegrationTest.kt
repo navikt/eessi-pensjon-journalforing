@@ -61,11 +61,9 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
 
 
 
-    @Disabled
     @Test
     fun `Skal finne fødselsdato for 3 personer gitt en forsikret person i P9000 og to gjenlevende (P8000) `() {
         every { personService.harAdressebeskyttelse(any()) } returns false
-//        every { personService.hentIdent(any(), any()) } returns Ident
         every { personService.sokPerson(any()) } returns setOf(
             IdentInformasjon(
                 FNR_VOKSEN_UNDER_62,
