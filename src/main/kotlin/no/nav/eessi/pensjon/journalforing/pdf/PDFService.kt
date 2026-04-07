@@ -26,7 +26,7 @@ class PDFService(
     private val euxService: EuxService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
-    private val maxTotalBase64SizeBytes: Long = 80L * 1024 * 1024
+    private val maxTotalBase64SizeBytes: Long = 150L * 1024 * 1024
 
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
 
