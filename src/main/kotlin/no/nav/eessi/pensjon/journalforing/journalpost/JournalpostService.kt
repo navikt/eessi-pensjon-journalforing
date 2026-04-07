@@ -90,12 +90,11 @@ class JournalpostService(
                 pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it).also { documentsAndAttachments ->
                     if (documentsAndAttachments.second.isNotEmpty()) {
                         oppgaveService.opprettBehandleSedOppgave(
-                            null,
-                            tildeltJoarkEnhet,
-                            aktoerId,
-                            sedHendelse,
-                            pdfService.usupporterteFilnavn(documentsAndAttachments.second),
-                            tema
+                            oppgaveEnhet = tildeltJoarkEnhet,
+                            aktoerId = aktoerId,
+                            sedHendelseModel = sedHendelse,
+                            uSupporterteVedlegg = pdfService.usupporterteFilnavn(documentsAndAttachments.second),
+                            tema = tema,
                         )
                     }
                 }

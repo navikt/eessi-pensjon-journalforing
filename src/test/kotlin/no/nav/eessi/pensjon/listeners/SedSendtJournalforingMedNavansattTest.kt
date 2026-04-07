@@ -75,7 +75,7 @@ internal class SedSendtJournalforingMedNavansattTest {
     private val journalpostKlient = mockk<JournalpostKlient>(relaxed = true)
 
     private val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
-    private val opprettOppgaveService = OpprettOppgaveService(oppgaveHandler)
+    private val opprettOppgaveService = OpprettOppgaveService(oppgaveHandler, "test")
     private val statistikkPublisher = mockk<StatistikkPublisher>(relaxed = true)
 
     private val navansattRestTemplate = mockk<RestTemplate>(relaxed = true)

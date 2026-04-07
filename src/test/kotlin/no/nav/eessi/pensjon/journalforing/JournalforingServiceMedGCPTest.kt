@@ -76,7 +76,7 @@ class JournalforingServiceMedGCPTest {
         journalpostService = mockk()
         oppgaveHandler = mockk()
         statistikkPublisher = mockk()
-        opprettOppgaveService  = OpprettOppgaveService(oppgaveHandler)
+        opprettOppgaveService  = OpprettOppgaveService(oppgaveHandler,"test")
         hentSakService = HentSakService(etterlatteService, gcpStorageService)
         hentTemaService = HentTemaService(journalpostService, gcpStorageService)
         journalforingService = JournalforingService(

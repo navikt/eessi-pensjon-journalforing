@@ -193,19 +193,25 @@ class JournalforingService(
         )
 
         if (hendelseType == MOTTATT && journalPostResponse?.journalpostferdigstilt == true) {
-            logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType}")
+            logger.info("Oppretter BehandleOppgave til bucType: ${sedHendelse.bucType} for alder: ${sedHendelse.navBruker?.getAge()}")
+            val beskrivelse = sedHendelse.navBruker?.getAge()?.let {
+                if(it > 74) "Det er mottatt søknad om alderspensjon. Automatisk opprettelse av krav feilet. Bruker er over 75 år. Krav må opprettes manuelt." else null
+            }
             oppgaveService.opprettBehandleSedOppgave(
                 journalPostResponse.journalpostId,
                 tildeltJoarkEnhet,
                 aktoerId,
                 sedHendelse,
-                tema = tema
+                tema = tema,
+                beskrivelse = beskrivelse
             )
-            kravInitialiseringsService.initKrav(
-                sedHendelse,
-                saksInfoSamlet?.sakInformasjonFraPesys,
-                currentSed
-            )
+            if( beskrivelse == null) {
+                kravInitialiseringsService.initKrav(
+                    sedHendelse,
+                    saksInfoSamlet?.sakInformasjonFraPesys,
+                    currentSed
+                )
+            }
         } else {
             loggDersomIkkeBehSedOppgaveOpprettes(
                 sedHendelse.bucType,

@@ -7,6 +7,8 @@ import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.Period
 
 @Component
 class KravInitialiseringsService (private val kravInitialiseringsHandler: KravInitialiseringsHandler) {
@@ -32,6 +34,7 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
                         beskrivelse = "Det er mottatt søknad om alderspensjon. Kravet er opprettet automatisk"
                     )
                     kravInitialiseringsHandler.putKravInitMeldingPaaKafka(hendelse)
+
                 }  else {
                     logger.warn("P2000 mangler sivilstand, sivilstand.dato eller statsborgerskap")
                 }
@@ -56,7 +59,6 @@ class KravInitialiseringsService (private val kravInitialiseringsHandler: KravIn
             return nav?.bruker?.person?.let { person ->
                 val isStatsborgerskapValid = person.statsborgerskap != null
                 val isSivilstandValid = person.sivilstand?.none { it.fradato == null } == true
-
                 logger.warn("Sjekker statsborgerskap: ${person.statsborgerskap}, sivilstand: ${person.sivilstand}")
 
                 isStatsborgerskapValid && isSivilstandValid

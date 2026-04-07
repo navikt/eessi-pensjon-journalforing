@@ -37,7 +37,7 @@ abstract class JournalforingServiceBase {
     val hentSakService = HentSakService(etterlatteService, gcpStorageService)
 
     val oppgaveHandler = mockk<OppgaveHandler>(relaxed = true)
-    val oppgaveService = OpprettOppgaveService(oppgaveHandler)
+    val oppgaveService = OpprettOppgaveService(oppgaveHandler, "test")
     val journalpostService = JournalpostService(journalpostKlient, pdfService, oppgaveService)
     val hentTemaService = HentTemaService(journalpostService, gcpStorageService)
 
