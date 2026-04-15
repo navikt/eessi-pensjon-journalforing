@@ -250,7 +250,6 @@
       "saksnummer" : "2345234234"
     } ]
   },
-  "sedVer" : "0",
   "pensjon" : {
     "ytelser" : [ {
       "status" : "02",
@@ -366,6 +365,5 @@
       "tildato" : "2025-04-01"
     } ]
   },
-  "sedGVer" : "4",
   "sed" : "P2000"
 }

@@ -41,7 +41,6 @@
       }
     ]
   },
-  "sedGVer": "4",
   "tilbakekreving": {
     "anmodningommotregning": {
       "bank": {
@@ -72,6 +71,5 @@
       }
     }
   },
-  "sedVer": "2",
   "sed": "R005"
 }

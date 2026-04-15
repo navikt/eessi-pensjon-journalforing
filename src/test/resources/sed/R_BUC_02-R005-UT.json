@@ -24,7 +24,6 @@
       { "saksnummer": "1234", "land": "BE" }
     ]
   },
-  "sedGVer": "4",
   "tilbakekreving": {
     "anmodning":
 
@@ -36,6 +35,5 @@
       { "type": "uførepensjon" }
     }
   },
-  "sedVer": "1",
   "sed": "R005"
 }

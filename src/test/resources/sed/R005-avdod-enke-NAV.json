@@ -45,7 +45,6 @@
       "institusjonsid": "NO:NAVAT07"
     }
   ],
-  "sedVer": "2",
   "tilbakekreving": {
     "feilutbetaling": {
       "ytelse": {
@@ -56,6 +55,5 @@
       "type": "foreløpig"
     }
   },
-  "sedGVer": "4",
   "sed": "R005"
 }
