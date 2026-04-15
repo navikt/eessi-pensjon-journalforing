@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 data class StatistikkMelding(
     val bucId: String,
     val sedId: String,
-    val sedVersjon: String,
     val opprettetTidspunkt: LocalDateTime,
     val oppgaveEierEnhet: String?,
     val bucType: BucType,
