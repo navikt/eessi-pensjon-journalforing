@@ -29,6 +29,7 @@
       }
     ]
   },
+  "sedGVer": "4",
   "tilbakekreving": {
     "anmodning": {
       "type": "foreløpig"
@@ -39,5 +40,6 @@
       }
     }
   },
+  "sedVer": "1",
   "sed": "R005"
 }

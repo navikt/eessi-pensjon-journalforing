@@ -30,10 +30,12 @@
       }
     }
   },
+  "sedGVer": "4",
   "pensjon": {
     "merinformasjon": {
       "tilleggsinformasjon": "test 14.05.2020 1625"
     }
   },
+  "sedVer": "2",
   "sed": "P10000"
 }

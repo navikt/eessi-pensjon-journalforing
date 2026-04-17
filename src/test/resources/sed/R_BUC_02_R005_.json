@@ -93,6 +93,7 @@
       }
     ]
   },
+  "sedVer": "4",
   "tilbakekreving": {
     "feilutbetaling": {
       "ytelse": {
@@ -103,5 +104,6 @@
       "type": "foreløpig"
     }
   },
+  "sedGVer": "4",
   "sed": "R005"
 }

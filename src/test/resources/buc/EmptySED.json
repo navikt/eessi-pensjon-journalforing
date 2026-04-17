@@ -1,5 +1,7 @@
 {
   "sed" : "P2000",
+  "sedGVer" : "4",
+  "sedVer" : "1",
   "nav" : {
     "eessisak" : null,
     "bruker" : {

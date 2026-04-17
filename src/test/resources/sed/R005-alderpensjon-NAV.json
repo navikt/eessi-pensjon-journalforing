@@ -23,6 +23,7 @@
     }
   },
   "sed": "R005",
+  "sedGVer": "4",
   "tilbakekreving": {
     "anmodning": {
       "type": "foreløpig"
@@ -32,5 +33,6 @@
         "type": "alderspensjon"
       }
     }
-  }
+  },
+  "sedVer": "2"
 }

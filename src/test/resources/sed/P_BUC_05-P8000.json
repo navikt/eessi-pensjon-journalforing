@@ -50,6 +50,8 @@
     ]
   },
   "Sector Components/Pensions/P8000": "Sector Components/Pensions/P8000",
+  "sedGVer": "4",
+  "sedVer": "2",
   "sed": "P8000",
   "pensjon": {
     "anmodning": {
