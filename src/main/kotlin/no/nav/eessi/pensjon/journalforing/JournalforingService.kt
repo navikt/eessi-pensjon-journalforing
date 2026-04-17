@@ -431,6 +431,7 @@ class JournalforingService(
             StatistikkMelding(
                 sedHendelse.rinaSakId,
                 sedHendelse.rinaDokumentId,
+                sedHendelse.rinaDokumentVersjon,
                 LocalDateTime.now(),
                 oppgaveEierEnhet,
                 sedHendelse.bucType!!,
