@@ -181,7 +181,7 @@ class PersonidentifiseringService(
         val pdlPersonEtternavn = normalizedPdlEtternavn.contains(normalizedSokEtternavn, ignoreCase = true)
 
         return (sokKriterieFornavn || pdlPersonFornavn ) && (sokKriterieEtternavn || pdlPersonEtternavn)
-                .also { logger.info("SøkKriterier: $sokKriterier, PDL PersonNavn: $pdlPersonNavn, erSokKriterieOgPdlNavnLikt: $it") }
+                .also { secureLog.info("SøkKriterier: $sokKriterier, PDL PersonNavn: $pdlPersonNavn, erSokKriterieOgPdlNavnLikt: $it") }
     }
 
 
