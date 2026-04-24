@@ -148,9 +148,10 @@ class PDFService(
         return filnavn.replaceAfterLast(".", "pdf")
     }
 
-    fun dokumentStorrelse(input: String): Double {
+    fun dokumentStorrelse(input: String?): String {
+        if (input == null) return "0.0"
         val byteSize = input.length * 2
-        return byteSize / (1024.0 * 1024.0)
+        return (byteSize / (1024.0 * 1024.0)).toString()
     }
 
     fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {

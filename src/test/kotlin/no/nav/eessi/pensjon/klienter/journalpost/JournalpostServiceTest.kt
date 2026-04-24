@@ -330,7 +330,7 @@ internal class JournalpostServiceTest {
         assertEquals(expectedRequest.kanal, actualRequest.kanal)
         assertEquals(expectedRequest.tema, actualRequest.tema)
         assertTrue(actualRequest.tittel.contains(expectedRequest.journalpostType.decode()))
-        assertEquals(1, actualRequest.tilleggsopplysninger!!.size)
+        assertEquals(3, actualRequest.tilleggsopplysninger!!.size)
 
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
