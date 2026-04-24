@@ -151,7 +151,8 @@ class PDFService(
     fun dokumentStorrelse(input: String?): String {
         if (input == null) return "0.0"
         val byteSize = input.length * 2
-        return (byteSize / (1024.0 * 1024.0)).toString()
+        val sizeMb = byteSize / (1024.0 * 1024.0)
+        return String.format("%.2f", sizeMb)
     }
 
     fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
