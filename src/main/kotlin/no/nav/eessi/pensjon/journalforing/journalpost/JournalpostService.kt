@@ -41,8 +41,8 @@ class JournalpostService(
 
     companion object {
         private const val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
-        private const val TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY = "eessi_pensjon_rinadokumentid"
-        private const val TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY = "eessi_pensjon_dokumentstorrelse"
+        private const val TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY = "eessi_pensjon_sedid"
+        private const val TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY = "eessi_pensjon_dokStr"
     }
 
     /**
