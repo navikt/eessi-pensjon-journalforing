@@ -41,6 +41,8 @@ class JournalpostService(
 
     companion object {
         private const val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
+        private const val TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY = "eessi_pensjon_sedid"
+        private const val TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY = "eessi_pensjon_dokStr"
     }
 
     /**
@@ -71,7 +73,11 @@ class JournalpostService(
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer,
             tema = tema,
-            tilleggsopplysninger = listOf(Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId)),
+            tilleggsopplysninger = listOf(
+                Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId),
+                Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY, sedHendelse.rinaDokumentId),
+                Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, pdfService.dokumentStorrelse(dokumenter))
+            ),
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),
             dokumenter = dokumenter,
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: tildeltJoarkEnhet
