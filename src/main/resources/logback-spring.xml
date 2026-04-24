@@ -66,24 +66,15 @@
         <logger name="no.nav.security.token.support.core.validation" level="ERROR"/>
         <logger name="org.springframework.web.client.RestTemplate" level="DEBUG"/>
 
-        <appender name="secureLog" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <destination>team-logs.nais-system:5170</destination>
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <customFields>{"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${NAIS_POD_NAME}","nais_container_name":"${NAIS_APP_NAME}"}</customFields>
-                <includeContext>false</includeContext>
-            </encoder>
-
-        </appender>
-
         <logger name="secureLog" level="DEBUG" additivity="false">
-            <appender-ref ref="secureLog"/>
+            <appender-ref ref="stdout_json"/>
         </logger>
 
         <logger name="no.nav.eessi.pensjon.logging.RequestResponseLoggerInterceptor" level="DEBUG" additivity="false">
-            <appender-ref ref="secureLog"/>
+            <appender-ref ref="stdout_json"/>
         </logger>
         <logger name="no.nav.eessi.pensjon.logging.RequestResponseLoggerFilter" level="DEBUG" additivity="false">
-            <appender-ref ref="secureLog"/>
+            <appender-ref ref="stdout_json"/>
         </logger>
 
     </springProfile>
