@@ -48,12 +48,11 @@ internal class GyldigeHendelserTest {
         assertTrue(GyldigeHendelser.sendt(hendelse))
     }
 
-    //Aktivere for journalføring av H_BUC_07 av eessipen
     @Test
     fun `Sendt hendelse H_BUC_07 er ikke gyldig`() {
         val hendelse = createDummy("H", H_BUC_07)
 
-        assertTrue(GyldigeHendelser.sendt(hendelse))
+        assertFalse(GyldigeHendelser.sendt(hendelse))
     }
 
     @Test
