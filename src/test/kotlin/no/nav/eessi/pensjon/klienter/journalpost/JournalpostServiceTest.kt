@@ -339,12 +339,17 @@ internal class JournalpostServiceTest {
     }
 
     @Test
-    fun `dokumentStorrelse i tilleggsopplysning skal vaere 5MB file`() {
-        val base64Content = lagStorTestFil()
-        val vedleggListe = listOf(SedVedlegg("testfile.pdf", MimeType.PDF, base64Content))
+    fun `dokumentStorrelse i tilleggsopplysning skal vaere korrekt for flere vedlegg`() {
+        fun makeBase64File(sizeMb: Int): String = java.util.Base64.getEncoder().encodeToString(ByteArray(1024 * 1024 * sizeMb))
+        val base64Content5mb = makeBase64File(5)
+        val base64Content7mb = makeBase64File(7)
+        val vedleggListe = listOf(
+            SedVedlegg("file5mb.pdf", MimeType.PDF, base64Content5mb),
+            SedVedlegg("file7mb.pdf", MimeType.PDF, base64Content7mb)
+        )
         val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
 
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(base64Content!!, vedleggListe)
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(base64Content5mb, vedleggListe)
         every { mockKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
 
         val actualRequest = journalpostService.opprettJournalpost(
@@ -358,9 +363,12 @@ internal class JournalpostServiceTest {
         )
 
         val tilleggsopplysninger = actualRequest.tilleggsopplysninger
-        val dokStrValue = tilleggsopplysninger?.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi
+        val dokStrValue = tilleggsopplysninger?.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi.also { print(it) }
         assertNotNull(dokStrValue)
-        assertTrue(dokStrValue!!.contains("storrelse=5.00"))
+        assertTrue(dokStrValue!!.contains("filnavn=file5mb.pdf"))
+        assertTrue(dokStrValue.contains("storrelse=5.00"))
+        assertTrue(dokStrValue.contains("filnavn=file7mb.pdf"))
+        assertTrue(dokStrValue.contains("storrelse=7.00"))
     }
 
     private fun lagStorTestFil(): String? {
