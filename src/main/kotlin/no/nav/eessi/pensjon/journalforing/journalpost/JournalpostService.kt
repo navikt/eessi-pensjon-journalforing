@@ -30,6 +30,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Base64
 
 @Service
 class JournalpostService(
@@ -86,7 +87,7 @@ class JournalpostService(
         val dokumenterInfo = vedlegg.map {
             mapOf(
                 "filnavn" to (it.filnavn ?: ""),
-                "storrelse" to pdfService.dokumentStorrelse(it.innhold)
+                "storrelse" to dokumentStorrelse(it.innhold)
             )
         }
         return listOf(
@@ -118,10 +119,20 @@ class JournalpostService(
                 }
             } ?: throw IllegalStateException("sedType is null")
         }
-        logger.info("Dokument hentet, størrelse: ${pdfService.dokumentStorrelse(documents)}")
+        logger.info("Dokument hentet, størrelse: ${dokumentStorrelse(documents)}")
         return Pair(documents, vedlegg)
     }
 
+    fun dokumentStorrelse(input: String?): String {
+        if (input.isNullOrEmpty()) return "0.0"
+        return try {
+            val bytes = Base64.getDecoder().decode(input)
+            val sizeMb = bytes.size / (1024.0 * 1024.0)
+            String.format("%.2f", sizeMb)
+        } catch (e: Exception) {
+            "unknown"
+        }
+    }
     fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
                         sedHendelse: SedHendelse,
                         hendelseType: HendelseType,

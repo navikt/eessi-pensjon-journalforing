@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.document.MimeType
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
@@ -303,8 +305,11 @@ internal class JournalpostServiceTest {
         """.trimIndent()
         val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
 
+        val base64Content = lagStorTestFil()
+        val vedleggListe = listOf(SedVedlegg("P2100-Vedlegg-Fra-DrWho", MimeType.PDF, base64Content))
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(base64Content!!, vedleggListe)
+
         every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("[\"P2100\"]", emptyList())
 
         val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
         val actualResponse = journalpostService.opprettJournalpost(
@@ -325,7 +330,6 @@ internal class JournalpostServiceTest {
         assertNotEquals(expectedRequest.eksternReferanseId, actualRequest.eksternReferanseId)
 
         assertEquals(expectedRequest.behandlingstema, actualRequest.behandlingstema)
-        assertEquals(expectedRequest.dokumenter, actualRequest.dokumenter)
         assertEquals(expectedRequest.journalfoerendeEnhet, actualRequest.journalfoerendeEnhet)
         assertEquals(expectedRequest.journalpostType, actualRequest.journalpostType)
         assertEquals(expectedRequest.kanal, actualRequest.kanal)
@@ -333,10 +337,23 @@ internal class JournalpostServiceTest {
         assertTrue(actualRequest.tittel.contains(expectedRequest.journalpostType.decode()))
         assertEquals(3, actualRequest.tilleggsopplysninger!!.size)
 
+        val tilleggsopplysninger = actualRequest.tilleggsopplysninger
+        val keys = tilleggsopplysninger.map { it.nokkel }
+        assertTrue(keys.contains("eessi_pensjon_bucid"))
+        assertTrue(keys.contains("eessi_pensjon_sedid"))
+        assertTrue(keys.contains("eessi_pensjon_dokStr"))
+        val dokStrValue = tilleggsopplysninger.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi
+        assertNotNull(dokStrValue)
+        assertTrue(dokStrValue!!.contains("filnavn"))
+        assertTrue(dokStrValue.contains("storrelse=5.00"))
+
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
+    }
 
-        //verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false, null) }
+    private fun lagStorTestFil(): String? {
+        val byteArray = ByteArray(1024 * 1024 * 5) // 5 MB
+        return java.util.Base64.getEncoder().encodeToString(byteArray)
     }
 
     @Test
@@ -395,4 +412,5 @@ internal class JournalpostServiceTest {
         rinaDokumentVersjon = "695654686"
     )
 }
+
 
