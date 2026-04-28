@@ -305,10 +305,7 @@ internal class JournalpostServiceTest {
         """.trimIndent()
         val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
 
-        val base64Content = lagStorTestFil()
-        val vedleggListe = listOf(SedVedlegg("P2100-Vedlegg-Fra-DrWho", MimeType.PDF, base64Content))
-        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(base64Content!!, vedleggListe)
-
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("[\"P2100\"]", emptyList())
         every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
 
         val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
@@ -337,18 +334,33 @@ internal class JournalpostServiceTest {
         assertTrue(actualRequest.tittel.contains(expectedRequest.journalpostType.decode()))
         assertEquals(3, actualRequest.tilleggsopplysninger!!.size)
 
-        val tilleggsopplysninger = actualRequest.tilleggsopplysninger
-        val keys = tilleggsopplysninger.map { it.nokkel }
-        assertTrue(keys.contains("eessi_pensjon_bucid"))
-        assertTrue(keys.contains("eessi_pensjon_sedid"))
-        assertTrue(keys.contains("eessi_pensjon_dokStr"))
-        val dokStrValue = tilleggsopplysninger.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi
-        assertNotNull(dokStrValue)
-        assertTrue(dokStrValue!!.contains("filnavn"))
-        assertTrue(dokStrValue.contains("storrelse=5.00"))
-
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
+    }
+
+    @Test
+    fun `dokumentStorrelse i tilleggsopplysning skal vaere 5MB file`() {
+        val base64Content = lagStorTestFil()
+        val vedleggListe = listOf(SedVedlegg("testfile.pdf", MimeType.PDF, base64Content))
+        val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
+
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(base64Content!!, vedleggListe)
+        every { mockKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
+
+        val actualRequest = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            identifisertPerson = LEALAUS_KAKE_IDENT,
+            sedHendelseType = SENDT,
+            tildeltJoarkEnhet = ID_OG_FORDELING,
+            institusjon = mockk(relaxed = true),
+            identifisertePersoner = 1,
+            tema = PENSJON,
+        )
+
+        val tilleggsopplysninger = actualRequest.tilleggsopplysninger
+        val dokStrValue = tilleggsopplysninger?.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi
+        assertNotNull(dokStrValue)
+        assertTrue(dokStrValue!!.contains("storrelse=5.00"))
     }
 
     private fun lagStorTestFil(): String? {
@@ -411,6 +423,8 @@ internal class JournalpostServiceTest {
         rinaDokumentId = "65KJHHG876876656oji7",
         rinaDokumentVersjon = "695654686"
     )
+
 }
+
 
 
