@@ -48,7 +48,7 @@ class PDFService(
                         .map { konverterEventuelleBilderTilPDF(it) }
                 val convertedDocuments = listOf(hovedDokument).plus(vedlegg)
 
-                logger.info("SED omfatter ${convertedDocuments.size} dokumenter, inkludert vedlegg")
+                logger.info("SED omfatter ${convertedDocuments.size} dokumenter: ${hovedDokument.filnavn}, inkludert vedlegg: ${vedlegg.mapNotNull { it.filnavn }}")
 
                 val (supportedDocuments, unsupportedDocuments) = convertedDocuments.partition {
                     (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null && it.innhold != null
@@ -88,7 +88,7 @@ class PDFService(
                 }
 
                 val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
-                Pair(supportedDocumentsJson, unsupportedDocuments)
+                Pair(supportedDocumentsJson, vedlegg)
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
                 throw ex
@@ -156,7 +156,7 @@ class PDFService(
     }
 
     fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
-        return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
+        return uSupporterteVedlegg.joinToString(separator = ", ") { it.filnavn ?: "" }
     }
 
 }

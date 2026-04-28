@@ -44,10 +44,10 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedVedlegg.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (supported, unsupported) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (supported, vedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
 
         assertEquals("[{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"JVBERi0xLjQKJeLjz9MKMiAwIG9iago8PC9BbHRlcm5hdGUvRGV2aWNlUkdCL04gMy9MZW5ndGggMjU5Ni9G\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"P2000 - Krav om alderspensjon.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"jpg.pdf\"},{\"brevkode\":\"P2000\",\"dokumentKategori\":\"SED\",\"dokumentvarianter\":[{\"filtype\":\"PDF\",\"fysiskDokument\":\"MockPDFContent\",\"variantformat\":\"ARKIV\"}],\"tittel\":\"png.pdf\"}]", supported)
-        assertEquals(0, unsupported.size)
+        assertEquals(2, vedlegg.size)
 
         unmockkAll()
     }
@@ -100,10 +100,10 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResonseMedP2000MedVedlegg.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (supportereVedlegg, usupportertVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        val (supportereVedlegg, vedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
 
         assertTrue ( supportereVedlegg.contains("P2000_vedlegg_1.pdf"))
-        assertEquals(0, usupportertVedlegg.size)
+        assertEquals(1, vedlegg.size)
 
     }
 
@@ -126,9 +126,11 @@ class PDFServiceTest {
         val fileContent = javaClass.getResource("/pdf/pdfResponseMedUgyldigInnhold.json").readText()
         every { euxService.hentAlleDokumentfiler(any(), any()) } returns mapJsonToAny(fileContent)
 
-        val (_, uSupporterteVedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
-        assertEquals(1, uSupporterteVedlegg.size)
-        assertEquals("UgyldigInnhold.jpg", uSupporterteVedlegg[0].filnavn)
+        val (_, vedlegg) = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
+        assertEquals(1, vedlegg.size)
+        assertEquals("UgyldigInnhold.jpg", vedlegg[0].filnavn)
+        assertEquals("UgyldigInnhold.jpg", vedlegg[0].filnavn)
+
     }
 
     @Test

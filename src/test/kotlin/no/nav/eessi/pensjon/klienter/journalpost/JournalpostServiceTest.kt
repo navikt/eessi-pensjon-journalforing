@@ -226,6 +226,7 @@ internal class JournalpostServiceTest {
         val actualRequest = journalpostSlot.captured
         println("actualResponse ${opprettJournalpost.toJson()}")
         println("actualreq ${actualRequest.toJson()}")
+        assertEquals(GJENLEVENDEPENSJON, actualRequest.behandlingstema)
     }
 
     private fun hentSupportedDokumenter(): String {
