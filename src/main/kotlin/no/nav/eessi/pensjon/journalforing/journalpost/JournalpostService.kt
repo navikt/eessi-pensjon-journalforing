@@ -95,7 +95,7 @@ class JournalpostService(
         return listOf(
             Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId),
             Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY, sedHendelse.rinaDokumentId),
-            Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, dokumenterInfo.x()),
+            Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, dokumenterInfo.toJson()),
         )
     }
 
