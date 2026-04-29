@@ -365,10 +365,11 @@ internal class JournalpostServiceTest {
         val tilleggsopplysninger = actualRequest.tilleggsopplysninger
         val dokStrValue = tilleggsopplysninger?.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi.also { print(it) }
         assertNotNull(dokStrValue)
-        assertTrue(dokStrValue!!.contains("filnavn=file5mb.pdf"))
-        assertTrue(dokStrValue.contains("storrelse=5.00"))
-        assertTrue(dokStrValue.contains("filnavn=file7mb.pdf"))
-        assertTrue(dokStrValue.contains("storrelse=7.00"))
+        val docInfo = mapJsonToAny<List<JournalpostService.DokumentInfo>>(dokStrValue!!)
+        assertEquals("file5mb.pdf", docInfo[0].filnavn)
+        assertEquals("5.00", docInfo[0].storrelse)
+        assertEquals("file7mb.pdf", docInfo[1].filnavn)
+        assertEquals("7.00", docInfo[1].storrelse)
     }
 
     private fun lagStorTestFil(): String? {

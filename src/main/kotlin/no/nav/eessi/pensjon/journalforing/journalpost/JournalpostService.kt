@@ -31,6 +31,7 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Base64
+import no.nav.eessi.pensjon.utils.toJson
 
 @Service
 class JournalpostService(
@@ -82,18 +83,19 @@ class JournalpostService(
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: tildeltJoarkEnhet
         )
     }
+    data class DokumentInfo(val filnavn: String, val storrelse: String)
 
     private fun hentTilleggsInformasjon(vedlegg: List<SedVedlegg>, sedHendelse: SedHendelse): List<Tilleggsopplysning> {
         val dokumenterInfo = vedlegg.map {
-            mapOf(
-                "filnavn" to (it.filnavn ?: ""),
-                "storrelse" to dokumentStorrelse(it.innhold)
+            DokumentInfo(
+                filnavn = it.filnavn ?: "",
+                storrelse = dokumentStorrelse(it.innhold)
             )
         }
         return listOf(
             Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId),
             Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY, sedHendelse.rinaDokumentId),
-            Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, dokumenterInfo.toString()),
+            Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, dokumenterInfo.x()),
         )
     }
 
