@@ -40,6 +40,10 @@ spec:
         - host: eux-rina-api-q2.intern.dev.nav.no
         - host: eessi-pensjon-oppgave-q2.intern.dev.nav.no
         - host: eessi-pensjon-fagmodul-q2.intern.dev.nav.no
+  gcp:
+    buckets:
+      - name: eessi-pensjon-journalpost-info-q2
+        uniformBucketLevelAccess: true
 
   webproxy: true
   kafka:
