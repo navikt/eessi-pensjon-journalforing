@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.GjenlevPensjon
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.UforePensjon
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.JournalpostType.UTGAAENDE
@@ -31,13 +32,13 @@ import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Base64
-import no.nav.eessi.pensjon.utils.toJson
 
 @Service
 class JournalpostService(
     val journalpostKlient: JournalpostKlient,
     val pdfService: PDFService,
-    val oppgaveService: OpprettOppgaveService
+    val oppgaveService: OpprettOppgaveService,
+    val gcpService: GcpStorageService
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
@@ -45,7 +46,6 @@ class JournalpostService(
     companion object {
         private const val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
         private const val TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY = "eessi_pensjon_sedid"
-        private const val TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY = "eessi_pensjon_dokStr"
     }
 
     /**
@@ -67,7 +67,9 @@ class JournalpostService(
         currentSed: SED? = null
     ): OpprettJournalpostRequest {
         logger.info("Oppretter OpprettJournalpostRequest for sed: ${sedHendelse.sedType} med rinasSakId: ${sedHendelse.rinaSakId}")
-        val (documents, vedlegg) = hentDocuments(sedHendelse, tildeltJoarkEnhet, identifisertPerson?.aktoerId, tema)
+        val (documents, vedlegg) = hentDocuments(sedHendelse, tildeltJoarkEnhet, identifisertPerson?.aktoerId, tema).also {
+            lagreVedleggInfo(it.second, sedHendelse)
+        }
         val tilleggsinformasjon = hentTilleggsInformasjon(vedlegg, sedHendelse)
         val fnrFraPersonrelasjon = identifisertPerson?.personRelasjon?.fnr
         return OpprettJournalpostRequest(
@@ -83,19 +85,21 @@ class JournalpostService(
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: tildeltJoarkEnhet
         )
     }
-    data class DokumentInfo(val filnavn: String, val storrelse: String)
 
-    private fun hentTilleggsInformasjon(vedlegg: List<SedVedlegg>, sedHendelse: SedHendelse): List<Tilleggsopplysning> {
-        val dokumenterInfo = vedlegg.map {
-            DokumentInfo(
-                filnavn = it.filnavn ?: "",
-                storrelse = dokumentStorrelse(it.innhold)
-            )
+    private fun lagreVedleggInfo(vedlegg: List<SedVedlegg>?, sedHendelse: SedHendelse) {
+        vedlegg?.let {
+            try {
+                gcpService.lagreVedleggInfo(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId, vedlegg)
+            } catch (e: Exception) {
+                logger.warn("Feil ved lagring av vedlegg: ${e.message}")
+            }
         }
+    }
+
+    private fun hentTilleggsInformasjon(sedHendelse: SedHendelse): List<Tilleggsopplysning> {
         return listOf(
             Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId),
             Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY, sedHendelse.rinaDokumentId),
-            Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, dokumenterInfo.toJson()),
         )
     }
 
@@ -121,19 +125,7 @@ class JournalpostService(
                 }
             } ?: throw IllegalStateException("sedType is null")
         }
-        logger.info("Dokument hentet, størrelse: ${dokumentStorrelse(documents)}")
         return Pair(documents, vedlegg)
-    }
-
-    fun dokumentStorrelse(input: String?): String {
-        if (input.isNullOrEmpty()) return "0.0"
-        return try {
-            val bytes = Base64.getDecoder().decode(input)
-            val sizeMb = bytes.size / (1024.0 * 1024.0)
-            String.format("%.2f", sizeMb)
-        } catch (e: Exception) {
-            "unknown"
-        }
     }
     fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
                         sedHendelse: SedHendelse,

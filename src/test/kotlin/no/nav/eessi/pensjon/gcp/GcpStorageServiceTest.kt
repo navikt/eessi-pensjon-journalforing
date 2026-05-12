@@ -38,7 +38,7 @@ open class GcpStorageServiceTest {
             every { getContent() } returns lagretJournalPost.toJson().toByteArray()
         }
         listOf("gjennyB", "journalB").forEach { every { storage.get(it, *emptyArray<Storage.BucketGetOption>()) } returns mockk(relaxed = true)}
-        gcpStorageService = GcpStorageService("gjennyB", storage)
+        gcpStorageService = GcpStorageService("gjennyB", "vedlegg", storage)
 
     }
 

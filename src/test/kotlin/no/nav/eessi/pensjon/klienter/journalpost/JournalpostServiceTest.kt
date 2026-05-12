@@ -45,7 +45,7 @@ internal class JournalpostServiceTest {
     private var pdfService: PDFService = mockk(relaxed = true)
     private val oppgaveService: OpprettOppgaveService = mockk(relaxed = true)
     private val mockKlient: JournalpostKlient = mockk(relaxed = true)
-    private val journalpostService = JournalpostService(mockKlient, pdfService, oppgaveService)
+    private val journalpostService = JournalpostService(mockKlient, pdfService, oppgaveService,mockk())
 
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
@@ -332,7 +332,7 @@ internal class JournalpostServiceTest {
         assertEquals(expectedRequest.kanal, actualRequest.kanal)
         assertEquals(expectedRequest.tema, actualRequest.tema)
         assertTrue(actualRequest.tittel.contains(expectedRequest.journalpostType.decode()))
-        assertEquals(3, actualRequest.tilleggsopplysninger!!.size)
+        assertEquals(2, actualRequest.tilleggsopplysninger!!.size)
 
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
@@ -363,13 +363,8 @@ internal class JournalpostServiceTest {
         )
 
         val tilleggsopplysninger = actualRequest.tilleggsopplysninger
-        val dokStrValue = tilleggsopplysninger?.find { it.nokkel == "eessi_pensjon_dokStr" }?.verdi.also { print(it) }
-        assertNotNull(dokStrValue)
-        val docInfo = mapJsonToAny<List<JournalpostService.DokumentInfo>>(dokStrValue!!)
-        assertEquals("file5mb.pdf", docInfo[0].filnavn)
-        assertEquals("5.00", docInfo[0].storrelse)
-        assertEquals("file7mb.pdf", docInfo[1].filnavn)
-        assertEquals("7.00", docInfo[1].storrelse)
+        assertNotNull(tilleggsopplysninger)
+        assertEquals(2, tilleggsopplysninger!!.size)
     }
 
     private fun lagStorTestFil(): String? {
