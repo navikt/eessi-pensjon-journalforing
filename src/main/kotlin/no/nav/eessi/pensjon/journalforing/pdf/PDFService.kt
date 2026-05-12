@@ -48,7 +48,7 @@ class PDFService(
                         .map { konverterEventuelleBilderTilPDF(it) }
                 val convertedDocuments = listOf(hovedDokument).plus(vedlegg)
 
-                logger.info("SED omfatter ${convertedDocuments.size} dokumenter, inkludert vedlegg")
+                logger.info("SED omfatter ${convertedDocuments.size} dokumenter: ${hovedDokument.filnavn}, inkludert vedlegg: ${vedlegg.mapNotNull { it.filnavn }}")
 
                 val (supportedDocuments, unsupportedDocuments) = convertedDocuments.partition {
                     (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null && it.innhold != null
@@ -88,7 +88,7 @@ class PDFService(
                 }
 
                 val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
-                Pair(supportedDocumentsJson, unsupportedDocuments)
+                Pair(supportedDocumentsJson, vedlegg)
             } catch (ex: Exception) {
                 logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
                 throw ex
@@ -148,15 +148,20 @@ class PDFService(
         return filnavn.replaceAfterLast(".", "pdf")
     }
 
-    fun dokumentStorrelse(input: String?): String {
-        if (input == null) return "0.0"
-        val byteSize = input.length * 2
-        val sizeMb = byteSize / (1024.0 * 1024.0)
-        return String.format("%.2f", sizeMb)
+    fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
+        return uSupporterteVedlegg.joinToString(separator = ", ") { it.filnavn ?: "" }
     }
 
-    fun usupporterteFilnavn(uSupporterteVedlegg: List<SedVedlegg>): String {
-        return uSupporterteVedlegg.joinToString(separator = "") { it.filnavn + " " }
+    fun dokumentStorrelse(input: String?): String {
+        if (input == null) return "0.0"
+        return try {
+            val bytes = java.util.Base64.getDecoder().decode(input)
+            val sizeMb = bytes.size / (1024.0 * 1024.0)
+            String.format("%.2f", sizeMb)
+        } catch (e: IllegalArgumentException) {
+            // Not valid Base64, return 0.0 or handle as needed
+            "0.0"
+        }
     }
 
 }

@@ -102,7 +102,7 @@ internal class SedSendtJournalforingTest {
         pdfService = mockk<PDFService>(relaxed = true).also {
             every { it.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("1234568", emptyList())
         }
-        journalpostService = JournalpostService(journalpostKlient, pdfService, opprettOppgaveService)
+        journalpostService = JournalpostService(journalpostKlient, pdfService, opprettOppgaveService, mockk())
         hentTemaService = HentTemaService(journalpostService, gcpStorageService)
         jouralforingService = JournalforingService(
             journalpostService = journalpostService,

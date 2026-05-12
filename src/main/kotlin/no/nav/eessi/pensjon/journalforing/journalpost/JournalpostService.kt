@@ -9,9 +9,11 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.GjenlevPensjon
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.eux.model.sed.UforePensjon
+import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.JournalpostType.UTGAAENDE
@@ -29,12 +31,14 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Base64
 
 @Service
 class JournalpostService(
     val journalpostKlient: JournalpostKlient,
     val pdfService: PDFService,
-    val oppgaveService: OpprettOppgaveService
+    val oppgaveService: OpprettOppgaveService,
+    val gcpService: GcpStorageService
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
@@ -42,7 +46,6 @@ class JournalpostService(
     companion object {
         private const val TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY = "eessi_pensjon_bucid"
         private const val TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY = "eessi_pensjon_sedid"
-        private const val TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY = "eessi_pensjon_dokStr"
     }
 
     /**
@@ -64,7 +67,10 @@ class JournalpostService(
         currentSed: SED? = null
     ): OpprettJournalpostRequest {
         logger.info("Oppretter OpprettJournalpostRequest for sed: ${sedHendelse.sedType} med rinasSakId: ${sedHendelse.rinaSakId}")
-        val dokumenter = hentDocuments(sedHendelse, tildeltJoarkEnhet, identifisertPerson?.aktoerId, tema)
+        val (documents, vedlegg) = hentDocuments(sedHendelse, tildeltJoarkEnhet, identifisertPerson?.aktoerId, tema).also {
+            lagreVedleggInfo(it.second, sedHendelse)
+        }
+        val tilleggsinformasjon = hentTilleggsInformasjon(vedlegg, sedHendelse)
         val fnrFraPersonrelasjon = identifisertPerson?.personRelasjon?.fnr
         return OpprettJournalpostRequest(
             avsenderMottaker = institusjon,
@@ -73,27 +79,40 @@ class JournalpostService(
             journalpostType = bestemJournalpostType(sedHendelseType),
             sak = arkivsaksnummer,
             tema = tema,
-            tilleggsopplysninger = listOf(
-                Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId),
-                Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY, sedHendelse.rinaDokumentId),
-                Tilleggsopplysning(TILLEGGSOPPLYSNING_DOKUMENTSTORRELSE_KEY, pdfService.dokumentStorrelse(dokumenter))
-            ),
+            tilleggsopplysninger = tilleggsinformasjon,
             tittel = lagTittel(bestemJournalpostType(sedHendelseType), sedHendelse.sedType!!),
-            dokumenter = dokumenter,
+            dokumenter = documents,
             journalfoerendeEnhet = saksbehandlerInfo?.second ?: tildeltJoarkEnhet
         )
     }
 
+    private fun lagreVedleggInfo(vedlegg: List<SedVedlegg>?, sedHendelse: SedHendelse) {
+        vedlegg?.let {
+            try {
+                gcpService.lagreVedleggInfo(sedHendelse.rinaSakId, sedHendelse.rinaDokumentId, vedlegg)
+            } catch (e: Exception) {
+                logger.warn("Feil ved lagring av vedlegg: ${e.message}")
+            }
+        }
+    }
+
+    private fun hentTilleggsInformasjon(sedHendelse: SedHendelse): List<Tilleggsopplysning> {
+        return listOf(
+            Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_SAK_ID_KEY, sedHendelse.rinaSakId),
+            Tilleggsopplysning(TILLEGGSOPPLYSNING_RINA_DOKUMENT_ID_KEY, sedHendelse.rinaDokumentId),
+        )
+    }
 
     private fun hentDocuments(
         sedHendelse: SedHendelse,
         tildeltJoarkEnhet: Enhet,
         aktoerId: String?,
         tema: Tema
-    ): String {
-        val (documents, _) = sedHendelse.run {
+    ): Pair<String, List<SedVedlegg>> {
+        val (documents, vedlegg) = sedHendelse.run {
             sedType?.let {
-                pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it).also { documentsAndAttachments ->
+                val result = pdfService.hentDokumenterOgVedlegg(rinaSakId, rinaDokumentId, it)
+                result.also { documentsAndAttachments ->
                     if (documentsAndAttachments.second.isNotEmpty()) {
                         oppgaveService.opprettBehandleSedOppgave(
                             oppgaveEnhet = tildeltJoarkEnhet,
@@ -106,10 +125,8 @@ class JournalpostService(
                 }
             } ?: throw IllegalStateException("sedType is null")
         }
-        logger.info("Dokument hentet, størrelse: ${pdfService.dokumentStorrelse(documents)}")
-        return documents
+        return Pair(documents, vedlegg)
     }
-
     fun sendJournalPost(journalpostRequest: OpprettJournalpostRequest,
                         sedHendelse: SedHendelse,
                         hendelseType: HendelseType,

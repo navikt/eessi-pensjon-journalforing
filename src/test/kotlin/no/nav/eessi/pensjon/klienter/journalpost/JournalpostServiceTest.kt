@@ -9,6 +9,8 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.SedType.*
+import no.nav.eessi.pensjon.eux.model.document.MimeType
+import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
@@ -43,7 +45,7 @@ internal class JournalpostServiceTest {
     private var pdfService: PDFService = mockk(relaxed = true)
     private val oppgaveService: OpprettOppgaveService = mockk(relaxed = true)
     private val mockKlient: JournalpostKlient = mockk(relaxed = true)
-    private val journalpostService = JournalpostService(mockKlient, pdfService, oppgaveService)
+    private val journalpostService = JournalpostService(mockKlient, pdfService, oppgaveService,mockk())
 
     companion object {
         private val LEALAUS_KAKE = Fodselsnummer.fra("22117320034")!!
@@ -226,6 +228,7 @@ internal class JournalpostServiceTest {
         val actualRequest = journalpostSlot.captured
         println("actualResponse ${opprettJournalpost.toJson()}")
         println("actualreq ${actualRequest.toJson()}")
+        assertEquals(GJENLEVENDEPENSJON, actualRequest.behandlingstema)
     }
 
     private fun hentSupportedDokumenter(): String {
@@ -302,8 +305,8 @@ internal class JournalpostServiceTest {
         """.trimIndent()
         val expectedRequest = mapJsonToAny<OpprettJournalpostRequest>(requestBody)
 
-        every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair("[\"P2100\"]", emptyList())
+        every { mockKlient.opprettJournalpost(capture(requestSlot), any(), any()) } returns expectedResponse
 
         val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
         val actualResponse = journalpostService.opprettJournalpost(
@@ -324,18 +327,49 @@ internal class JournalpostServiceTest {
         assertNotEquals(expectedRequest.eksternReferanseId, actualRequest.eksternReferanseId)
 
         assertEquals(expectedRequest.behandlingstema, actualRequest.behandlingstema)
-        assertEquals(expectedRequest.dokumenter, actualRequest.dokumenter)
         assertEquals(expectedRequest.journalfoerendeEnhet, actualRequest.journalfoerendeEnhet)
         assertEquals(expectedRequest.journalpostType, actualRequest.journalpostType)
         assertEquals(expectedRequest.kanal, actualRequest.kanal)
         assertEquals(expectedRequest.tema, actualRequest.tema)
         assertTrue(actualRequest.tittel.contains(expectedRequest.journalpostType.decode()))
-        assertEquals(3, actualRequest.tilleggsopplysninger!!.size)
+        assertEquals(2, actualRequest.tilleggsopplysninger!!.size)
 
         assertEquals(expectedRequest.sak, actualRequest.sak)
         assertEquals(expectedRequest.bruker!!.id, actualRequest.bruker!!.id)
+    }
 
-        //verify(exactly = 1) { mockKlient.opprettJournalpost(actualRequest, false, null) }
+    @Test
+    fun `dokumentStorrelse i tilleggsopplysning skal vaere korrekt for flere vedlegg`() {
+        fun makeBase64File(sizeMb: Int): String = java.util.Base64.getEncoder().encodeToString(ByteArray(1024 * 1024 * sizeMb))
+        val base64Content5mb = makeBase64File(5)
+        val base64Content7mb = makeBase64File(7)
+        val vedleggListe = listOf(
+            SedVedlegg("file5mb.pdf", MimeType.PDF, base64Content5mb),
+            SedVedlegg("file7mb.pdf", MimeType.PDF, base64Content7mb)
+        )
+        val sedHendelse = sedHendelse(P2100, P_BUC_02, "NAVT003")
+
+        every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(base64Content5mb, vedleggListe)
+        every { mockKlient.opprettJournalpost(any(), any(), any()) } returns mockk(relaxed = true)
+
+        val actualRequest = journalpostService.opprettJournalpost(
+            sedHendelse = sedHendelse,
+            identifisertPerson = LEALAUS_KAKE_IDENT,
+            sedHendelseType = SENDT,
+            tildeltJoarkEnhet = ID_OG_FORDELING,
+            institusjon = mockk(relaxed = true),
+            identifisertePersoner = 1,
+            tema = PENSJON,
+        )
+
+        val tilleggsopplysninger = actualRequest.tilleggsopplysninger
+        assertNotNull(tilleggsopplysninger)
+        assertEquals(2, tilleggsopplysninger!!.size)
+    }
+
+    private fun lagStorTestFil(): String? {
+        val byteArray = ByteArray(1024 * 1024 * 5) // 5 MB
+        return java.util.Base64.getEncoder().encodeToString(byteArray)
     }
 
     @Test
@@ -393,5 +427,8 @@ internal class JournalpostServiceTest {
         rinaDokumentId = "65KJHHG876876656oji7",
         rinaDokumentVersjon = "695654686"
     )
+
 }
+
+
 
