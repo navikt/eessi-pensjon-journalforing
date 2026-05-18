@@ -28,13 +28,15 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType.SENDT
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentifisertPerson
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class JournalpostService(
     val journalpostKlient: JournalpostKlient,
     val pdfService: PDFService,
-    val oppgaveService: OpprettOppgaveService
+    val oppgaveService: OpprettOppgaveService,
+    @Value("\${NAMESPACE}") private val env: String?
 ) {
 
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
@@ -125,8 +127,9 @@ class JournalpostService(
         val journalforingResponse  = journalpostKlient.opprettJournalpost(journalpostRequest, forsokFerdigstill, saksbehandlerIdent)
 
         // Vi har en uvanlig situasjon der vi forventer ferdigstilling, men dokarkiv klarer ikke å ferdigstille journalposten.
-        if(forsokFerdigstill && journalforingResponse?.journalpostferdigstilt == false) {
+        if(forsokFerdigstill && journalforingResponse?.journalpostferdigstilt == false && env != "test") {
             logger.error("Forventet ferdigstilling feilet")
+            throw RuntimeException("Forventet ferdigstilling feilet")
         }
 
         return journalforingResponse

@@ -137,7 +137,7 @@ internal open class JournalforingTestBase {
 
     private val oppgaveHandler: OppgaveHandler = OppgaveHandler(oppgaveHandlerKafka)
     private var opprettOppgaveService: OpprettOppgaveService = OpprettOppgaveService(oppgaveHandler, "test")
-    val journalpostService = spyk(JournalpostService(journalpostKlient, pdfService, opprettOppgaveService))
+    val journalpostService = spyk(JournalpostService(journalpostKlient, pdfService, opprettOppgaveService, "test"))
 
     private val kravHandler = KravInitialiseringsHandler(kravInitHandlerKafka)
     private val kravService = KravInitialiseringsService(kravHandler)
