@@ -12,6 +12,7 @@ import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.Base64
 
 
 val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
@@ -27,7 +28,7 @@ class PDFService(
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) {
     private val maxTotalBase64SizeBytes: Long = 150L * 1024 * 1024
-
+    private val BYTES_PER_MB = 1024 * 1024
     private val logger = LoggerFactory.getLogger(PDFService::class.java)
 
     private var pdfConverter: MetricsHelper.Metric
@@ -96,15 +97,25 @@ class PDFService(
         }
     }
 
-    private fun validerVedleggInfo(filtrertSupportedDokument: List<SedVedlegg>) {
-        val totalBase64Length = filtrertSupportedDokument.sumOf { it.innhold!!.length.toLong() }
+    private fun estimateDecodedSize(base64: String): Long {
+        val padding = base64.takeLastWhile { it == '=' }.length
+        return ((base64.length * 3L) / 4L) - padding
+    }
 
-        if (totalBase64Length * 2 > maxTotalBase64SizeBytes) {
-            val sizeMb = (totalBase64Length * 2).toDouble() / (1024 * 1024)
-            logger.error(
-                "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
-                        "overskrider grensen på ${maxTotalBase64SizeBytes / (1024 * 1024)} MB"
-            )
+    fun validerVedleggInfo(filtrertSupportedDokument: List<SedVedlegg>) {
+        try {
+            val totalDecodedSize = filtrertSupportedDokument.sumOf { vedlegg ->
+                vedlegg.innhold?.let { estimateDecodedSize(it) } ?: 0L
+            }
+            if (totalDecodedSize > maxTotalBase64SizeBytes) {
+                val sizeMb = totalDecodedSize.toDouble() / (BYTES_PER_MB)
+                logger.error(
+                    "Total størrelse på dokumentene (${String.format("%.2f", sizeMb)} MB) " +
+                            "overskrider grensen på ${maxTotalBase64SizeBytes / (BYTES_PER_MB)} MB"
+                )
+            }
+        } catch (e: Exception) {
+            logger.warn("Feil under validering av vedlegg", e)
         }
     }
 
@@ -150,8 +161,8 @@ class PDFService(
 
     fun dokumentStorrelse(input: String?): String {
         if (input == null) return "0.0"
-        val byteSize = input.length * 2
-        val sizeMb = byteSize / (1024.0 * 1024.0)
+        val decodedSize = estimateDecodedSize(input)
+        val sizeMb = decodedSize.toDouble() / BYTES_PER_MB
         return String.format("%.2f", sizeMb)
     }
 

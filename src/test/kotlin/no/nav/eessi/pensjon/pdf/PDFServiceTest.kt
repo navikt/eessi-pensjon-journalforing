@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import io.mockk.verify
 import no.nav.eessi.pensjon.eux.EuxService
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.document.MimeType
@@ -16,10 +17,11 @@ import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.slf4j.Logger
 
 
 class PDFServiceTest {
-
+    private val logger = mockk<Logger>(relaxed = true)
     private val euxService: EuxService = mockk()
 
     private val pdfService = PDFService(euxService)
@@ -140,5 +142,31 @@ class PDFServiceTest {
         val docs = pdfService.hentDokumenterOgVedlegg("rinaSakId", "dokumentId", P2000)
         assertNotNull(docs.second)
         assertNull(docs.second[0].mimeType)
+    }
+
+
+    @Test
+    fun `validerVedleggInfo skal ikke logge feil naar størrelsen på filen er under 150 MB`() {
+        val base64 = java.util.Base64.getEncoder().encodeToString(ByteArray(1024 * 1024)) // 1MB
+        val vedlegg = SedVedlegg("file.pdf", null, base64)
+        assertDoesNotThrow {
+            pdfService.validerVedleggInfo(listOf(vedlegg))
+        }
+    }
+
+    @Test
+    fun `validerVedleggInfo logger error når størrelsen på fila er over 150 MB`() {
+        val base64 = java.util.Base64.getEncoder().encodeToString(ByteArray(151 * 1024 * 1024)) // 151MB
+        val vedlegg = SedVedlegg("file.pdf", null, base64)
+        assertDoesNotThrow {
+            pdfService.validerVedleggInfo(listOf(vedlegg))
+        }
+        val loggerField = PDFService::class.java.getDeclaredField("logger")
+        loggerField.isAccessible = true
+        loggerField.set(pdfService, logger)
+
+        pdfService.validerVedleggInfo(listOf(vedlegg))
+
+        verify { logger.error(match { it.contains("overskrider grensen") }) }
     }
 }
