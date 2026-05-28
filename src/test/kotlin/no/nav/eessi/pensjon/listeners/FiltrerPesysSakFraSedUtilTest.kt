@@ -1,6 +1,7 @@
 package no.nav.eessi.pensjon.listeners
 
 import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
@@ -18,17 +19,21 @@ internal class FiltrerPesysSakFraSedUtilTest {
 
     @Test
     fun `erGyldigPesysNummer godkjenner gyldige pesysnummer`() {
-        assertTrue("12345678".erGyldigPesysNummer())
-        assertTrue("22345678".erGyldigPesysNummer())
+        FiltrerPesysSakFraSedUtil.run {
+            assertTrue("12345678".erGyldigPesysNummer())
+            assertTrue("22345678".erGyldigPesysNummer())
+        }
     }
 
     @Test
     fun `erGyldigPesysNummer avviser ugyldige verdier`() {
-        assertFalse(null.erGyldigPesysNummer())
-        assertFalse("".erGyldigPesysNummer())
-        assertFalse("32345678".erGyldigPesysNummer())
-        assertFalse("1234567A".erGyldigPesysNummer())
-        assertFalse("1234567".erGyldigPesysNummer())
+        FiltrerPesysSakFraSedUtil.run {
+            assertFalse(null.erGyldigPesysNummer())
+            assertFalse("".erGyldigPesysNummer())
+            assertFalse("32345678".erGyldigPesysNummer())
+            assertFalse("1234567A".erGyldigPesysNummer())
+            assertFalse("1234567".erGyldigPesysNummer())
+        }
     }
 
     @Test
@@ -118,6 +123,7 @@ internal class FiltrerPesysSakFraSedUtilTest {
     }
 
     private fun sed(saksnummer: String?, land: String = "NO") = SED(
+        type = SedType.P2000,
         nav = Nav(eessisak = listOf(EessisakItem(saksnummer = saksnummer, land = land)))
     )
 
