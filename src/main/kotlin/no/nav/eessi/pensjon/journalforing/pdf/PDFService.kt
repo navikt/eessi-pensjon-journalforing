@@ -8,11 +8,9 @@ import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.document.MimeType
 import no.nav.eessi.pensjon.eux.model.document.SedVedlegg
 import no.nav.eessi.pensjon.metrics.MetricsHelper
-import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.Base64
 
 
 val mapper: ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
@@ -39,63 +37,52 @@ class PDFService(
 
     fun hentDokumenterOgVedlegg(rinaSakId: String, dokumentId: String, sedType: SedType): Pair<String, List<SedVedlegg>> {
         val documents = euxService.hentAlleDokumentfiler(rinaSakId, dokumentId)
-            ?: throw RuntimeException("Failed to get documents from EUX (rinaSakId: $rinaSakId, dokumentId: $dokumentId)")
+            ?: throw RuntimeException("Klarte ikke hente dokumenter fra EUX (rinaSakId: $rinaSakId, dokumentId: $dokumentId)")
 
         return pdfConverter.measure {
-            try {
-                val hovedDokument = SedVedlegg("${sedType.typeMedBeskrivelse()}.pdf", documents.sed.mimeType, documents.sed.innhold)
-                val vedlegg = (documents.vedlegg ?: listOf())
-                        .mapIndexed { index, vedlegg -> opprettDokument(index, vedlegg, sedType) }
-                        .map { konverterEventuelleBilderTilPDF(it) }
-                val convertedDocuments = listOf(hovedDokument).plus(vedlegg)
+            val hovedDokument = SedVedlegg("${sedType.typeMedBeskrivelse()}.pdf", documents.sed.mimeType, documents.sed.innhold)
+            val vedlegg = documents.vedlegg.orEmpty()
+                .mapIndexed { index, v -> opprettDokument(index, v, sedType) }
+                .map { konverterEventuelleBilderTilPDF(it) }
 
-                logger.info("SED omfatter ${convertedDocuments.size} dokumenter, inkludert vedlegg")
+            val alleDokumenter = listOf(hovedDokument) + vedlegg
+            val (supported, unsupported) = alleDokumenter.partition { it.erStoettetPdf() }.also { loggUsupporterteDokumenter(it.second) }
 
-                val (supportedDocuments, unsupportedDocuments) = convertedDocuments.partition {
-                    (it.mimeType == MimeType.PDF || it.mimeType == MimeType.PDFA) && it.filnavn != null && it.innhold != null
-                }
-
-                logger.info("SED omfatter ${unsupportedDocuments.size} dokumenter som vi ikke har klart å konvertere til PDF")
-                unsupportedDocuments.forEach {
-                    logger.info("Usupportert dokument: ${it.filnavn} - av type${it.mimeType}")
-                }
-                if (supportedDocuments.isEmpty()) {
-                    throw RuntimeException("No supported documents, ${documents.toJson()}")
-                }
-
-                // Filtrer bort null‑innhold og beregn total base64‑størrelse før vi bygger JSON‑strengen
-                val filtrertSupportedDokument = supportedDocuments.filter { it.innhold != null }
-                validerVedleggInfo(filtrertSupportedDokument)
-
-                val journalPostDokumenter = filtrertSupportedDokument
-                    .filter { it.innhold != null }
-                    .map {
-                    logger.info("Oppretter journalpostDokument for rinaSakId: $rinaSakId, " + "dokumentId: $dokumentId med: sedtype: ${sedType.name} , tittel: ${it.filnavn}")
-                    JournalPostDokument(
-                        brevkode = sedType.name,
-                        dokumentKategori = "SED",
-                        dokumentvarianter = listOf(
-                            Dokumentvarianter(
-                                filtype = it.mimeType?.name
-                                    ?: throw RuntimeException(
-                                        "MimeType is null after being converted to PDF, $it"
-                                    ),
-                                fysiskDokument = it.innhold!!,
-                                variantformat = Variantformat.ARKIV
-                            )
-                        ),
-                        tittel = it.filnavn
-                    )
-                }
-
-                val supportedDocumentsJson = mapper.writeValueAsString(journalPostDokumenter)
-                Pair(supportedDocumentsJson, unsupportedDocuments)
-            } catch (ex: Exception) {
-                logger.error("Noe gikk galt under konvertering av vedlegg til PDF", ex)
-                throw ex
+            if (supported.isEmpty()) {
+                throw RuntimeException("Ingen støttede dokumenter funnet")
             }
+
+            validerVedleggInfo(supported)
+
+            val journalPostDokumenter = supported.map { dok ->
+                logger.info("Oppretter journalpostDokument: rinaSakId=$rinaSakId, dokumentId=$dokumentId, sedtype=${sedType.name}, tittel=${dok.filnavn}")
+                tilJournalPostDokument(dok, sedType)
+            }
+
+            Pair(mapper.writeValueAsString(journalPostDokumenter), unsupported)
         }
     }
+
+    private fun SedVedlegg.erStoettetPdf() = mimeType in listOf(MimeType.PDF, MimeType.PDFA) && filnavn != null && innhold != null
+
+    private fun loggUsupporterteDokumenter(unsupported: List<SedVedlegg>) {
+        if (unsupported.isNotEmpty()) {
+            logger.info("${unsupported.size} dokumenter kunne ikke konverteres til PDF: ${unsupported.map { "${it.filnavn} (${it.mimeType})" }}")
+        }
+    }
+
+    private fun tilJournalPostDokument(dok: SedVedlegg, sedType: SedType) = JournalPostDokument(
+        brevkode = sedType.name,
+        dokumentKategori = "SED",
+        dokumentvarianter = listOf(
+            Dokumentvarianter(
+                filtype = dok.mimeType!!.name,
+                fysiskDokument = dok.innhold!!,
+                variantformat = Variantformat.ARKIV
+            )
+        ),
+        tittel = dok.filnavn
+    )
 
     private fun estimateDecodedSize(base64: String): Long {
         val padding = base64.takeLastWhile { it == '=' }.length
