@@ -4,14 +4,11 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
 import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.*
-import javax.imageio.ImageIO
 
 
 // TODO using exceptions as control flow is pretty iffy ...
@@ -22,11 +19,11 @@ object ImageConverter {
 
     fun toBase64PDF(base64ImageContent: String): String {
         try {
-            val awtImage = ImageIO.read(ByteArrayInputStream(Base64.getDecoder().decode(base64ImageContent)))
-                    ?: throw RuntimeException("Klarte ikke å dekode bilde")
+            val imageBytes = Base64.getDecoder().decode(base64ImageContent)
             ByteArrayOutputStream().use { outStream ->
                 PDDocument().use { doc ->
-                    val pdImageXObject = LosslessFactory.createFromImage(doc, awtImage)
+                    // unngår konvertering av hele objektet til minnet
+                    val pdImageXObject = PDImageXObject.createFromByteArray(doc, imageBytes, "image")
                     val page = PDPage()
 
                     val (imageWidth, imageHeight) = pairImageSize(pdImageXObject)
@@ -47,7 +44,7 @@ object ImageConverter {
                     doc.addPage(page)
                     doc.save(outStream)
                 }
-                return String(Base64.getEncoder().encode(outStream.toByteArray()))
+                return Base64.getEncoder().encodeToString(outStream.toByteArray())
             }
         } catch (ex: Exception) {
             logger.error("Klarte ikke å konvertere dokument: $ex", ex)

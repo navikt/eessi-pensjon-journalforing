@@ -48,7 +48,7 @@ class JournalpostKlient(
     /**
      * Sender et POST request til Joark for opprettelse av JournalPost.
      *
-     * @param request: Request-objektet som skal sendes til joark.
+     * @param journalPostReq: Request-objektet som skal sendes til joark.
      * @param forsokFerdigstill: Hvis true vil Joark forsøke å ferdigstille journalposten.
      * Regler i Joark for å få forsoekFerdigstill=true ligger her: https://confluence.adeo.no/display/BOA/opprettJournalpost
      *
@@ -56,35 +56,36 @@ class JournalpostKlient(
      *         Respons fra Joark. Inneholder journalposten sin ID, status, melding, og en boolean-verdi
      *         som indikerer om posten ble ferdigstilt.
      */
-    fun opprettJournalpost(request: OpprettJournalpostRequest, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
+    fun opprettJournalpost(journalPostReq: OpprettJournalpostRequest, forsokFerdigstill: Boolean, saksbehandlerIdent: String?): OpprettJournalPostResponse? {
         logger.info("Forsøker å ferdigstille journalpost: $forsokFerdigstill")
 
         return opprettjournalpost.measure {
             return@measure try {
                 logger.info("Kaller Joark for å generere en journalpost: /journalpost?forsoekFerdigstill=$forsokFerdigstill")
 
-                val headers = HttpHeaders()
-                headers.contentType = MediaType.APPLICATION_JSON
-
-                if(!saksbehandlerIdent.isNullOrBlank()) {
-                    headers["Nav-User-Id"] = saksbehandlerIdent
-                }
-
-                request.sak?.takeIf { it.erGyldigPesysNummerEllerGjenny().not() }?.let {
+                journalPostReq.sak?.takeIf { it.erGyldigPesysNummerEllerGjenny().not() }?.let {
                     throw IllegalArgumentException("UGYLDIG PESYS-NUMMER: ${it.toJson()} ")
                 }
 
-                secureLog.info("Journalpostrequesten: ${request.copy(dokumenter = "***").toJson()}, header: $headers")
+                secureLog.info("Journalpostrequesten: ${journalPostReq.copy(dokumenter = "***").toJson()}, Nav-User-Id: $saksbehandlerIdent")
 
-                val response = journalpostOidcRestTemplate.exchange(
+                // Bruker execute() med RequestCallback for å strømme request body direkte via Jackson,
+                // og unngår mellomliggende toJson() / string for store dokumenter.
+                journalpostOidcRestTemplate.execute(
                     "/journalpost?forsoekFerdigstill=$forsokFerdigstill",
-                        HttpMethod.POST,
-                        HttpEntity(request.toJson(), headers),
-                        String::class.java)
-                logger.info("""Journalpost er opprettet med status: ${response.statusCode}
-                    | ${response.body}
-                """.trimMargin())
-                mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
+                    HttpMethod.POST,
+                    { request ->
+                        request.headers.contentType = MediaType.APPLICATION_JSON
+                        if (!saksbehandlerIdent.isNullOrBlank()) {
+                            request.headers["Nav-User-Id"] = saksbehandlerIdent
+                        }
+                        mapper.writeValue(request.body, journalPostReq)
+                    },
+                    { response ->
+                        logger.info("Journalpost er opprettet med status: ${response.statusCode}")
+                        mapper.readValue(response.body, OpprettJournalPostResponse::class.java)
+                    }
+                )
             } catch (ex: HttpStatusCodeException) {
                 logger.error("En feil oppstod under opprettelse av journalpost ex: ", ex)
                 throw RuntimeException("En feil oppstod under opprettelse av journalpost ex: ${ex.message} body: ${ex.responseBodyAsString}")

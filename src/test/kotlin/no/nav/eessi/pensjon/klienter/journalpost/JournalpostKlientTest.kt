@@ -5,10 +5,10 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.eessi.pensjon.journalforing.OppdaterDistribusjonsinfoRequest
+import no.nav.eessi.pensjon.journalforing.OpprettJournalPostResponse
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.utils.mapJsonToAny
-import no.nav.eessi.pensjon.utils.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -31,25 +31,28 @@ internal class JournalpostKlientTest {
         val dummyResponse = javaClass.classLoader.getResource("journalpost/opprettJournalpostResponseFalse.json")!!.readText()
         val opprettJournalpostRequestJson = javaClass.getResource("/journalpost/opprettJournalpostRequest.json")!!.readText()
         val opprettJournalpostRequest = mapJsonToAny<OpprettJournalpostRequest>((opprettJournalpostRequestJson))
+        val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(dummyResponse)
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-
-        every { mockrestTemplate.exchange(
+        every {
+            mockrestTemplate.execute<OpprettJournalPostResponse>(
                 "/journalpost?forsoekFerdigstill=false",
                 HttpMethod.POST,
                 any(),
-                String::class.java)
-        } returns ResponseEntity.ok(dummyResponse)
+                any()
+            )
+        } returns expectedResponse
 
-        journalpostKlient.opprettJournalpost(opprettJournalpostRequest, false, null)
+        val result = journalpostKlient.opprettJournalpost(opprettJournalpostRequest, false, null)
+
+        assertEquals(expectedResponse.journalpostId, result?.journalpostId)
+        assertEquals(expectedResponse.journalpostferdigstilt, result?.journalpostferdigstilt)
 
         verify(exactly = 1) {
-            mockrestTemplate.exchange(
+            mockrestTemplate.execute<OpprettJournalPostResponse>(
                 "/journalpost?forsoekFerdigstill=false",
                 HttpMethod.POST,
-                HttpEntity(opprettJournalpostRequest.toJson(), headers),
-                String::class.java
+                any(),
+                any()
             )
         }
     }
