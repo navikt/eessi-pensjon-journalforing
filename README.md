@@ -30,3 +30,35 @@ Se mer dokumentasjon rundt dette her: [Oppgradere avhengigheter](https://github.
 ## SonarQube m/JaCoCo
 
 Prosjektet er satt opp med støtte for å kunne kjøre SonarQube, med JaCoCo for å fange test coverage, men du trenger å ha en SonarQube-instans (lokal?) å kjøre dataene inn i - [les mer her](https://github.com/navikt/eessi-pensjon/blob/master/docs/dev/sonarqube.md).
+
+
+## Kritiske avhengigheter
+## HØY KRITIKALITET
+
+#### Google Secret Manager
+- servicebruker: srveessi-pensjon-j
+
+#### Kafka
+- eessibasis.sedsendt-v1 (READ)
+- eessibasis.sedmottatt-v1 (READ)
+- eessipensjon.privat-oppgave (WRITE)
+- eessipensjon.privat-krav-initialisering (WRITE)
+- eessipensjon.public-automatisering (WRITE)
+
+## REST API
+- Dokarkiv
+- PDL
+- SAF
+- EUX RINA API
+- Norg2
+- Pesys/PEN
+- Pensjon-navansatt
+
+#### Azure AD — Rollekontroll
+- Gruppe 0000-ga-eessi-clerk-pensjon (pensjonssaksbehandlere)
+- Gruppe 0000-ga-eessi-clerk-ufore (uføresaksbehandlere)
+
+
+## LAV KRITIKALITET
+#### GCP Buckets
+- eessi-pensjon-gjenny (gjeldende pensjonsdata)
