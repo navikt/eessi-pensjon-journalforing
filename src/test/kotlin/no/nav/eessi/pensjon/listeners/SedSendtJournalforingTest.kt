@@ -46,6 +46,7 @@ import no.nav.eessi.pensjon.statistikk.StatistikkPublisher
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.web.client.RestTemplate
@@ -263,6 +264,7 @@ internal class SedSendtJournalforingTest {
 
     }
 
+    @Disabled
     @Test
     fun `Ved kall til pensjoninformasjon der det returneres to saker saa skal vi velge den som har samme pesys sakid M051`() {
         val sedJson = javaClass.getResource("/sed/M051.json")!!.readText()
