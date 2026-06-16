@@ -54,7 +54,7 @@ class SedMottattListener(
     }
 
     private val offsetsToSkip = listOf(2031007L, 2142123L, 2368512L, 2732272L, 2782900L, 2782900L)
-    private val offsetsToSkipInTest = listOf(10434L)
+    private val offsetsToSkipInTest = listOf(10434L, 10435L)
 
     @KafkaListener(
         containerFactory = "sedKafkaListenerContainerFactory",
