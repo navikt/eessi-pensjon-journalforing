@@ -99,7 +99,7 @@ class RestTemplateConfig(
      */
     private fun opprettRestTemplateForJoark(url: String, bearerTokenInterceptor: ClientHttpRequestInterceptor) : RestTemplate {
         return RestTemplateBuilder()
-            .rootUri(url)
+            .baseUri(url)
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
@@ -113,7 +113,7 @@ class RestTemplateConfig(
     }
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
         return RestTemplateBuilder()
-            .rootUri(url)
+            .baseUri(url)
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),
@@ -128,7 +128,7 @@ class RestTemplateConfig(
 
     private fun buildRestTemplate(url: String): RestTemplate {
         return RestTemplateBuilder()
-            .rootUri(url)
+            .baseUri(url)
             .errorHandler(DefaultResponseErrorHandler())
             .additionalInterceptors(
                 RequestIdHeaderInterceptor(),

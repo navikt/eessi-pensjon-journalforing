@@ -109,10 +109,14 @@ class IntegrasjonsTestConfig {
     fun HentSakService(): HentSakService = mockk()
 
     fun mockedRestTemplate(): RestTemplate {
-        val port = System.getProperty("mockServerport")
-        return RestTemplateBuilder()
-            .rootUri("http://localhost:${port}")
-            .build()
+        val port = System.getProperty("mockServerport")?.toIntOrNull()
+        var builder = RestTemplateBuilder()
+
+        if (port != null) {
+            builder = builder.baseUri("http://localhost:$port")
+        }
+
+        return builder.build()
     }
 
     fun aivenKafkaConsumerFactory(): ConsumerFactory<String, String> {
