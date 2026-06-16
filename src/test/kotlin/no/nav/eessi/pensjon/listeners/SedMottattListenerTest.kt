@@ -35,7 +35,8 @@ internal class SedMottattListenerTest {
         fagmodulService,
         bestemSakService,
         gcpStorageService,
-        "test"
+        profile = "test",
+        env = "test"
     )
     @BeforeEach
     fun setup() {

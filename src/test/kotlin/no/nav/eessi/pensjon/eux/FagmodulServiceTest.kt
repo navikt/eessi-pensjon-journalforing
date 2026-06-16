@@ -42,7 +42,8 @@ internal class FagmodulServiceTest {
         fagmodulService = fmService,
         bestemSakService = bestemSakService,
         gcpStorageService = mockk(),
-        profile = "test"
+        profile = "test",
+        env = "test"
     )
 
     @AfterEach

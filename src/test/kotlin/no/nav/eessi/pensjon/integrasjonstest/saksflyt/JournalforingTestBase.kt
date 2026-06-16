@@ -184,7 +184,8 @@ internal open class JournalforingTestBase {
         fagmodulService = fagmodulService,
         bestemSakService = bestemSakService,
         gcpStorageService = gcpStorageService,
-        profile = "test"
+        profile = "test",
+        env = "test"
     )
     protected val sendtListener: SedSendtListener = SedSendtListener(
         journalforingService = journalforingService,
