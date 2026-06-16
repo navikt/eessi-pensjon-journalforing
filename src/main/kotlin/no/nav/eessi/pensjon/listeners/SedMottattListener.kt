@@ -37,6 +37,7 @@ class SedMottattListener(
     private val fagmodulService: FagmodulService,
     private val bestemSakService: BestemSakService,
     val gcpStorageService: GcpStorageService,
+    @Value("\${NAMESPACE}") private val env: String?,
     @Value("\${SPRING_PROFILES_ACTIVE}") private val profile: String,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest()
 ) : SedListenerBase(fagmodulService, bestemSakService, gcpStorageService, euxService, profile) {
@@ -53,6 +54,7 @@ class SedMottattListener(
     }
 
     private val offsetsToSkip = listOf(2031007L, 2142123L, 2368512L, 2732272L, 2782900L, 2782900L)
+    private val offsetsToSkipInTest = listOf(10434L)
 
     @KafkaListener(
         containerFactory = "sedKafkaListenerContainerFactory",
@@ -67,6 +69,9 @@ class SedMottattListener(
                 logger.info("Innkommet sedMottatt hendelse i partisjon: ${cr.partition()}, med offset: ${cr.offset()}")
 
                 try {
+                    if (env == "q2" && !skippingOffsett(cr.offset(), offsetsToSkipInTest)) {
+                        behandleHendelse(hendelse, MOTTATT, acknowledgment)
+                    }
                     if (!skippingOffsett(cr.offset(), offsetsToSkip)) {
                         behandleHendelse(hendelse, MOTTATT, acknowledgment)
                     }
