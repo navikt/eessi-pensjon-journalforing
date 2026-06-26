@@ -1,0 +1,17 @@
+#!/bin/sh
+
+TAG=" (epd)"
+MSG_FILE="$1"
+
+# Skip merge commits
+case "$2" in
+  merge|squash) exit 0 ;;
+esac
+
+# Add tag to first line if missing
+FIRST_LINE=$(head -n 1 "$MSG_FILE")
+
+case "$FIRST_LINE" in
+  *"$TAG"*) exit 0 ;;
+  *) sed -i.bak "1s/$/ $TAG/" "$MSG_FILE" && rm -f "$MSG_FILE.bak" ;;
+esac
