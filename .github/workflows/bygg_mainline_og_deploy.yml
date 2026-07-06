@@ -69,4 +69,4 @@ jobs:
           client-payload: '{"image": "${{ steps.docker-push.outputs.image }}"}'
 
       - name: 'Echo Image Name'
-        run: echo "### Image Hash $(echo ${{  steps.docker-push.outputs.image }} | cut -d':' -f2)" >> $GITHUB_STEP_SUMMARY
+        run: echo "### Image Hash $(echo ${{  steps.docker-push.outputs.image }} | cut -d':' -f2 | cut -d'@' -f1)" >> "$GITHUB_STEP_SUMMARY"
