@@ -37,7 +37,7 @@ class SafClient(private val safGraphQlOidcRestTemplate: RestTemplate,
                 val headers = HttpHeaders()
                 headers.contentType = MediaType.APPLICATION_JSON
                 val response = safGraphQlOidcRestTemplate.exchange(
-                    "/",
+                    "",
                     HttpMethod.POST,
                     HttpEntity(SafRequest(journalpostId).toJson(), headers),
                     String::class.java
