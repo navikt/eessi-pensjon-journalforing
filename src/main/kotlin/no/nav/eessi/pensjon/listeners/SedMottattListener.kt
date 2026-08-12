@@ -78,8 +78,10 @@ class SedMottattListener(
                 } catch (ex: Exception) {
                     logger.error("Feil ved behandling av SED-MOTTATT: ${hendelse.replaceAfter("navBruker", "******")}", ex)
                     throw SedMottattRuntimeException(ex)
+                } finally {
+                    // Alltid tell ned latchen, selv ved feil, så ventende (test-)kode ikke må vente på full timeout
+                    latch.countDown()
                 }
-                latch.countDown()
             }
         }
     }

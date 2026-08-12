@@ -66,8 +66,10 @@ class SedSendtListener(
                 } catch (ex: Exception) {
                     logger.error("Feil ved behandling av SED-SENDT: ${hendelse.replaceAfter("navBruker","******")}", ex)
                     throw SedSendtRuntimeException(ex)
+                } finally {
+                    // Alltid tell ned latchen, selv ved feil, så ventende (test-)kode ikke må vente på full timeout
+                    latch.countDown()
                 }
-                latch.countDown()
             }
         }
     }
