@@ -125,7 +125,7 @@ abstract class IntegrasjonsBase {
 
         mottattContainer = settOppUtitlityConsumer(SED_MOTTATT_TOPIC)
         mottattContainer.start()
-        Thread.sleep(1000) // wait a bit for the container to start
+        ContainerTestUtils.waitForAssignment(mottattContainer, 2)
 
         oppgaveContainer = settOppUtitlityConsumer(OPPGAVE_TOPIC)
         oppgaveContainer.start()
@@ -201,7 +201,7 @@ abstract class IntegrasjonsBase {
 
         sedMottattTemplate.sendDefault(hendelse).get(20L, TimeUnit.SECONDS)
         mottattListener.getLatch().await(50, TimeUnit.SECONDS)
-        Thread.sleep(5000)
+        waitForOppgaveMelding()
 
         // del 2: sender manuel generering av JP og oppgave som batch / gcp storage ville gjort
         createMockedJournalPostWithOppgave(journalpostRequest, hendelse, HendelseType.MOTTATT)
@@ -235,7 +235,20 @@ abstract class IntegrasjonsBase {
     fun startJornalforingForSendt(messagePath: String) {
         sedSendttTemplate.sendDefault(javaClass.getResource(messagePath)!!.readText()).get(20L, TimeUnit.SECONDS)
         sendtListener.getLatch().await(50, TimeUnit.SECONDS)
-        Thread.sleep(5000)
+        waitForOppgaveMelding()
+    }
+
+    /**
+     * Poller for oppgave-meldingen i loggen i stedet for en fast Thread.sleep, slik at testen
+     * returnerer så snart meldingen er logget (og likevel gir opp etter [timeoutMs] hvis den uteblir,
+     * f.eks. i tester der ingen oppgave forventes opprettet).
+     */
+    private fun waitForOppgaveMelding(timeoutMs: Long = 5000, pollMs: Long = 100) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (isMessageInlog("oppgave melding på kafka")) return
+            Thread.sleep(pollMs)
+        }
     }
 
 

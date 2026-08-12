@@ -72,6 +72,7 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
         )
         every { personService.hentPerson(NorskIdent(FNR_VOKSEN_UNDER_62)) } returns JournalforingTestBase()
             .createBrukerWith(FNR_VOKSEN_UNDER_62,aktorId = JournalforingTestBase.AKTOER_ID)
+        every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, any()) } returns NorskIdent(FNR_VOKSEN_UNDER_62)
 
         //server setup
         CustomMockServer()
