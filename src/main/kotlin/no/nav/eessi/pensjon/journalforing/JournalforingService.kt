@@ -98,9 +98,10 @@ class JournalforingService(
                 val aktoerId = identifisertPerson?.aktoerId
                 val alder = bestemAlder(identifisertPerson)
                 val tema = hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed)
-                val temaFraPesyskall = hentTemaFraPesys(saksInfoSamlet?.sakInformasjonFraPesys?.sakId)
-                val temaFraPesys = temaFraPesyskall ?: tema
-                logger.info("SakType fra pesys gir følgende tema: $temaFraPesys, tema fra hentTema: $tema, tema fra pesys kall: $temaFraPesyskall")
+                val temaFraPesyskall = if(saksInfoSamlet?.sakInformasjonFraPesys?.sakId.isNullOrBlank().not()) {
+                    hentTemaFraPesys(saksInfoSamlet.sakInformasjonFraPesys.sakId).also { logger.info("kallfra pesys ga følgende tema:$it") }
+                } else tema
+                logger.info("SakType fra pesys gir følgende tema: $temaFraPesyskall, tema fra hentTema: $tema")
                 val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
                 val institusjon = bestemAvsenderMottaker(hendelseType, sedHendelse)
                 val arkivsaksnummer = hentArkivsaksnummer(sedHendelse, hendelseType, saksInfoSamlet, identifisertPerson)
