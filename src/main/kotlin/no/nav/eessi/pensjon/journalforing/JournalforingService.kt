@@ -97,7 +97,6 @@ class JournalforingService(
 
                 val aktoerId = identifisertPerson?.aktoerId
                 val alder = bestemAlder(identifisertPerson)
-                val temaFraPesyskall = hentTemaFraPesys(saksInfoSamlet?.sakInformasjonFraPesys?.sakId)
                 val tema = hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed)
                 val temaFraPesyskall = hentTemaFraPesys(saksInfoSamlet?.sakInformasjonFraPesys?.sakId)
                 val temaFraPesys = temaFraPesyskall ?: tema
