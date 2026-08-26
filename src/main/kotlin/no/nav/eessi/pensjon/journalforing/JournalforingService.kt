@@ -99,6 +99,7 @@ class JournalforingService(
                 val alder = bestemAlder(identifisertPerson)
                 val temaFraPesyskall = hentTemaFraPesys(saksInfoSamlet?.sakInformasjonFraPesys?.sakId)
                 val tema = hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed)
+                val temaFraPesyskall = hentTemaFraPesys(saksInfoSamlet?.sakInformasjonFraPesys?.sakId)
                 val temaFraPesys = temaFraPesyskall ?: tema
                 logger.info("SakType fra pesys gir følgende tema: $temaFraPesys, tema fra hentTema: $tema, tema fra pesys kall: $temaFraPesyskall")
                 val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
