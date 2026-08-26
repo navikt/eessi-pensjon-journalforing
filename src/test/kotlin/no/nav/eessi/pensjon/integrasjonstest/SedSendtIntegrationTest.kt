@@ -2,9 +2,11 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
+import no.nav.eessi.pensjon.journalforing.PesysService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -35,6 +37,9 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     @MockkBean(relaxed = true)
     private lateinit var gcpStorageService: GcpStorageService
 
+    @MockkBean(relaxed = true)
+    private lateinit var pesysService: PesysService
+
     @Autowired
     private lateinit var hentSakService: HentSakService
 
@@ -50,6 +55,7 @@ internal class SedSendtIntegrationTest : IntegrasjonsBase() {
     fun beforeEach() {
         every { gcpStorageService.gjennyFinnes(any()) } returns false
         every { gcpStorageService.hentFraGjenny(any()) } returns null
+        every { pesysService.hentSaktype(any()) } returns mockk()
     }
 
 
