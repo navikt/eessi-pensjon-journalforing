@@ -112,7 +112,6 @@ internal class SedSendtJournalforingMedNavansattTest {
             hentTemaService = hentTemaService,
             oppgaveService = opprettOppgaveService,
             env = null,
-            pesysService = mockk<PesysService>(relaxed = true),
         )
 
         sedListener = SedSendtListener(

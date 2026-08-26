@@ -17,7 +17,6 @@ import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.HentSakService
 import no.nav.eessi.pensjon.journalforing.OpprettJournalpostRequest
-import no.nav.eessi.pensjon.journalforing.PesysService
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
@@ -75,8 +74,7 @@ import java.io.ByteArrayOutputStream
 @MockkBeans(
     MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
     MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "pesysClientRestTemplate", classes = [RestTemplate::class])
+    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
 )
 internal class ConfigRestTemplateTest {
 
@@ -102,9 +100,6 @@ internal class ConfigRestTemplateTest {
 
     @MockkBean(relaxed = true)
     private lateinit var etterlatteService: EtterlatteService
-
-    @MockkBean(relaxed = true)
-    private lateinit var pesysService: PesysService
 
     @MockkBean(relaxed = true)
     private lateinit var hentSakService: HentSakService

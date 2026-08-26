@@ -21,8 +21,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
 import org.springframework.web.client.DefaultResponseErrorHandler
-import org.springframework.web.client.ResponseErrorHandler
-import java.time.Duration
 import java.util.*
 
 
@@ -65,11 +63,6 @@ class RestTemplateConfig(
     @Value("\${ETTERLATTE_URL}")
     lateinit var etterlatteUrl: String
 
-    @Value("\${PESYS_URL}")
-    lateinit var pesysUrl: String
-
-    @Bean
-    fun pesysClientRestTemplate() = opprettRestTemplateForJoarkOgPesys(pesysUrl, bearerTokenInterceptor(clientProperties("pensjon-credentials"), oAuth2AccessTokenService!!))
 
     @Bean
     fun euxOAuthRestTemplate(): RestTemplate = opprettRestTemplate(euxUrl, "eux-credentials")
@@ -81,7 +74,7 @@ class RestTemplateConfig(
     fun norg2RestTemplate(): RestTemplate? = buildRestTemplate(norg2Url)
 
     @Bean
-    fun journalpostOidcRestTemplate(): RestTemplate = opprettRestTemplateForJoarkOgPesys(joarkUrl,
+    fun journalpostOidcRestTemplate(): RestTemplate = opprettRestTemplateForJoark(joarkUrl,
         bearerTokenInterceptor(clientProperties("dokarkiv-credentials"), oAuth2AccessTokenService!!))
 
     @Bean
@@ -94,7 +87,7 @@ class RestTemplateConfig(
     fun navansattRestTemplate(): RestTemplate? = opprettRestTemplate(navansattUrl, "navansatt-credentials")
 
     @Bean
-    fun safGraphQlOidcRestTemplate() = opprettRestTemplateForJoarkOgPesys(graphQlUrl, bearerTokenInterceptor(
+    fun safGraphQlOidcRestTemplate() = opprettRestTemplateForJoark(graphQlUrl, bearerTokenInterceptor(
         clientProperties("saf-credentials"), oAuth2AccessTokenService!!))
 
     @Bean
@@ -104,7 +97,7 @@ class RestTemplateConfig(
      * Denne bruker HttpComponentsClientHttpRequestFactory - angivelig for å fikse
      * problemer med HTTP-PATCH – som brukes mot joark.
      */
-    private fun opprettRestTemplateForJoarkOgPesys(url: String, bearerTokenInterceptor: ClientHttpRequestInterceptor) : RestTemplate {
+    private fun opprettRestTemplateForJoark(url: String, bearerTokenInterceptor: ClientHttpRequestInterceptor) : RestTemplate {
         return RestTemplateBuilder()
             .baseUri(url)
             .errorHandler(DefaultResponseErrorHandler())
@@ -118,7 +111,6 @@ class RestTemplateConfig(
                 requestFactory = JdkClientHttpRequestFactory()
             }
     }
-
     private fun opprettRestTemplate(url: String, oAuthKey: String) : RestTemplate {
         return RestTemplateBuilder()
             .baseUri(url)

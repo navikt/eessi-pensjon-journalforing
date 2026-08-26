@@ -12,7 +12,6 @@ import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_01
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType.P2000
 import no.nav.eessi.pensjon.eux.model.SedType.P2100
-import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -27,7 +26,6 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.journalforing.pdf.PDFService
 import no.nav.eessi.pensjon.journalforing.saf.SafClient
 import no.nav.eessi.pensjon.journalforing.saf.SafSak
-import no.nav.eessi.pensjon.listeners.fagmodul.EessiFellesDto
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema.PENSJON
@@ -62,7 +60,6 @@ class JournalforingServiceMedGCPTest {
     lateinit var hentSakService: HentSakService
     lateinit var hentTemaService: HentTemaService
     lateinit var opprettOppgaveService: OpprettOppgaveService
-    lateinit var pesysService: PesysService
 
 
     var etterlatteService = mockk<EtterlatteService>()
@@ -70,9 +67,7 @@ class JournalforingServiceMedGCPTest {
     @BeforeEach
     fun setup() {
         gcpStorage = mockk<Storage>()
-        pesysService = mockk<PesysService>()
         every { gcpStorage.get(eq("bucket"), *anyVararg()) } returns mockk<Bucket>()
-        every { pesysService.hentSaktype(any()) } returns ALDER
 
         gcpStorageService = GcpStorageService("bucket", gcpStorage)
         safClient =  mockk()
@@ -94,7 +89,6 @@ class JournalforingServiceMedGCPTest {
             hentTemaService,
             opprettOppgaveService,
             env = null,
-            pesysService = pesysService
         )
     }
 

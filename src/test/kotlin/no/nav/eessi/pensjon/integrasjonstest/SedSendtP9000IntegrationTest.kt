@@ -2,14 +2,12 @@ package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.eux.model.buc.Buc
 import no.nav.eessi.pensjon.eux.model.buc.Participant
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase.Companion.FNR_VOKSEN_UNDER_62
-import no.nav.eessi.pensjon.journalforing.PesysService
 import no.nav.eessi.pensjon.personoppslag.pdl.PersonService
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
@@ -47,9 +45,6 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     @MockkBean(relaxed = true)
     private lateinit var gcpStorageService: GcpStorageService
 
-    @MockkBean
-    private lateinit var pesysService: PesysService
-
     init {
         System.getProperty("mockServerport") ?: run {
             mockServer = ClientAndServer(Configuration().logLevel(Level.ERROR), PortFactory.findFreePort())
@@ -62,7 +57,6 @@ internal class SedSendtP9000IntegrationTest : IntegrasjonsBase() {
     @BeforeEach
     fun setupTest(){
         every { gcpStorageService.hentFraGjenny(any())} returns null
-        every { pesysService.hentSaktype(any())} returns mockk()
     }
 
 

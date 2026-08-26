@@ -71,8 +71,6 @@ spec:
       value: http://navansatt.pensjon-saksbehandling
     - name: ETTERLATTE_URL
       value: http://etterlatte-api.etterlatte
-    - name: PESYS_URL
-      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/api/eessi/v2
 
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1-q2

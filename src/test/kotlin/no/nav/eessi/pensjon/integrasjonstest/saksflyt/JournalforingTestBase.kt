@@ -126,7 +126,6 @@ internal open class JournalforingTestBase {
     val oppgaveRoutingService: OppgaveRoutingService = OppgaveRoutingService(norg2Service)
 
     val etterlatteService = mockk<EtterlatteService>(relaxed = true)
-    val pesysService = mockk<PesysService>(relaxed = true)
 
     protected val oppgaveHandlerKafka: KafkaTemplate<String, String> = mockk(relaxed = true) {
         every { sendDefault(any(), any()).get() } returns mockk()
@@ -169,7 +168,6 @@ internal open class JournalforingTestBase {
         hentTemaService = hentTemaService,
         oppgaveService = opprettOppgaveService,
         env = null,
-        pesysService = pesysService,
     )
 
     private val personSok = PersonSok(personService)

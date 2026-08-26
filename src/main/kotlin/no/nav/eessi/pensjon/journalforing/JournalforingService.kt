@@ -48,7 +48,6 @@ class JournalforingService(
     private val hentSakService: HentSakService,
     private val hentTemaService: HentTemaService,
     private val oppgaveService: OpprettOppgaveService,
-    private val pesysService: PesysService,
     @Autowired(required = false) private val metricsHelper: MetricsHelper = MetricsHelper.ForTest(),
     @Value("\${NAMESPACE}") private val env: String?
 ) {
@@ -97,8 +96,6 @@ class JournalforingService(
 
                 val aktoerId = identifisertPerson?.aktoerId
                 val alder = bestemAlder(identifisertPerson)
-                val temaFraPesys = hentTemaFraPesys(saksInfoSamlet?.sakInformasjonFraPesys?.sakId)
-                logger.debug("SakType fra pesys gir følgende tema: $temaFraPesys")
                 val tema = hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed)
                 val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
                 val institusjon = bestemAvsenderMottaker(hendelseType, sedHendelse)
@@ -145,14 +142,6 @@ class JournalforingService(
     ): Tema {
         return hentTemaService.hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed).also {
             logger.info("Hent tema gir: $it for ${sedHendelse.rinaSakId}, sedtype: ${sedHendelse.sedType}, buc: ${sedHendelse.bucType}")
-        }
-    }
-
-    private fun hentTemaFraPesys(
-        saksId: String?
-    ): SakType? {
-        return pesysService.hentSaktype(saksId).also {
-            logger.info("Hent tema fra Pesys gir: $it")
         }
     }
 

@@ -6,7 +6,6 @@ import io.mockk.mockk
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.eessi.pensjon.journalforing.PesysService
 import no.nav.eessi.pensjon.journalforing.Sak
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -39,11 +38,7 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
     @MockkBean(relaxed = true)
     lateinit var gcpStorageService: GcpStorageService
 
-    @MockkBean(relaxed = true)
-    lateinit var pesysService: PesysService
-
     private var hentSakService: HentSakService = mockk()
-//    private var pesysService: PesysService = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -54,8 +49,6 @@ internal class SedMottattIntegrationTest : IntegrasjonsBase() {
                 fagsaksystem = "PP01"
             )
         }
-
-        every { pesysService.hentSaktype(any()) } returns mockk()
     }
 
     @Test
