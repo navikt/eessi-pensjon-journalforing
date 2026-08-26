@@ -71,6 +71,8 @@ spec:
       value: https://pensjon-pen.prod-fss-pub.nais.io/pen/api/bestemsak/v1
     - name: NAVANSATT_URL
       value: http://navansatt.pensjon-saksbehandling
+    - name: PESYS_URL
+      value: https://pensjon-pen.prod-fss-pub.nais.io/pen/api/eessi/v2
 
     - name: KAFKA_SEDSENDT_TOPIC
       value: eessibasis.sedsendt-v1
