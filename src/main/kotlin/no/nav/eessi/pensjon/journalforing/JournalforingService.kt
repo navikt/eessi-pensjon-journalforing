@@ -99,7 +99,7 @@ class JournalforingService(
                 val alder = bestemAlder(identifisertPerson)
                 val tema = hentTema(sedHendelse, alder, identifisertePersoner, saksInfoSamlet, currentSed)
                 val temaFraPesyskall = if(saksInfoSamlet?.sakInformasjonFraPesys?.sakId.isNullOrBlank().not()) {
-                    hentTemaFraPesys(saksInfoSamlet.sakInformasjonFraPesys.sakId).also { logger.info("kallfra pesys ga følgende tema:$it") }
+                    hentTemaFraPesys(saksInfoSamlet.sakInformasjonFraPesys.sakId)
                 } else tema
                 logger.info("SakType fra pesys gir følgende tema: $temaFraPesyskall, tema fra hentTema: $tema")
                 val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
@@ -152,10 +152,17 @@ class JournalforingService(
 
     private fun hentTemaFraPesys(
         saksId: String?
-    ): SakType? {
-        return pesysService.hentSaktype(saksId).also {
-            logger.info("Hent tema fra Pesys gir: $it")
+    ): Tema {
+        val saktype = pesysService.hentSaktype(saksId)
+            logger.info("Hent tema fra Pesys gir: $saktype")
+        return when (saktype) {
+            SakType.ALDER -> Tema.PENSJON
+            SakType.UFOREP -> Tema.UFORETRYGD
+            SakType.BARNEP -> Tema.EYBARNEP
+            SakType.OMSORG -> Tema.OMSTILLING
+            else -> Tema.PENSJON
         }
+
     }
 
     private fun bestemAvsenderMottaker(hendelseType: HendelseType, sedHendelse: SedHendelse): AvsenderMottaker? =
