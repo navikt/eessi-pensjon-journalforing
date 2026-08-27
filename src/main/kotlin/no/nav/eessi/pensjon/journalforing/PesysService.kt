@@ -2,7 +2,6 @@ package no.nav.eessi.pensjon.journalforing
 
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.listeners.fagmodul.EessiFellesDto
-import no.nav.eessi.pensjon.models.Tema
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
@@ -17,7 +16,7 @@ class PesysService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(PesysService::class.java)
 
-    fun hentSaktype(sakId: String?): Tema? =
+    fun hentSaktype(sakId: String?): SakType? =
         getWithHeaders(
             "/sak/$sakId/saktype",
         )

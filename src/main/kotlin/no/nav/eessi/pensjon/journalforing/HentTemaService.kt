@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostService
-import no.nav.eessi.pensjon.models.Behandlingstema
 import no.nav.eessi.pensjon.models.Behandlingstema.*
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
@@ -135,10 +134,10 @@ class HentTemaService(
 
         return if (identifisertPerson.landkode == "NOR")
             when (behandlingstema) {
-                GJENLEVENDEPENSJON, Behandlingstema.BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.NFP_UTLAND_AALESUND
+                GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.NFP_UTLAND_AALESUND
                 UFOREPENSJON -> Enhet.UFORE_UTLANDSTILSNITT
             } else when (behandlingstema) {
-                GJENLEVENDEPENSJON, Behandlingstema.BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.PENSJON_UTLAND
+                GJENLEVENDEPENSJON, BARNEP, ALDERSPENSJON, TILBAKEBETALING -> Enhet.PENSJON_UTLAND
                 UFOREPENSJON -> Enhet.UFORE_UTLAND
             }
     }

@@ -8,9 +8,4 @@ enum class Tema(@JsonValue val kode: String) {
     UFORETRYGD("UFO"),
     OMSTILLING("EYO"),
     EYBARNEP("EYB"),
-    ALDER("PEN"),
-    UFOREP("UFO"),
-    OMST("EYO"),
-    BARNEP("EYB")
 }
-

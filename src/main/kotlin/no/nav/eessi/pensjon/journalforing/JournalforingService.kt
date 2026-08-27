@@ -152,7 +152,7 @@ class JournalforingService(
 
     private fun hentTemaFraPesys(
         saksId: String?
-    ): Tema? {
+    ): SakType? {
         return pesysService.hentSaktype(saksId).also {
             logger.info("Hent tema fra Pesys gir: $it")
         }
