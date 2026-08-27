@@ -30,6 +30,7 @@ import no.nav.eessi.pensjon.journalforing.saf.SafSak
 import no.nav.eessi.pensjon.listeners.fagmodul.EessiFellesDto
 import no.nav.eessi.pensjon.models.Behandlingstema.ALDERSPENSJON
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.models.Tema.PENSJON
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.PENSJON_UTLAND
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -72,7 +73,7 @@ class JournalforingServiceMedGCPTest {
         gcpStorage = mockk<Storage>()
         pesysService = mockk<PesysService>()
         every { gcpStorage.get(eq("bucket"), *anyVararg()) } returns mockk<Bucket>()
-        every { pesysService.hentSaktype(any()) } returns ALDER
+        every { pesysService.hentSaktype(any()) } returns Tema.ALDER
 
         gcpStorageService = GcpStorageService("bucket", gcpStorage)
         safClient =  mockk()
