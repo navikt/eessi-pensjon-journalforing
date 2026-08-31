@@ -31,8 +31,6 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentGruppe
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -331,6 +329,7 @@ internal class PBuc03IntegrationTest : JournalforingTestBase() {
         val (journalpost, journalpostResponse) = initJournalPostRequestSlot(forsokFerdigStilt)
 
         val hendelse = createHendelseJson(P2200, P_BUC_03)
+        every { pesysService.hentSaktype(any()) } returns UFOREP
 
         val meldingSlot = mutableListOf<String>()
         every { oppgaveHandlerKafka.sendDefault(any(), capture(meldingSlot)).get() } returns mockk()

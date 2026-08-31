@@ -84,16 +84,19 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om uføretrygd`() {
             val bestemsak = bestemSakResponse(SakType.UFOREP,TIL_BEHANDLING )
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
             testRunner(FNR_VOKSEN_UNDER_62, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
             testRunner(FNR_VOKSEN_2, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
             testRunner(FNR_VOKSEN_2, bestemsak, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
@@ -104,11 +107,13 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om uføretrygd - sakstatus AVSLUTTET - ID_OG_FORDELING`() {
             val bestemsak = bestemSakResponse(SakType.UFOREP, AVSLUTTET)
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
             testRunner(FNR_VOKSEN_UNDER_62, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
             testRunner(FNR_VOKSEN_2, bestemsak, krav = UFOREP, alleDocs = allDocuemtActions, hendelseType = SENDT, norg2svar = null) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
@@ -306,6 +311,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         fun `Krav om gjenlevendeytelse - Uføretrygd automatisk`() {
             val bestemsak = bestemSakResponse(SakType.UFOREP, TIL_BEHANDLING)
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
             testRunnerVoksen(
                 FNR_VOKSEN_UNDER_62,
                 FNR_OVER_62,
@@ -331,6 +337,7 @@ internal class PBuc10IntegrationTest : JournalforingTestBase() {
         @Test
         fun `Krav om gjenlevendeytelse - Uføretrygd manuelt - id og fordeling`() {
             val bestemsak = bestemSakResponse(SakType.UFOREP, AVSLUTTET)
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
 
             //TODO feil enhet og feil tema(person nummer 2 skal ikke trenge å være over 62 år for å få tema pensjon her)
             testRunnerVoksen(

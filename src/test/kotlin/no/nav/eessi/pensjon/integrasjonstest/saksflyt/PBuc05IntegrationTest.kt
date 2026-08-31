@@ -176,16 +176,20 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes, SakType er GENRL, men finnes flere sakstyper, bosatt utland`() {
             val saker = listOf(sakInformasjon(GENRL), sakInformasjon(ALDER), sakInformasjon(UFOREP))
 
+            every { pesysService.hentSaktype(any()) } returns ALDER
+
             testRunner(FNR_OVER_62, saker, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
+            every { pesysService.hentSaktype(any()) } returns UFOREP
 
             testRunner(FNR_VOKSEN_UNDER_62, saker, land = "SWE") {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns ALDER
             testRunner(FNR_BARN, saker, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
@@ -196,16 +200,20 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes, SakType er GENRL`() {
             val saker = listOf(sakInformasjon(GENRL))
 
+            every { pesysService.hentSaktype(any()) } returns ALDER
+
             testRunner(FNR_OVER_62, saker) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_VOKSEN_UNDER_62, saker) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns ALDER
             testRunner(FNR_BARN, saker) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
@@ -217,17 +225,22 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val saker = listOf(sakInformasjon(GENRL))
 
             every { etterlatteService.hentGjennySak("12345678") }  returns mockHentGjennySak("12345678")
+            every { pesysService.hentSaktype(any()) } returns SakType.ALDER
+
 
             testRunner(FNR_OVER_62, saker, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns SakType.UFOREP
+
             testRunner(FNR_VOKSEN_UNDER_62, saker, land = "SWE") {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns SakType.ALDER
             testRunner(FNR_BARN, saker, land = "SWE") {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(PENSJON_UTLAND, it.journalfoerendeEnhet)
@@ -243,16 +256,19 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes og SakType er GENRL, med flere sakstyper, person bosatt Norge`() {
             val saker = listOf(sakInformasjon(GENRL), sakInformasjon(BARNEP))
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_VOKSEN_UNDER_62, saker) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+//            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_OVER_62, saker) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns ALDER
             testRunner(FNR_BARN, saker) {
                 assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
@@ -263,6 +279,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes, SakType er GENRL, med flere sakstyper, person bosatt utland`() {
             val saker = listOf(sakInformasjon(GENRL), sakInformasjon(BARNEP))
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_VOKSEN_UNDER_62, saker, land = "SWE") {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
@@ -321,16 +338,19 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
         fun `1 person i SED fnr finnes og bestemsak finner sak UFORE Så journalføres automatisk på tema UFORETRYGD`() {
             val saker = listOf(SakInformasjon(sakId = SAK_ID, sakType = UFOREP, sakStatus = TIL_BEHANDLING))
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_VOKSEN_UNDER_62, saker) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_OVER_62, saker) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
             }
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunner(FNR_BARN, saker) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
@@ -404,7 +424,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnrAnnenPerson = FNR_OVER_62
 
             testRunnerFlerePersoner(FNR_OVER_62, fnrAnnenPerson = fnrAnnenPerson, saker = saker, sakId = SAK_ID, rolle = Rolle.ETTERLATTE) {
-                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(PENSJON, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 assertEquals(fnrAnnenPerson, it.bruker?.id)
             }
@@ -425,6 +445,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
 
             val forsikredeFnr = FNR_OVER_62
 
+            every { pesysService.hentSaktype(any()) } returns UFOREP
             testRunnerFlerePersoner(forsikredeFnr, FNR_VOKSEN_UNDER_62, saker, SAK_ID, rolle = Rolle.FORSORGER) {
                 assertEquals(UFORETRYGD, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
@@ -499,13 +520,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, saker, rolle = Rolle.BARN) {
-                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(PENSJON, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
             //TODO Hva gjør vi med rolle barn og 2 identifiserte personer i seden? Her skal enhet bli UFØRE_UTLAND
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE") {
-                assertEquals(UFORETRYGD, it.tema)
+                assertEquals(PENSJON, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
@@ -717,7 +738,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             every { personService.hentPerson(NorskIdent(fnr)) } returns createBrukerWith(fnr, "Død", "Helt Død", "NOR", aktorId = aktoerf)
             every { personService.hentIdent(IdentGruppe.FOLKEREGISTERIDENT, AktoerId("281278220441111")) } returns NorskIdent(afnr)
             every { etterlatteService.hentGjennySak(any()) } returns mockHentGjennySakMedError()
-
+            every { pesysService.hentSaktype(any()) } returns UFOREP
 
             val saker = listOf(
                 SakInformasjon(sakId = "34234234", sakType = ALDER, sakStatus = AVSLUTTET),
