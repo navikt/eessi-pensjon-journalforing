@@ -350,7 +350,7 @@ abstract class SedListenerBase(
         val gyldigeSendteHendelser = (sedRetning == SENDT) && GyldigeHendelser.sendt(sedHendelse)
         val gyldigeMottatteHendelser = (sedRetning == MOTTATT) && GyldigeHendelser.mottatt(sedHendelse)
 
-        if(sedHendelse.rinaSakId.contains("1610484")) {
+        if(sedHendelse.rinaSakId in listOf<String>("1610484", "1610096")) {
             logger.error("Sed med rinaSakId: ${sedHendelse.rinaSakId} er en test sak som ikke skal behandles i prod. Sed: $sedHendelse")
             acknowledgment.acknowledge()
             return
