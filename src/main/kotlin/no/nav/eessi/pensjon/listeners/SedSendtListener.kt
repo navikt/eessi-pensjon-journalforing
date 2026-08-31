@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -63,10 +64,21 @@ class SedSendtListener(
                     if (!skippingOffsett(cr.offset(), offsetsToSkip)) {
                         behandleHendelse(hendelse, SENDT, acknowledgment)
                     }
+                } catch (ex2: HttpClientErrorException) {
+                    if (ex2.message?.contains("Saken er arkivert") == true) {
+                        logger.error("Sak med offset ${cr.offset()} er arkivert. Feil ved behandling av SED-SENDT", ex2)
+                        acknowledgment.acknowledge()
+                        return@measure
+                    }
+                    throw SedSendtRuntimeException(ex2)
                 } catch (ex: Exception) {
-                    logger.error("Feil ved behandling av SED-SENDT: ${hendelse.replaceAfter("navBruker","******")}", ex)
+                    logger.error(
+                        "Feil ved behandling av SED-SENDT: ${hendelse.replaceAfter("navBruker", "******")}", ex
+                    )
                     throw SedSendtRuntimeException(ex)
-                } finally {
+                }
+
+                finally {
                     // Alltid tell ned latchen, selv ved feil, så ventende (test-)kode ikke må vente på full timeout
                     latch.countDown()
                 }
