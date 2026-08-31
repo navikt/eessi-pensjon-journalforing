@@ -350,6 +350,12 @@ abstract class SedListenerBase(
         val gyldigeSendteHendelser = (sedRetning == SENDT) && GyldigeHendelser.sendt(sedHendelse)
         val gyldigeMottatteHendelser = (sedRetning == MOTTATT) && GyldigeHendelser.mottatt(sedHendelse)
 
+        if(sedHendelse.rinaSakId.contains("1610484")) {
+            logger.error("Sed med rinaSakId: ${sedHendelse.rinaSakId} er en test sak som ikke skal behandles i prod. Sed: $sedHendelse")
+            acknowledgment.acknowledge()
+            return
+        }
+
         if (profile == "prod" && sedHendelse.avsenderId in TEST_DATA_SENDERS) {
             logger.error("Avsender id er ${sedHendelse.avsenderId}. Dette er testdata i produksjon!!!\n$sedHendelse")
         } else if (gyldigeSendteHendelser || gyldigeMottatteHendelser) {
