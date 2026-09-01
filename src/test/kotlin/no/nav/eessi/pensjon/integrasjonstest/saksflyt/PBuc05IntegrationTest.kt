@@ -424,7 +424,7 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             val fnrAnnenPerson = FNR_OVER_62
 
             testRunnerFlerePersoner(FNR_OVER_62, fnrAnnenPerson = fnrAnnenPerson, saker = saker, sakId = SAK_ID, rolle = Rolle.ETTERLATTE) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(NFP_UTLAND_AALESUND, it.journalfoerendeEnhet)
                 assertEquals(fnrAnnenPerson, it.bruker?.id)
             }
@@ -520,13 +520,13 @@ internal class PBuc05IntegrationTest : JournalforingTestBase() {
             )
 
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, saker, rolle = Rolle.BARN) {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLANDSTILSNITT, it.journalfoerendeEnhet)
             }
 
             //TODO Hva gjør vi med rolle barn og 2 identifiserte personer i seden? Her skal enhet bli UFØRE_UTLAND
             testRunnerFlerePersoner(FNR_VOKSEN_UNDER_62, FNR_BARN, saker, rolle = Rolle.BARN, land = "SWE") {
-                assertEquals(PENSJON, it.tema)
+                assertEquals(UFORETRYGD, it.tema)
                 assertEquals(UFORE_UTLAND, it.journalfoerendeEnhet)
             }
         }
