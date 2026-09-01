@@ -105,7 +105,7 @@ class JournalforingService(
                 if (temaFraPesyskall != tema) logger.warn("Tema fra hentTema:$tema er ikke lik tema hentet fra pesyskall: $temaFraPesyskall")
                 logger.info("SakType fra pesys gir følgende tema: $temaFraPesyskall, tema fra hentTema: $tema")
 
-                val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, temaFraPesyskall)
+                val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
                 val institusjon = bestemAvsenderMottaker(hendelseType, sedHendelse)
                 val arkivsaksnummer = hentArkivsaksnummer(sedHendelse, hendelseType, saksInfoSamlet, identifisertPerson)
 
@@ -119,7 +119,7 @@ class JournalforingService(
                     institusjon = institusjon,
                     identifisertePersoner = identifisertePersoner,
                     saksbehandlerInfo = navAnsattInfo,
-                    tema = temaFraPesyskall,
+                    tema = tema,
                     currentSed
                 )
                 sendJournalpostRequest(journalpostRequest, sedHendelse, hendelseType, navAnsattInfo, identifisertPerson, tildeltJoarkEnhet, aktoerId, tema, currentSed, saksInfoSamlet)
