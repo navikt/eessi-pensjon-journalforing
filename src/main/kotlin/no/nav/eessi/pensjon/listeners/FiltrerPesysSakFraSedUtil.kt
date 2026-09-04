@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
+import no.nav.eessi.pensjon.personidentifisering.relasjoner.secureLog
 import no.nav.eessi.pensjon.utils.toJson
 import org.slf4j.LoggerFactory
 
@@ -59,7 +60,7 @@ object FiltrerPesysSakFraSedUtil {
             logger.warn("Finner ingen pensjonsinformasjon for aktoerid: $aktoerId med pesys sakID: $pesysSakIdFraSed ")
             return null
         }
-        logger.info("aktoerid: $aktoerId pesys sakID: $pesysSakIdFraSed Pensjoninformasjon: ${saklistFraPesys.toJson()}")
+        secureLog.info("aktoerid: $aktoerId pesys sakID: $pesysSakIdFraSed Pensjoninformasjon: ${saklistFraPesys.toJson()}")
 
         if (saklistFraPesys.none { it.sakId == pesysSakIdFraSed }) {
             logger.warn("Vi finner en sak fra pesys som ikke matcher sakId fra sed for: $aktoerId med pesys sakID: $pesysSakIdFraSed fra listen: ${saklistFraPesys.toJson()}")
@@ -72,8 +73,8 @@ object FiltrerPesysSakFraSedUtil {
             return Pair(null, saklistFraPesys)
         }
 
-        val gyldigSak = saklistFraPesys.firstOrNull { it.sakId == pesysSakIdFraSed } ?: return null.also {
-            logger.info("Returnerer første match for pesys sakID: $pesysSakIdFraSed da flere saker ble funnet")
+        val gyldigSak = saklistFraPesys.firstOrNull { it.sakId == pesysSakIdFraSed }.also { logger.info("kommer hit, returnerer ${it?.toJson()}") }
+            ?: return null.also { logger.info("Returnerer første match for pesys sakID: $pesysSakIdFraSed da flere saker ble funnet")
         }
 
         return Pair(gyldigSak, saklistFraPesys)
