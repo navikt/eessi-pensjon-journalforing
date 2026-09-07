@@ -2,12 +2,19 @@ package no.nav.eessi.pensjon.journalforing
 
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
+import no.nav.eessi.pensjon.eux.model.BucType
+import no.nav.eessi.pensjon.eux.model.BucType.P_BUC_05
+import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.LOPENDE
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.sed.Pensjon
 import no.nav.eessi.pensjon.gcp.GjennySak
 import no.nav.eessi.pensjon.integrasjonstest.saksflyt.JournalforingTestBase
 import no.nav.eessi.pensjon.journalforing.etterlatte.EtterlatteResponseData
+import no.nav.eessi.pensjon.models.SaksInfoSamlet
+import no.nav.eessi.pensjon.models.Tema
 import no.nav.eessi.pensjon.oppgaverouting.SakInformasjon
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.shared.person.FodselsnummerGenerator
@@ -127,6 +134,17 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
 
         assertEquals(Sak("FAGSAK", sakInformasjon.sakId!!, "PP01"), result)
         verify { gcpStorageService.hentFraGjenny(euxCaseId) }
+    }
+
+    //På buctype P_BUC_04, P_BUC_05, P_BUC_09 returneres saktypen som finnes i sed, dersom den finnes.
+    @Test
+    fun `hentTema skal gi tema som er oppgitt i sed dersom den finnes i en P_BUC_05`() {
+        val sakInformasjon = SakInformasjon("12131223", SakType.ALDER, LOPENDE)
+        val sedhendelse = SedHendelse(bucType = P_BUC_05, rinaSakId = "123", sektorKode = "P", rinaDokumentId = "JKHGIUYG0", rinaDokumentVersjon = "4,3")
+
+        val result = hentTemaService.hentTema(sedhendelse, 60, 1, SaksInfoSamlet("123", sakInformasjon, SakType.ALDER), mockk())
+
+        assertEquals(Tema.PENSJON, result)
     }
 
     @Test
