@@ -141,8 +141,9 @@ class JournalforingServiceHentSakTest : JournalforingServiceBase() {
     fun `hentTema skal gi tema som er oppgitt i sed dersom den finnes i en P_BUC_05`() {
         val sakInformasjon = SakInformasjon("12131223", SakType.ALDER, LOPENDE)
         val sedhendelse = SedHendelse(bucType = P_BUC_05, rinaSakId = "123", sektorKode = "P", rinaDokumentId = "JKHGIUYG0", rinaDokumentVersjon = "4,3")
+        val saksInfo = SaksInfoSamlet("123", sakInformasjon, SakType.ALDER)
 
-        val result = hentTemaService.hentTema(sedhendelse, 60, 1, SaksInfoSamlet("123", sakInformasjon, SakType.ALDER), mockk())
+        val result = hentTemaService.hentTema(sedhendelse, 60, 1, saksInfo, mockk())
 
         assertEquals(Tema.PENSJON, result)
     }
