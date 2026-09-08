@@ -3,7 +3,6 @@ package no.nav.eessi.pensjon.journalforing
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
-import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -61,13 +60,7 @@ class HentTemaService(
             P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo).also { logTema("P_BUC_10", it) }
             P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo).also { logTema("P_BUC_07, P_BUC_08", it) }
             P_BUC_04, P_BUC_05, P_BUC_09 -> {
-                val aldersak = saksInfo?.saktypeFraSed == SakType.ALDER
-                val tema = when {
-                    aldersak -> PENSJON
-                    ufoereSak -> UFORETRYGD
-                    enPersonOgUforeAlderUnder62 -> UFORETRYGD
-                    else -> PENSJON
-                }
+                val tema = if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
                 logTema("P_BUC_04, P_BUC_05, P_BUC_09", tema)
                 tema
             }
