@@ -66,7 +66,7 @@ dependencies {
 	implementation("com.google.cloud:google-cloud-storage:2.73.0")
 
 	// Eessi pensjon biblioteker
-	implementation("no.nav.eessi.pensjon:ep-eux:3.0.92")
+	implementation("no.nav.eessi.pensjon:ep-eux:3.0.94")
 	implementation("no.nav.eessi.pensjon:ep-metrics:3.0.40")
 	implementation("no.nav.eessi.pensjon:ep-logging:3.0.60")
 
