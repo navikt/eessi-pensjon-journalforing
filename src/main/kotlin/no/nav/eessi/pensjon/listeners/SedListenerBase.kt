@@ -7,7 +7,9 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
+import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPHOR
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.SED
@@ -81,7 +83,7 @@ abstract class SedListenerBase(
             ?: collectedResults.firstOrNull()
     }
 
-    private fun hentSakInformasjon(
+    fun hentSakInformasjon(
         sakFraPenInfo: List<SakInformasjon>?,
         bucType: BucType,
         saktypeFraSed: SakType?,
@@ -111,7 +113,7 @@ abstract class SedListenerBase(
 
     //TODO: Kan vi vurdere alle bucer som har mulighet for gjenlevende på samme måte som P_BUC_10 her?
 
-    private fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
+    fun populerSaktype(saktypeFraSED: SakType?, sakInformasjon: SakInformasjon?, bucType: BucType): SakType? {
         return when {
             bucType == P_BUC_03 -> UFOREP
             bucType == P_BUC_01 -> ALDER
@@ -164,7 +166,7 @@ abstract class SedListenerBase(
 
         val saktypeFraSedEllerPesys = populerSaktype(
             saktypeFraSED = sakTypeFraSED,
-            sakInformasjon = sakFraPesysSomMatcherSed ?: sakerFraPesys.firstOrNull(),
+            sakInformasjon = sakFraPesysSomMatcherSed ?: sakFraPesysListe(sakerFraPesys),
             bucType = bucType
         )
 
@@ -173,7 +175,7 @@ abstract class SedListenerBase(
         val harSvarFraPen = sakerFraPesys.isNotEmpty()          // har vi svar fra PenInfo eller bestemSak?
         val flereSakerfraPenInfo = sakerFraPesys.size > 1       // finnes det flere saker i svar fra PenInfo eller bestemSak?
 
-        val sakInformasjonFraPesysFirst = sakerFraPesys.firstOrNull()  // første sak i listen fra PESYS, hvis den finnes
+        val sakInformasjonFraPesysFirst = sakFraPesysListe(sakerFraPesys)  // første sak i listen fra PESYS, hvis den finnes
 
         when (hendelseType) {
             MOTTATT -> {
@@ -276,6 +278,16 @@ abstract class SedListenerBase(
                 }
             }
         }
+    }
+
+    fun sakFraPesysListe(sakerFraPesys: List<SakInformasjon>): SakInformasjon? {
+        val valgtAldersSakFraPesys = sakerFraPesys.firstOrNull { it.sakType == ALDER && it.sakStatus != AVSLUTTET || it.sakStatus != OPPHOR }
+        val valgtUfoereSakFraPesys = sakerFraPesys.firstOrNull { it.sakType == UFOREP && it.sakStatus != AVSLUTTET || it.sakStatus != OPPHOR }
+        logger.info("Aldersak fra Pesys: $valgtAldersSakFraPesys")
+        logger.info("UfoereSak fra Pesys: $valgtUfoereSakFraPesys")
+
+        return valgtAldersSakFraPesys ?: (valgtUfoereSakFraPesys ?: sakerFraPesys.firstOrNull())
+            .also { logger.info("Valgt sak fra Pesys: ${it?.sakId} med saktype: ${it?.sakType}") }
     }
 
     fun hentGjennySakIdFraSed(currentSed: SED?): String? {
