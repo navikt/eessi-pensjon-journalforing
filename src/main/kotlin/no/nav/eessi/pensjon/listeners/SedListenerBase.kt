@@ -7,7 +7,6 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.Buc
-import no.nav.eessi.pensjon.eux.model.buc.SakStatus
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.AVSLUTTET
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus.OPPHOR
 import no.nav.eessi.pensjon.eux.model.buc.SakType
@@ -163,10 +162,10 @@ abstract class SedListenerBase(
 
         // advarsel for oppgave
         val advarsel = hentAdvarsel(pesysIDerFraSED = saksIdFraSed, pesysSakInformasjonListe = sakerFraPesys, hendesesType = hendelseType, match = sakFraPesysSomMatcherSed != null)
-
+        val sakInformasjonFraPesysFirst = sakFraPesysListe(sakerFraPesys, sakFraPesysSomMatcherSed?.sakId)
         val saktypeFraSedEllerPesys = populerSaktype(
             saktypeFraSED = sakTypeFraSED,
-            sakInformasjon = sakFraPesysSomMatcherSed ?: sakFraPesysListe(sakerFraPesys),
+            sakInformasjon =  sakInformasjonFraPesysFirst,
             bucType = bucType
         )
 
@@ -174,8 +173,6 @@ abstract class SedListenerBase(
         val match = sakFraPesysSomMatcherSed != null            // matcher sakID fra SED med sakID fra PESYS?
         val harSvarFraPen = sakerFraPesys.isNotEmpty()          // har vi svar fra PenInfo eller bestemSak?
         val flereSakerfraPenInfo = sakerFraPesys.size > 1       // finnes det flere saker i svar fra PenInfo eller bestemSak?
-
-        val sakInformasjonFraPesysFirst = sakFraPesysListe(sakerFraPesys)  // første sak i listen fra PESYS, hvis den finnes
 
         when (hendelseType) {
             MOTTATT -> {
@@ -280,7 +277,9 @@ abstract class SedListenerBase(
         }
     }
 
-    fun sakFraPesysListe(sakerFraPesys: List<SakInformasjon>): SakInformasjon? {
+    //Forsøker å matche pesysSakid mot pesyssaksliste fra penjonsinformasjon
+    fun sakFraPesysListe(sakerFraPesys: List<SakInformasjon>, pesysSakIdFraSed: String?): SakInformasjon? {
+        sakerFraPesys.firstOrNull { it.sakId == pesysSakIdFraSed }?.let { return it }
         val valgtAldersSakFraPesys = sakerFraPesys.firstOrNull { it.sakType == ALDER && it.sakStatus != AVSLUTTET || it.sakStatus != OPPHOR }
         val valgtUfoereSakFraPesys = sakerFraPesys.firstOrNull { it.sakType == UFOREP && it.sakStatus != AVSLUTTET || it.sakStatus != OPPHOR }
         logger.info("Aldersak fra Pesys: $valgtAldersSakFraPesys")
