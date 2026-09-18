@@ -779,7 +779,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @Test
     fun `Gitt en P12000 i P_BUC_08 med tema ufoere så skal tema bli uforep`() {
-        val p12000 = P12000(type = SedType.P12000, pensjonP12000 = P12000Pensjon(pensjoninfo = listOf(Pensjoninfo(betalingsdetaljer = Betalingsdetaljer(pensjonstype = "02")))))
+        val p12000 = P12000(type = SedType.P12000, pensjonP12000 = P12000Pensjon(pensjoninfo = Pensjoninfo(betalingsdetaljer = listOf(Betalingsdetaljer(pensjonstype = "02")))))
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns P_BUC_08
@@ -793,7 +793,7 @@ internal class JournalforingServiceTest : JournalforingServiceBase() {
 
     @Test
     fun `Gitt en P12000 i P_BUC_08 med tema gjenlevende så skal tema bli PEN`() {
-        val p12000 = P12000(type = SedType.P12000, pensjonP12000 = P12000Pensjon(pensjoninfo = listOf(Pensjoninfo(betalingsdetaljer = Betalingsdetaljer(pensjonstype = "03")))))
+        val p12000 = P12000(type = SedType.P12000, pensjonP12000 = P12000Pensjon(pensjoninfo = Pensjoninfo(betalingsdetaljer = listOf(Betalingsdetaljer(pensjonstype = "03")))))
         val mockedSedhendelse = mockk<SedHendelse>(relaxUnitFun = true).apply {
             every { rinaSakId } returns RINADOK_ID
             every { bucType } returns P_BUC_08

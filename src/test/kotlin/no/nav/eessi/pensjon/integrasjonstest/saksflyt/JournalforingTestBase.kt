@@ -741,7 +741,7 @@ internal open class JournalforingTestBase {
 
         val pensjon = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
             if (sedType == SedType.P12000) {
-                P12000Pensjon(listOf(Pensjoninfo(Betalingsdetaljer(pensjonstype = "02"))), gjenlevende = annenPerson)
+                P12000Pensjon(Pensjoninfo(listOf(Betalingsdetaljer(pensjonstype = "02"))), gjenlevende = annenPerson)
             }
             Pensjon(gjenlevende = annenPerson)
         } else {
