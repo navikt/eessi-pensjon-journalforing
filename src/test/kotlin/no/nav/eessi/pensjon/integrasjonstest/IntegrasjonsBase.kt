@@ -3,6 +3,7 @@ package no.nav.eessi.pensjon.integrasjonstest
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import com.ninjasquad.springmockk.MockkBean
 import io.mockk.CapturingSlot
 import io.mockk.mockk
 import io.mockk.slot
@@ -24,6 +25,7 @@ import no.nav.eessi.pensjon.oppgaverouting.HendelseType
 import no.nav.eessi.pensjon.shared.person.Fodselsnummer
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -83,6 +85,9 @@ abstract class IntegrasjonsBase {
 
     @Autowired
     lateinit var fagmodulOidcRestTemplate : RestTemplate
+
+    @MockkBean
+    private lateinit var clientConfigurationProperties: ClientConfigurationProperties
 
     @TestConfiguration
     class TestConfig {

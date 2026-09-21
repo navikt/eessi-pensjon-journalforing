@@ -1,9 +1,7 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.MockkBeans
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.eessi.pensjon.EessiPensjonJournalforingTestApplication
@@ -34,6 +32,7 @@ import no.nav.eessi.pensjon.personoppslag.pdl.model.IdentInformasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.NorskIdent
 import no.nav.eessi.pensjon.utils.mapJsonToAny
 import no.nav.eessi.pensjon.utils.toJson
+import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.pdfbox.cos.COSDictionary
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.pdmodel.PDPage
@@ -72,12 +71,10 @@ import java.io.ByteArrayOutputStream
         "offsets.topic.replication.factor=1"
     ]
 )
-@MockkBeans(
-    MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class]),
-    MockkBean(name = "pesysClientRestTemplate", classes = [RestTemplate::class])
-)
+@MockkBean(name = "navansattRestTemplate", types = [RestTemplate::class])
+@MockkBean(name = "bestemSakOidcRestTemplate", types = [RestTemplate::class])
+@MockkBean(name = "safGraphQlOidcRestTemplate", types = [RestTemplate::class])
+@MockkBean(name = "pesysClientRestTemplate", types = [RestTemplate::class])
 internal class ConfigRestTemplateTest {
 
     @Autowired
@@ -96,6 +93,11 @@ internal class ConfigRestTemplateTest {
 
     @MockkBean
     private lateinit var gcpStorageService: GcpStorageService
+
+    // Field on the test class itself (not IntegrasjonsTestConfig) so Spring's
+    // ConfigurationPropertiesBindingPostProcessor doesn't rebind it from real application.yml properties.
+    @MockkBean
+    private lateinit var clientConfigurationProperties: ClientConfigurationProperties
 
     @MockkBean(relaxed = true)
     private lateinit var navansattKlient: NavansattKlient

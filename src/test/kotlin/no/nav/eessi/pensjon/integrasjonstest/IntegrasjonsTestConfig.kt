@@ -1,10 +1,8 @@
 package no.nav.eessi.pensjon.integrasjonstest
 
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.mockk
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.HentSakService
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -30,9 +28,6 @@ class IntegrasjonsTestConfig {
     @Value("\${KAFKA_OPPGAVE_TOPIC}") private lateinit var oppgaveTopic: String
     @Value("\${KAFKA_OPPDATEROPPGAVE_TOPIC}") private lateinit var oppdaterOppgaveTopic: String
     @Value("\${KAFKA_AUTOMATISERING_TOPIC}") private lateinit var automatiseringTopic: String
-
-    @MockkBean
-    lateinit var ClientConfigurationProperties: ClientConfigurationProperties
 
     @Bean
     fun consumerFactory(): ConsumerFactory<String, String> {
