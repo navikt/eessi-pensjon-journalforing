@@ -83,7 +83,7 @@ class FodselsdatoHelper {
                     P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
                     P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    P12000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
+                    P12000 -> leggTilGjenlevendeFdatoHvisFinnes((sed as P12000).nav?.bruker?.person, sed.pensjonP12000?.gjenlevende)
                     P15000 -> filterP15000(sed as P15000)
                     H121, H120, H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
