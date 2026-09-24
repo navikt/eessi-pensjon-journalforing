@@ -4,6 +4,7 @@ import no.nav.eessi.pensjon.eux.model.BucType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
 import no.nav.eessi.pensjon.eux.model.buc.SakType.GJENLEV
 import no.nav.eessi.pensjon.eux.model.sed.Bruker
+import no.nav.eessi.pensjon.eux.model.sed.Person
 import no.nav.eessi.pensjon.eux.model.sed.RelasjonTilAvdod
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.personidentifisering.helpers.Rolle
@@ -14,12 +15,12 @@ import no.nav.eessi.pensjon.utils.toJson
 
 abstract class GjenlevendeHvisFinnes(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) : AbstractRelasjon(sed, bucType, rinaDocumentId) {
 
-    fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendeBruker: Bruker? = null) : List<SEDPersonRelasjon> {
+    fun hentRelasjonGjenlevendeFnrHvisFinnes(gjenlevendePerson: Person? = null) : List<SEDPersonRelasjon> {
         logger.info("hentRelasjonGjenlevendeFnrHvisFinnes Leter etter gyldig ident og relasjon(er) i SedType: ${sed.type}, med rinasak: $rinaDocumentId")
 
         val sedType = sed.type
         //gjenlevendePerson (søker)
-        val gjenlevendePerson = gjenlevendeBruker?.person
+//        val gjenlevendePerson = gjenlevendeBruker?.person
         secureLog.info("Hva er gjenlevendePerson pin?: ${gjenlevendePerson?.pin}")
 
         if (gjenlevendePerson == null) {

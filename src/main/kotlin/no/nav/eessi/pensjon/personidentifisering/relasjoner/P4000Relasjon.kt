@@ -9,7 +9,7 @@ class P4000Relasjon(private val sed: SED, private val bucType: BucType, val rina
 
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val forsikret = hentForsikretPerson(bestemSaktype(bucType))
-        val gjenlevende = hentRelasjonGjenlevendeFnrHvisFinnes((sed as P4000).p4000Pensjon?.gjenlevende)
+        val gjenlevende = hentRelasjonGjenlevendeFnrHvisFinnes((sed as P4000).p4000Pensjon?.gjenlevende?.person)
 
         return gjenlevende.ifEmpty { forsikret }
 
