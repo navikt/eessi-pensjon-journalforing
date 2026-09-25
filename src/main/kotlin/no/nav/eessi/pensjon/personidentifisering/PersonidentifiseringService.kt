@@ -320,25 +320,23 @@ class PersonidentifiseringService(
      *
      */
     fun hentFodselsDato(identifisertPerson: IdentifisertPDLPerson?, seder: List<SED>): LocalDate? {
-        val identifisertFdato = identifisertPerson?.fdato ?: identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
-        if (identifisertPerson?.personRelasjon?.fnr == null) {
-            return runCatching { FodselsdatoHelper.fdatoFraSedListe(seder) }
-                .onFailure { logger.info("Fant ingen fødselsdato i SED-listen for identifisert person uten gyldig fnr", it) }
-                .getOrNull()
+
+        if( identifisertPerson?.personRelasjon?.fnr == null ){
+            return FodselsdatoHelper.fdatoFraSedListe(seder).also { logger.info("Funnet fdato:$it fra identifisert person sin personrelasjon") }
         }
 
         identifisertPerson.personRelasjon?.fnr?.value?.let {
-            if (identifisertPerson.identer?.contains(it) == true) {
+            if(identifisertPerson.identer?.contains(it) == true){
                 logger.info("Fødselsdato funnet i identifisert person sin personrelasjon")
-            } else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon")
+            }
+            else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon")
         }
 
         return seder
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
             .firstOrNull { it == identifisertPerson.personRelasjon?.fdato }
-            ?: identifisertFdato
-            .also { logger.info("Funnet fdato: $it i sed som matcher identifisert person sin personrelasjon eller fallback fra PDL") }
+            .also { logger.info("Funnet fdato: $it i sed som matcher identifisert person sin personrelasjon") }
     }
 }
 
