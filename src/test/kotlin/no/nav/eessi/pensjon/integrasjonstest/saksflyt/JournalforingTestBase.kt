@@ -757,8 +757,8 @@ internal open class JournalforingTestBase {
                 nav = nav,
                 pensjonP12000 = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
                     P12000Pensjon(
-                        pensjoninfo = listOf(Pensjoninfo(Betalingsdetaljer(pensjonstype = "02"))),
-                        gjenlevende = annenPerson
+                        pensjoninfo = listOf(Pensjoninfo(listOf(Betalingsdetaljer(pensjonstype = "02")))),
+                        gjenlevende = BrukerP12000(person = annenPerson.person)
                     )
                 } else {
                     null
