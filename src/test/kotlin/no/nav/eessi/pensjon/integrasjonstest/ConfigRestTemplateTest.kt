@@ -71,10 +71,10 @@ import java.io.ByteArrayOutputStream
         "offsets.topic.replication.factor=1"
     ]
 )
-@MockkBean(name = "navansattRestTemplate", types = [RestTemplate::class])
-@MockkBean(name = "bestemSakOidcRestTemplate", types = [RestTemplate::class])
-@MockkBean(name = "safGraphQlOidcRestTemplate", types = [RestTemplate::class])
-@MockkBean(name = "pesysClientRestTemplate", types = [RestTemplate::class])
+@MockkBean(name = "navansattRestTemplate", classes = [RestTemplate::class])
+@MockkBean(name = "bestemSakOidcRestTemplate", classes = [RestTemplate::class])
+@MockkBean(name = "safGraphQlOidcRestTemplate", classes = [RestTemplate::class])
+@MockkBean(name = "pesysClientRestTemplate", classes = [RestTemplate::class])
 internal class ConfigRestTemplateTest {
 
     @Autowired

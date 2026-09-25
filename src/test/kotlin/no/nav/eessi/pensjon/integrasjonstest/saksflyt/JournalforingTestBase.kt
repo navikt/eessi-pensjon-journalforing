@@ -751,32 +751,21 @@ internal open class JournalforingTestBase {
             krav = Krav("2019-02-01", krav)
         )
 
-        return when (sedType) {
-            SedType.P12000 -> P12000(
+        return if (sedType == SedType.P12000) {
+            P12000(
                 type = sedType,
                 nav = nav,
                 pensjonP12000 = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
                     P12000Pensjon(
-                        pensjoninfo = listOf(Pensjoninfo(listOf(Betalingsdetaljer(pensjonstype = "02")))),
-                        gjenlevende = BrukerP12000(person = annenPerson.person)
+                        pensjoninfo = listOf(Pensjoninfo(Betalingsdetaljer(pensjonstype = "02"))),
+                        gjenlevende = annenPerson
                     )
                 } else {
                     null
                 }
             )
-            SedType.P2200 -> P2200(
-                type = sedType,
-                navP2200 = NavP2200(
-                    eessisak = nav.eessisak,
-                    bruker = BrukerP2200(person = forsikretBruker.person),
-                    krav = nav.krav
-                ),
-                pensjon = P2200Pensjon(
-                    kravDato = nav.krav,
-                    bruker = forsikretBruker
-                )
-            )
-            else -> SED(sedType, nav = nav, pensjon = pensjon)
+        } else {
+            SED(sedType, nav = nav, pensjon = pensjon)
         }
     }
     private fun createSivilstand(sivilstand: SivilstandItem?): List<SivilstandItem>? = if (sivilstand != null) listOf(sivilstand) else null
