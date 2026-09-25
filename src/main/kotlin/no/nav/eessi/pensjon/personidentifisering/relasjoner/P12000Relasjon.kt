@@ -18,7 +18,7 @@ class P12000Relasjon(val sed: SED, val bucType: BucType, val rinaDocumentId: Str
     override fun hentRelasjoner(): List<SEDPersonRelasjon> {
         val forsikret = hentForsikretPerson(bestemSaktype(bucType))
         val p12000 = mapJsonToAny<P12000>( mapAnyToJson(sed))
-        val gjenlevende = hentRelasjonGjenlevendeFnrHvisFinnes(p12000.pensjonP12000?.gjenlevende?.person)
+        val gjenlevende = hentRelasjonGjenlevendeFnrHvisFinnes(p12000.pensjonP12000?.gjenlevende)
 
         return gjenlevende.ifEmpty { forsikret }
     }

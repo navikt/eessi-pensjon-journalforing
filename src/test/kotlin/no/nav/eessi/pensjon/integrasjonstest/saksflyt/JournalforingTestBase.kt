@@ -739,34 +739,24 @@ internal open class JournalforingTestBase {
 
         val annenPerson = Bruker(person = createAnnenPerson(gjenlevendeFnr, relasjon = relasjon, pdlPerson = pdlPersonAnnen, fdato = fdatoAnnenPerson))
 
-        val pensjon: Pensjon? = if (sedType != SedType.P12000 && (gjenlevendeFnr != null || pdlPersonAnnen != null)) {
+        val pensjon = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
+            if (sedType == SedType.P12000) {
+                P12000Pensjon(Pensjoninfo(listOf(Betalingsdetaljer(pensjonstype = "02"))), gjenlevende = annenPerson)
+            }
             Pensjon(gjenlevende = annenPerson)
         } else {
             null
         }
 
-        val nav = Nav(
-            eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
-            bruker = forsikretBruker,
-            krav = Krav("2019-02-01", krav)
+        return SED(
+            sedType,
+            nav = Nav(
+                eessisak = eessiSaknr?.let { listOf(EessisakItem(saksnummer = eessiSaknr, land = "NO")) },
+                bruker = forsikretBruker,
+                krav = Krav("2019-02-01", krav)
+            ),
+            pensjon = pensjon
         )
-
-        return if (sedType == SedType.P12000) {
-            P12000(
-                type = sedType,
-                nav = nav,
-                pensjonP12000 = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
-                    P12000Pensjon(
-                        pensjoninfo = listOf(Pensjoninfo(listOf(Betalingsdetaljer(pensjonstype = "02")))),
-                        gjenlevende = BrukerP12000(person = annenPerson.person)
-                    )
-                } else {
-                    null
-                }
-            )
-        } else {
-            SED(sedType, nav = nav, pensjon = pensjon)
-        }
     }
     private fun createSivilstand(sivilstand: SivilstandItem?): List<SivilstandItem>? = if (sivilstand != null) listOf(sivilstand) else null
 
