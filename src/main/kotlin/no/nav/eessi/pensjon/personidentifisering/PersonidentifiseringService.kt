@@ -320,6 +320,7 @@ class PersonidentifiseringService(
      *
      */
     fun hentFodselsDato(identifisertPerson: IdentifisertPDLPerson?, seder: List<SED>): LocalDate? {
+        val identifisertFdato = identifisertPerson?.fdato ?: identifisertPerson?.personRelasjon?.fnr?.getBirthDate()
         if (identifisertPerson?.personRelasjon?.fnr == null) {
             return runCatching { FodselsdatoHelper.fdatoFraSedListe(seder) }
                 .onFailure { logger.info("Fant ingen fødselsdato i SED-listen for identifisert person uten gyldig fnr", it) }
@@ -332,7 +333,6 @@ class PersonidentifiseringService(
             } else logger.info("Fødselsdato ikke funnet i identifisert person sin personrelasjon")
         }
 
-        val identifisertFdato = identifisertPerson.fdato ?: identifisertPerson.personRelasjon?.fnr?.getBirthDate()
         return seder
             .filter { it.type.kanInneholdeIdentEllerFdato() }
             .mapNotNull { FodselsdatoHelper.filterFodselsdato(it) }
