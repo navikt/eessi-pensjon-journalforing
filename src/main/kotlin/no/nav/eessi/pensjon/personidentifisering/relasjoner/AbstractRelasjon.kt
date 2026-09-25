@@ -5,6 +5,7 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.buc.SakType
 import no.nav.eessi.pensjon.eux.model.buc.SakType.*
 import no.nav.eessi.pensjon.eux.model.sed.Person
+import no.nav.eessi.pensjon.eux.model.sed.P2200
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.personoppslag.pdl.model.Relasjon
 import no.nav.eessi.pensjon.personoppslag.pdl.model.SEDPersonRelasjon
@@ -20,7 +21,10 @@ val secureLog = LoggerFactory.getLogger("secureLog")
 
 abstract class AbstractRelasjon(private val sed: SED, private val bucType: BucType, private val rinaDocumentId: String) {
 
-    val forsikretPerson = sed.nav?.bruker?.person
+    val forsikretPerson = when (sed) {
+        is P2200 -> sed.navP2200?.bruker?.person
+        else -> sed.nav?.bruker?.person
+    }
 
     abstract fun hentRelasjoner(): List<SEDPersonRelasjon>
 

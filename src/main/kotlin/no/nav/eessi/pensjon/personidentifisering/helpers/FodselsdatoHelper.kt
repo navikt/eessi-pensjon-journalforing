@@ -76,14 +76,15 @@ class FodselsdatoHelper {
                 val fdato = when (sed.type) {
                     R005 -> filterPersonR005Fodselsdato(sed as R005)
                     X005, X008, X010 -> filterPersonFodselsdatoX00Sed(sed)
-                    P2000, P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
-                    P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
-                    P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende)
-                    P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende)
+                    P2000 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P2200 -> filterPersonFodselsdato((sed as P2200).navP2200?.bruker?.person)
+                    P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende?.person)
+                    P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende?.person)
+                    P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende?.person)
                     P8000, P10000 ->  leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
                     P9000 ->  filterPersonFodselsdato(sed.nav?.bruker?.person)?: leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person)
-                    P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende)
-                    P12000 -> leggTilGjenlevendeFdatoHvisFinnes((sed as P12000).nav?.bruker?.person, sed.pensjonP12000?.gjenlevende)
+                    P11000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, sed.pensjon?.gjenlevende?.person)
+                    P12000 -> leggTilGjenlevendeFdatoHvisFinnes((sed as P12000).nav?.bruker?.person, sed.pensjonP12000?.gjenlevende?.person)
                     P15000 -> filterP15000(sed as P15000)
                     H121, H120, H070 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
                     else -> leggTilAnnenPersonFdatoHvisFinnes(sed.nav?.annenperson?.person) ?: filterPersonFodselsdato(sed.nav?.bruker?.person)
@@ -98,7 +99,7 @@ class FodselsdatoHelper {
                 null
             }
         }
-        private fun leggTilGjenlevendeFdatoHvisFinnes(person: Person?, gjenlevende: Bruker?): String? {
+        private fun leggTilGjenlevendeFdatoHvisFinnes(person: Person?, gjenlevende: Person?): String? {
             val result = if (gjenlevende != null) filterGjenlevendeFodselsdato(gjenlevende)
             else filterPersonFodselsdato(person)
             logger.info("leggTilGjenlevendeFdatoHvisFinnes resultat: $result")
@@ -106,7 +107,7 @@ class FodselsdatoHelper {
         }
 
         private fun filterP15000(sed: P15000): String? {
-            val result = if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende)
+            val result = if (sed.nav?.krav?.type == GJENLEV) filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende?.person)
             else filterPersonFodselsdato(sed.nav?.bruker?.person)
             logger.info("filterP15000 resultat: $result")
             return result
@@ -143,8 +144,8 @@ class FodselsdatoHelper {
             return result
         }
 
-        private fun filterGjenlevendeFodselsdato(gjenlevende: Bruker?): String? {
-            val result = gjenlevende?.person?.foedselsdato
+        private fun filterGjenlevendeFodselsdato(gjenlevende: Person?): String? {
+            val result = gjenlevende?.foedselsdato
             logger.info("filterGjenlevendeFodselsdato resultat: $result")
             return result
         }
