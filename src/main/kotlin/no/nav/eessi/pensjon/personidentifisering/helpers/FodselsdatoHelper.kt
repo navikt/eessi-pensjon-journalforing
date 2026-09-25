@@ -76,7 +76,8 @@ class FodselsdatoHelper {
                 val fdato = when (sed.type) {
                     R005 -> filterPersonR005Fodselsdato(sed as R005)
                     X005, X008, X010 -> filterPersonFodselsdatoX00Sed(sed)
-                    P2000, P2200 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P2000 -> filterPersonFodselsdato(sed.nav?.bruker?.person)
+                    P2200 -> filterPersonFodselsdato((sed as P2200).navP2200?.bruker?.person)
                     P2100 -> filterGjenlevendeFodselsdato(sed.pensjon?.gjenlevende?.person)
                     P5000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P5000).pensjon?.gjenlevende?.person)
                     P6000 -> leggTilGjenlevendeFdatoHvisFinnes(sed.nav?.bruker?.person, (sed as P6000).pensjon?.gjenlevende?.person)

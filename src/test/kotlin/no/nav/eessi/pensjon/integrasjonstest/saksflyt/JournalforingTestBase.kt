@@ -751,8 +751,8 @@ internal open class JournalforingTestBase {
             krav = Krav("2019-02-01", krav)
         )
 
-        return if (sedType == SedType.P12000) {
-            P12000(
+        return when (sedType) {
+            SedType.P12000 -> P12000(
                 type = sedType,
                 nav = nav,
                 pensjonP12000 = if (gjenlevendeFnr != null || pdlPersonAnnen != null) {
@@ -764,8 +764,19 @@ internal open class JournalforingTestBase {
                     null
                 }
             )
-        } else {
-            SED(sedType, nav = nav, pensjon = pensjon)
+            SedType.P2200 -> P2200(
+                type = sedType,
+                navP2200 = NavP2200(
+                    eessisak = nav.eessisak,
+                    bruker = BrukerP2200(person = forsikretBruker.person),
+                    krav = nav.krav
+                ),
+                pensjon = P2200Pensjon(
+                    kravDato = nav.krav,
+                    bruker = forsikretBruker
+                )
+            )
+            else -> SED(sedType, nav = nav, pensjon = pensjon)
         }
     }
     private fun createSivilstand(sivilstand: SivilstandItem?): List<SivilstandItem>? = if (sivilstand != null) listOf(sivilstand) else null
