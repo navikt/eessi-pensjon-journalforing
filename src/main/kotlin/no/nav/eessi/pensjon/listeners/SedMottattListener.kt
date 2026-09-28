@@ -72,7 +72,7 @@ class SedMottattListener(
                     if (env == "q2" && !skippingOffsett(cr.offset(), offsetsToSkipInTest)) {
                         behandleHendelse(hendelse, MOTTATT, acknowledgment)
                     }
-                    if (!skippingOffsett(cr.offset(), offsetsToSkip)) {
+                    else if (!skippingOffsett(cr.offset(), offsetsToSkip)) {
                         behandleHendelse(hendelse, MOTTATT, acknowledgment)
                     }
                 } catch (ex: Exception) {
