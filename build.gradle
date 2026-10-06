@@ -131,5 +131,5 @@ dependencies {
 	testImplementation("com.ninja-squad:springmockk:5.0.1")
 
 	// Architecture tests
-	testImplementation 'com.tngtech.archunit:archunit:1.5.0'
+	testImplementation 'com.tngtech.archunit:archunit:1.5.1'
 }
