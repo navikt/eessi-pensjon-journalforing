@@ -60,6 +60,7 @@ class HentTemaService(
             P_BUC_10 -> temaPbuc10(currentSed, enPersonOgUforeAlderUnder62, saksInfo).also { logTema("P_BUC_10", it) }
             P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo).also { logTema("P_BUC_07, P_BUC_08", it) }
             P_BUC_04, P_BUC_05, P_BUC_09 -> {
+                logger.info("Henting av tema for ${sedhendelse.bucType} med enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62 og ufoereSak: $ufoereSak")
                 val tema = if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
                 logTema("P_BUC_04, P_BUC_05, P_BUC_09", tema)
                 tema
