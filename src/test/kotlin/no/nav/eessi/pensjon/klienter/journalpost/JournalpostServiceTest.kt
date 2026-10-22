@@ -13,6 +13,7 @@ import no.nav.eessi.pensjon.eux.model.sed.Krav
 import no.nav.eessi.pensjon.eux.model.sed.KravType
 import no.nav.eessi.pensjon.eux.model.sed.Nav
 import no.nav.eessi.pensjon.eux.model.sed.P15000Pensjon
+import no.nav.eessi.pensjon.eux.model.sed.P2100Pensjon
 import no.nav.eessi.pensjon.journalforing.*
 import no.nav.eessi.pensjon.journalforing.JournalpostType.INNGAAENDE
 import no.nav.eessi.pensjon.journalforing.journalpost.JournalpostKlient
@@ -203,7 +204,7 @@ internal class JournalpostServiceTest {
         val expectedResponse = mapJsonToAny<OpprettJournalPostResponse>(responseBody)
         val sedHendelse = sedHendelse(P2100, P_BUC_02, null)
 
-        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = P2100, pensjon = P15000Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
+        val currentSed = no.nav.eessi.pensjon.eux.model.sed.P2100(type = P2100, pensjon = P2100Pensjon(), nav = Nav(krav = Krav( type =  KravType.GJENLEV)))
         val supportedDocumentsJson = hentSupportedDokumenter()
 
         every { pdfService.hentDokumenterOgVedlegg(any(), any(), any()) } returns Pair(supportedDocumentsJson, emptyList())
