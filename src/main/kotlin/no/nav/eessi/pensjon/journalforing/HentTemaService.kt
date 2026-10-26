@@ -3,6 +3,8 @@ package no.nav.eessi.pensjon.journalforing
 import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.buc.SakStatus
+import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
 import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.*
 import no.nav.eessi.pensjon.gcp.GcpStorageService
@@ -45,6 +47,7 @@ class HentTemaService(
         }
 
         val ufoereSak = saksInfo?.saktypeFraSed == UFOREP
+        val alderSak = saksInfo?.saktypeFraSed == ALDER
         if(alder == null) {
             return if(sedhendelse?.bucType == P_BUC_03 || ufoereSak || currentSed is P15000 && currentSed.hasUforePensjonType()) UFORETRYGD
             else PENSJON.also { logger.info("Alder er null -> tema=PENSJON") }
@@ -61,8 +64,11 @@ class HentTemaService(
             P_BUC_07, P_BUC_08 -> temaPbuc07Og08(currentSed, enPersonOgUforeAlderUnder62, saksInfo).also { logTema("P_BUC_07, P_BUC_08", it) }
             P_BUC_04, P_BUC_05, P_BUC_09 -> {
                 logger.info("Henting av tema for ${sedhendelse.bucType} med enPersonOgUforeAlderUnder62: $enPersonOgUforeAlderUnder62 og ufoereSak: $ufoereSak")
-                val tema = if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD else PENSJON
-                logTema("P_BUC_04, P_BUC_05, P_BUC_09", tema)
+                val sakTypeFraPesysSakinfo = saksInfo?.sakInformasjonFraPesys?.sakType == ALDER
+                val tema = if (alderSak || sakTypeFraPesysSakinfo) PENSJON
+                    else if (enPersonOgUforeAlderUnder62 || ufoereSak) UFORETRYGD
+                    else PENSJON
+                    logTema("P_BUC_04, P_BUC_05, P_BUC_09", tema)
                 tema
             }
             else -> {

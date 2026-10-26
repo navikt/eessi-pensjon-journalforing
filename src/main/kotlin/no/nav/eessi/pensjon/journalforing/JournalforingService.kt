@@ -6,6 +6,10 @@ import no.nav.eessi.pensjon.eux.model.BucType.*
 import no.nav.eessi.pensjon.eux.model.SedHendelse
 import no.nav.eessi.pensjon.eux.model.SedType
 import no.nav.eessi.pensjon.eux.model.buc.SakType
+import no.nav.eessi.pensjon.eux.model.buc.SakType.ALDER
+import no.nav.eessi.pensjon.eux.model.buc.SakType.BARNEP
+import no.nav.eessi.pensjon.eux.model.buc.SakType.OMSORG
+import no.nav.eessi.pensjon.eux.model.buc.SakType.UFOREP
 import no.nav.eessi.pensjon.eux.model.sed.SED
 import no.nav.eessi.pensjon.gcp.GcpStorageService
 import no.nav.eessi.pensjon.journalforing.IdType.UTL_ORG
@@ -18,6 +22,10 @@ import no.nav.eessi.pensjon.journalforing.opprettoppgave.OpprettOppgaveService
 import no.nav.eessi.pensjon.metrics.MetricsHelper
 import no.nav.eessi.pensjon.models.SaksInfoSamlet
 import no.nav.eessi.pensjon.models.Tema
+import no.nav.eessi.pensjon.models.Tema.EYBARNEP
+import no.nav.eessi.pensjon.models.Tema.OMSTILLING
+import no.nav.eessi.pensjon.models.Tema.PENSJON
+import no.nav.eessi.pensjon.models.Tema.UFORETRYGD
 import no.nav.eessi.pensjon.oppgaverouting.Enhet
 import no.nav.eessi.pensjon.oppgaverouting.Enhet.*
 import no.nav.eessi.pensjon.oppgaverouting.HendelseType
@@ -102,8 +110,7 @@ class JournalforingService(
                     hentTemaFraPesys(saksInfoSamlet.sakInformasjonFraPesys.sakId)
                 } else tema
 
-                if (temaFraPesyskall != tema) logger.warn("Tema fra hentTema:$tema er ikke lik tema hentet fra pesyskall: $temaFraPesyskall")
-                logger.info("SakType fra pesys gir følgende tema: $temaFraPesyskall, tema fra hentTema: $tema")
+                if (temaFraPesyskall != tema) logger.error("Tema fra hentTema:$tema er ikke lik tema hentet fra pesyskall: $temaFraPesyskall")
 
                 val tildeltJoarkEnhet = journalforingsEnhet(fdato, identifisertPerson, sedHendelse, hendelseType, saksInfoSamlet, harAdressebeskyttelse, identifisertePersoner, currentSed, tema)
                 val institusjon = bestemAvsenderMottaker(hendelseType, sedHendelse)
@@ -159,11 +166,11 @@ class JournalforingService(
         val saktype = pesysService.hentSaktype(saksId)
             logger.info("Hent tema fra Pesys gir: $saktype")
         return when (saktype) {
-            SakType.ALDER -> Tema.PENSJON
-            SakType.UFOREP -> Tema.UFORETRYGD
-            SakType.BARNEP -> Tema.EYBARNEP
-            SakType.OMSORG -> Tema.OMSTILLING
-            else -> Tema.PENSJON
+            ALDER -> PENSJON
+            UFOREP -> UFORETRYGD
+            BARNEP -> EYBARNEP
+            OMSORG -> OMSTILLING
+            else -> PENSJON
         }
 
     }
