@@ -31,15 +31,15 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom:${kotlinVersion}"))
 }
 
-assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21): "Java 21 or newer is required"
+assert JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_25): "Java 25 or newer is required"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 
     compilerOptions {
         allWarningsAsErrors.set(true)
@@ -67,7 +67,7 @@ dependencyUpdates {
 
 // https://docs.gradle.org/current/userguide/jacoco_plugin.html
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.14"
 }
 
 jacocoTestReport {
