@@ -129,7 +129,6 @@ class JournalpostService(
         // Vi har en uvanlig situasjon der vi forventer ferdigstilling, men dokarkiv klarer ikke å ferdigstille journalposten.
         if(forsokFerdigstill && journalforingResponse?.journalpostferdigstilt == false && env != "test") {
             logger.error("Forventet ferdigstilling feilet")
-            throw RuntimeException("Forventet ferdigstilling feilet")
         }
 
         return journalforingResponse
