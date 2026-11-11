@@ -127,7 +127,7 @@ dependencies {
 	testImplementation("org.mock-server:mockserver-netty:8.0.0") {
 		exclude module: 'junit'
 	}
-	testImplementation("io.mockk:mockk:1.14.11")
+	testImplementation("io.mockk:mockk:1.14.12")
 	testImplementation("com.ninja-squad:springmockk:5.0.1")
 
 	// Architecture tests
